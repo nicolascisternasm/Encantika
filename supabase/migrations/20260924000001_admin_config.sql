@@ -1,28 +1,28 @@
 -- ============================================================
--- Block 1: Admin profiles, is_admin helper, store settings
+-- Bloque 1: Perfiles admin, helper es_admin, configuracion_tienda
 -- ============================================================
 
--- Reusable updated_at trigger function
-CREATE OR REPLACE FUNCTION update_updated_at()
+-- Funcion reutilizable para trigger de actualizado_en
+CREATE OR REPLACE FUNCTION actualizar_actualizado_en()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
-  NEW.updated_at = now();
+  NEW.actualizado_en = now();
   RETURN NEW;
 END;
 $$;
 
--- profiles --------------------------------------------------
-CREATE TABLE profiles (
-  id         uuid PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
-  full_name  text,
-  role       text NOT NULL CHECK (role IN ('owner', 'staff')),
-  created_at timestamptz NOT NULL DEFAULT now()
+-- perfiles --------------------------------------------------
+CREATE TABLE perfiles (
+  id              uuid        PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  nombre_completo text,
+  rol             text        NOT NULL CHECK (rol IN ('propietario', 'colaborador')),
+  creado_en       timestamptz NOT NULL DEFAULT now()
 );
 
--- Security-definer helper so RLS policies can call it safely
-CREATE OR REPLACE FUNCTION is_admin()
+-- Helper SECURITY DEFINER para que las politicas RLS puedan llamarlo con seguridad
+CREATE OR REPLACE FUNCTION es_admin()
 RETURNS boolean
 LANGUAGE sql
 SECURITY DEFINER
@@ -31,27 +31,27 @@ SET search_path = public
 AS $$
   SELECT EXISTS (
     SELECT 1
-    FROM profiles
+    FROM perfiles
     WHERE id = auth.uid()
-      AND role IN ('owner', 'staff')
+      AND rol IN ('propietario', 'colaborador')
   );
 $$;
 
--- store_settings (singleton row enforced by CHECK id = 1) ---
-CREATE TABLE store_settings (
-  id                   integer  PRIMARY KEY CHECK (id = 1),
-  store_name           text     NOT NULL DEFAULT 'Encantika',
-  logo_url             text,
-  currency             text     NOT NULL DEFAULT 'CLP',
-  whatsapp_number      text,
-  instagram_url        text,
-  mercadolibre_url     text,
-  contact_email        text,
-  pickup_address       text,
-  pickup_instructions  text,
-  updated_at           timestamptz NOT NULL DEFAULT now()
+-- configuracion_tienda (fila singleton forzada por CHECK id = 1) ---
+CREATE TABLE configuracion_tienda (
+  id                    integer     PRIMARY KEY CHECK (id = 1),
+  nombre_tienda         text        NOT NULL DEFAULT 'Encantika',
+  url_logo              text,
+  moneda                text        NOT NULL DEFAULT 'CLP',
+  numero_whatsapp       text,
+  url_instagram         text,
+  url_mercadolibre      text,
+  email_contacto        text,
+  direccion_retiro      text,
+  instrucciones_retiro  text,
+  actualizado_en        timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER store_settings_updated_at
-  BEFORE UPDATE ON store_settings
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER configuracion_tienda_actualizado_en
+  BEFORE UPDATE ON configuracion_tienda
+  FOR EACH ROW EXECUTE FUNCTION actualizar_actualizado_en();

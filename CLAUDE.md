@@ -9,16 +9,27 @@ E-commerce admin panel for Encantika, a jewelry brand. Built with Next.js 15 App
 - **Styles**: Tailwind CSS v4
 - **Package manager**: pnpm
 
+## Regla de idioma
+
+| Capa | Idioma |
+|------|--------|
+| Código (TypeScript, archivos, carpetas, variables) | inglés |
+| Base de datos (tablas, columnas, vistas, funciones SQL, triggers, valores de CHECK, buckets, variables de sesión) | español, snake_case, sin tildes ni ñ |
+| Interfaz (tienda y admin, errores, validaciones Zod) | español de Chile, con tildes correctas |
+| Comunicación, README, CLAUDE.md, docs/, comentarios, commits | español |
+
+`id` y `slug` se mantienen en todos los contextos.
+Ver `docs/glosario.md` para la tabla completa de equivalencias inglés → español.
+
 ## Key conventions
 
 - **Migrations**: Nunca editar una migración ya aplicada en remoto; cualquier cambio va en una migración nueva.
-- Table/column names: **English, snake_case**
 - All IDs: **uuid** (`gen_random_uuid()`)
 - Prices: **integer** (CLP, no decimals — e.g. `3990` = $3.990)
-- All tables have `created_at`; mutable tables also have `updated_at` with a trigger
+- All tables have `creado_en`; mutable tables also have `actualizado_en` with a trigger (`actualizar_actualizado_en()`)
 - Status enums are enforced with PostgreSQL `CHECK` constraints (not enum types) for easier migration
-- Supabase clients live in `src/lib/supabase/` (client, server, middleware-client)
-- DB types live in `src/types/database.ts` — regenerate with `supabase gen types typescript`
+- Supabase clients live in `src/lib/supabase/` (client, server, middleware-client, admin)
+- DB types live in `src/types/database.ts` — regenerate with `npx supabase gen types typescript --linked`
 
 ## Project structure
 
@@ -39,8 +50,8 @@ src/
       layout.tsx
       AdminSidebar.tsx
       page.tsx         # Dashboard
-  lib/supabase/        # Three Supabase client factories
-  middleware.ts        # Protects /admin/* routes
+  lib/supabase/        # Four Supabase client factories (client, server, middleware-client, admin)
+  proxy.ts             # Protects /admin/* routes (Next.js 16 proxy convention)
   types/database.ts    # Generated DB types
 docs/
   database.md          # ER diagram (Mermaid)

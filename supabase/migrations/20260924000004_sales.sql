@@ -1,153 +1,162 @@
 -- ============================================================
--- Block 4: Sales channels, customers, shipping, orders
+-- Bloque 4: Canales de venta, clientes, envios, pedidos
 -- ============================================================
 
--- sales_channels --------------------------------------------
-CREATE TABLE sales_channels (
-  id         uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  code       text        NOT NULL UNIQUE CHECK (code IN ('web', 'instagram', 'mercadolibre', 'whatsapp', 'in_person')),
-  name       text        NOT NULL,
-  is_active  boolean     NOT NULL DEFAULT true,
-  created_at timestamptz NOT NULL DEFAULT now()
+-- canales_venta ---------------------------------------------
+CREATE TABLE canales_venta (
+  id        uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  codigo    text        NOT NULL UNIQUE
+                        CHECK (codigo IN ('web', 'instagram', 'mercadolibre', 'whatsapp', 'presencial')),
+  nombre    text        NOT NULL,
+  activo    boolean     NOT NULL DEFAULT true,
+  creado_en timestamptz NOT NULL DEFAULT now()
 );
 
--- customers -------------------------------------------------
-CREATE TABLE customers (
-  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  full_name   text        NOT NULL,
-  email       text,
-  phone       text,
-  notes       text,
-  created_at  timestamptz NOT NULL DEFAULT now(),
-  updated_at  timestamptz NOT NULL DEFAULT now()
+-- clientes --------------------------------------------------
+CREATE TABLE clientes (
+  id              uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre_completo text        NOT NULL,
+  email           text,
+  telefono        text,
+  notas           text,
+  creado_en       timestamptz NOT NULL DEFAULT now(),
+  actualizado_en  timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE INDEX customers_email_idx ON customers (email);
-CREATE INDEX customers_phone_idx ON customers (phone);
+CREATE INDEX clientes_email_idx    ON clientes (email);
+CREATE INDEX clientes_telefono_idx ON clientes (telefono);
 
-CREATE TRIGGER customers_updated_at
-  BEFORE UPDATE ON customers
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER clientes_actualizado_en
+  BEFORE UPDATE ON clientes
+  FOR EACH ROW EXECUTE FUNCTION actualizar_actualizado_en();
 
--- shipping_methods ------------------------------------------
-CREATE TABLE shipping_methods (
-  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  name        text        NOT NULL,
-  type        text        NOT NULL CHECK (type IN ('flat', 'zone', 'pickup')),
-  flat_price  integer,
-  is_active   boolean     NOT NULL DEFAULT true,
-  sort_order  integer     NOT NULL DEFAULT 0,
-  created_at  timestamptz NOT NULL DEFAULT now(),
-  updated_at  timestamptz NOT NULL DEFAULT now()
+-- metodos_envio ---------------------------------------------
+CREATE TABLE metodos_envio (
+  id             uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre         text        NOT NULL,
+  tipo           text        NOT NULL CHECK (tipo IN ('tarifa_fija', 'por_zona', 'retiro')),
+  precio_fijo    integer,
+  activo         boolean     NOT NULL DEFAULT true,
+  orden          integer     NOT NULL DEFAULT 0,
+  creado_en      timestamptz NOT NULL DEFAULT now(),
+  actualizado_en timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER shipping_methods_updated_at
-  BEFORE UPDATE ON shipping_methods
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER metodos_envio_actualizado_en
+  BEFORE UPDATE ON metodos_envio
+  FOR EACH ROW EXECUTE FUNCTION actualizar_actualizado_en();
 
--- shipping_zones --------------------------------------------
-CREATE TABLE shipping_zones (
-  id                  uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  shipping_method_id  uuid        NOT NULL REFERENCES shipping_methods(id) ON DELETE CASCADE,
-  name                text        NOT NULL,
-  locations           text[]      NOT NULL DEFAULT '{}',
-  price               integer     NOT NULL DEFAULT 0,
-  estimated_days      integer,
-  is_active           boolean     NOT NULL DEFAULT true,
-  created_at          timestamptz NOT NULL DEFAULT now(),
-  updated_at          timestamptz NOT NULL DEFAULT now()
+-- zonas_envio -----------------------------------------------
+CREATE TABLE zonas_envio (
+  id               uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  metodo_envio_id  uuid        NOT NULL REFERENCES metodos_envio(id) ON DELETE CASCADE,
+  nombre           text        NOT NULL,
+  localidades      text[]      NOT NULL DEFAULT '{}',
+  precio           integer     NOT NULL DEFAULT 0,
+  dias_estimados   integer,
+  activo           boolean     NOT NULL DEFAULT true,
+  creado_en        timestamptz NOT NULL DEFAULT now(),
+  actualizado_en   timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER shipping_zones_updated_at
-  BEFORE UPDATE ON shipping_zones
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER zonas_envio_actualizado_en
+  BEFORE UPDATE ON zonas_envio
+  FOR EACH ROW EXECUTE FUNCTION actualizar_actualizado_en();
 
--- Sequence for human-readable order numbers ----------------
-CREATE SEQUENCE order_number_seq START 1;
+-- Secuencia para numeros de pedido legibles ----------------
+CREATE SEQUENCE pedidos_numero_seq START 1;
 
--- orders ----------------------------------------------------
-CREATE TABLE orders (
+-- pedidos ---------------------------------------------------
+CREATE TABLE pedidos (
+  id               uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  numero_pedido    text        NOT NULL UNIQUE
+                               DEFAULT ('JY-' || LPAD(nextval('pedidos_numero_seq')::text, 6, '0')),
+  canal_id         uuid        REFERENCES canales_venta(id) ON DELETE SET NULL,
+  cliente_id       uuid        REFERENCES clientes(id) ON DELETE SET NULL,
+  estado           text        NOT NULL DEFAULT 'pendiente_pago'
+                               CHECK (estado IN (
+                                 'pendiente_pago', 'pagado', 'en_produccion',
+                                 'listo', 'enviado', 'entregado', 'cancelado', 'reembolsado'
+                               )),
+  estado_pago      text        NOT NULL DEFAULT 'sin_pagar'
+                               CHECK (estado_pago IN ('sin_pagar', 'parcial', 'pagado', 'reembolsado')),
+  subtotal         integer     NOT NULL DEFAULT 0,
+  costo_envio      integer     NOT NULL DEFAULT 0,
+  descuento_total  integer     NOT NULL DEFAULT 0,
+  total            integer     NOT NULL DEFAULT 0,
+  monto_pagado     integer     NOT NULL DEFAULT 0,
+  metodo_envio_id  uuid        REFERENCES metodos_envio(id) ON DELETE SET NULL,
+  zona_envio_id    uuid        REFERENCES zonas_envio(id) ON DELETE SET NULL,
+  direccion_envio  jsonb,
+  notas_cliente    text,
+  notas_internas   text,
+  creado_por       uuid,
+  creado_en        timestamptz NOT NULL DEFAULT now(),
+  actualizado_en   timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER pedidos_actualizado_en
+  BEFORE UPDATE ON pedidos
+  FOR EACH ROW EXECUTE FUNCTION actualizar_actualizado_en();
+
+-- detalle_pedido --------------------------------------------
+CREATE TABLE detalle_pedido (
+  id                   uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  pedido_id            uuid        NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+  variante_id          uuid        REFERENCES variantes_producto(id) ON DELETE SET NULL,
+  tipo_item            text        NOT NULL
+                                   CHECK (tipo_item IN ('stock', 'a_pedido', 'personalizado')),
+  nombre_producto      text        NOT NULL,
+  etiqueta_variante    text,
+  sku                  text,
+  precio_unitario      integer     NOT NULL DEFAULT 0,
+  cantidad             integer     NOT NULL DEFAULT 1,
+  total_linea          integer     NOT NULL DEFAULT 0,
+  configuracion        jsonb,
+  estado_produccion    text        NOT NULL DEFAULT 'no_requiere'
+                                   CHECK (estado_produccion IN (
+                                     'no_requiere', 'pendiente', 'en_produccion', 'listo'
+                                   )),
+  fecha_estimada_listo date,
+  ruta_imagen_preview  text,
+  creado_en            timestamptz NOT NULL DEFAULT now(),
+  actualizado_en       timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER detalle_pedido_actualizado_en
+  BEFORE UPDATE ON detalle_pedido
+  FOR EACH ROW EXECUTE FUNCTION actualizar_actualizado_en();
+
+-- historial_estados_pedido (solo insercion) ----------------
+CREATE TABLE historial_estados_pedido (
+  id              uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  pedido_id       uuid        NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+  estado_anterior text,
+  estado_nuevo    text        NOT NULL,
+  cambiado_por    uuid,
+  nota            text,
+  creado_en       timestamptz NOT NULL DEFAULT now()
+);
+
+-- pagos -----------------------------------------------------
+CREATE TABLE pagos (
   id                uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_number      text        NOT NULL UNIQUE DEFAULT ('JY-' || LPAD(nextval('order_number_seq')::text, 6, '0')),
-  channel_id        uuid        REFERENCES sales_channels(id) ON DELETE SET NULL,
-  customer_id       uuid        REFERENCES customers(id) ON DELETE SET NULL,
-  status            text        NOT NULL DEFAULT 'pending_payment'
-                                CHECK (status IN ('pending_payment', 'paid', 'in_production', 'ready', 'shipped', 'delivered', 'cancelled', 'refunded')),
-  payment_status    text        NOT NULL DEFAULT 'unpaid'
-                                CHECK (payment_status IN ('unpaid', 'partial', 'paid', 'refunded')),
-  subtotal          integer     NOT NULL DEFAULT 0,
-  shipping_cost     integer     NOT NULL DEFAULT 0,
-  discount_total    integer     NOT NULL DEFAULT 0,
-  total             integer     NOT NULL DEFAULT 0,
-  amount_paid       integer     NOT NULL DEFAULT 0,
-  shipping_method_id uuid       REFERENCES shipping_methods(id) ON DELETE SET NULL,
-  shipping_zone_id  uuid        REFERENCES shipping_zones(id) ON DELETE SET NULL,
-  shipping_address  jsonb,
-  customer_notes    text,
-  internal_notes    text,
-  created_by        uuid,
-  created_at        timestamptz NOT NULL DEFAULT now(),
-  updated_at        timestamptz NOT NULL DEFAULT now()
+  pedido_id         uuid        NOT NULL REFERENCES pedidos(id) ON DELETE CASCADE,
+  proveedor         text        NOT NULL
+                                CHECK (proveedor IN ('mercadopago', 'transferencia', 'efectivo', 'mercadolibre')),
+  id_pago_proveedor text        UNIQUE,
+  estado            text        NOT NULL DEFAULT 'pendiente',
+  monto             integer     NOT NULL DEFAULT 0,
+  datos_crudos      jsonb,
+  creado_en         timestamptz NOT NULL DEFAULT now(),
+  actualizado_en    timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER orders_updated_at
-  BEFORE UPDATE ON orders
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER pagos_actualizado_en
+  BEFORE UPDATE ON pagos
+  FOR EACH ROW EXECUTE FUNCTION actualizar_actualizado_en();
 
--- order_items -----------------------------------------------
-CREATE TABLE order_items (
-  id                  uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id            uuid        NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-  variant_id          uuid        REFERENCES product_variants(id) ON DELETE SET NULL,
-  item_type           text        NOT NULL CHECK (item_type IN ('stock', 'made_to_order', 'custom')),
-  product_name        text        NOT NULL,
-  variant_label       text,
-  sku                 text,
-  unit_price          integer     NOT NULL DEFAULT 0,
-  quantity            integer     NOT NULL DEFAULT 1,
-  line_total          integer     NOT NULL DEFAULT 0,
-  configuration       jsonb,
-  production_status   text        NOT NULL DEFAULT 'not_required'
-                                  CHECK (production_status IN ('not_required', 'pending', 'in_production', 'ready')),
-  estimated_ready_date date,
-  preview_image_path  text,
-  created_at          timestamptz NOT NULL DEFAULT now(),
-  updated_at          timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TRIGGER order_items_updated_at
-  BEFORE UPDATE ON order_items
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- order_status_history (append-only) -----------------------
-CREATE TABLE order_status_history (
-  id           uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id     uuid        NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-  from_status  text,
-  to_status    text        NOT NULL,
-  changed_by   uuid,
-  note         text,
-  created_at   timestamptz NOT NULL DEFAULT now()
-);
-
--- payments --------------------------------------------------
-CREATE TABLE payments (
-  id                  uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  order_id            uuid        NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
-  provider            text        NOT NULL CHECK (provider IN ('mercadopago', 'transfer', 'cash', 'mercadolibre')),
-  provider_payment_id text        UNIQUE,
-  status              text        NOT NULL DEFAULT 'pending',
-  amount              integer     NOT NULL DEFAULT 0,
-  raw_payload         jsonb,
-  created_at          timestamptz NOT NULL DEFAULT now(),
-  updated_at          timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TRIGGER payments_updated_at
-  BEFORE UPDATE ON payments
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- FK from inventory_movements.order_id ----------------------
-ALTER TABLE inventory_movements
-  ADD CONSTRAINT inventory_movements_order_id_fkey
-  FOREIGN KEY (order_id) REFERENCES orders(id) ON DELETE SET NULL;
+-- FK desde movimientos_inventario.pedido_id ----------------
+ALTER TABLE movimientos_inventario
+  ADD CONSTRAINT movimientos_inventario_pedido_id_fkey
+  FOREIGN KEY (pedido_id) REFERENCES pedidos(id) ON DELETE SET NULL;

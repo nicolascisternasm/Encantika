@@ -1,191 +1,191 @@
 -- ============================================================
--- Block 5: Row Level Security on ALL tables
+-- Bloque 5: Row Level Security en TODAS las tablas
 -- ============================================================
 
--- Enable RLS ------------------------------------------------
-ALTER TABLE profiles                ENABLE ROW LEVEL SECURITY;
-ALTER TABLE store_settings          ENABLE ROW LEVEL SECURITY;
-ALTER TABLE categories              ENABLE ROW LEVEL SECURITY;
-ALTER TABLE collections             ENABLE ROW LEVEL SECURITY;
-ALTER TABLE attributes              ENABLE ROW LEVEL SECURITY;
-ALTER TABLE attribute_values        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE products                ENABLE ROW LEVEL SECURITY;
-ALTER TABLE product_attributes      ENABLE ROW LEVEL SECURITY;
-ALTER TABLE product_variants        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE variant_attribute_values ENABLE ROW LEVEL SECURITY;
-ALTER TABLE product_collections     ENABLE ROW LEVEL SECURITY;
-ALTER TABLE product_images          ENABLE ROW LEVEL SECURITY;
-ALTER TABLE inventory_movements     ENABLE ROW LEVEL SECURITY;
-ALTER TABLE sales_channels          ENABLE ROW LEVEL SECURITY;
-ALTER TABLE customers               ENABLE ROW LEVEL SECURITY;
-ALTER TABLE shipping_methods        ENABLE ROW LEVEL SECURITY;
-ALTER TABLE shipping_zones          ENABLE ROW LEVEL SECURITY;
-ALTER TABLE orders                  ENABLE ROW LEVEL SECURITY;
-ALTER TABLE order_items             ENABLE ROW LEVEL SECURITY;
-ALTER TABLE order_status_history    ENABLE ROW LEVEL SECURITY;
-ALTER TABLE payments                ENABLE ROW LEVEL SECURITY;
+-- Habilitar RLS ---------------------------------------------
+ALTER TABLE perfiles                  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE configuracion_tienda      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE categorias                ENABLE ROW LEVEL SECURITY;
+ALTER TABLE colecciones               ENABLE ROW LEVEL SECURITY;
+ALTER TABLE atributos                 ENABLE ROW LEVEL SECURITY;
+ALTER TABLE valores_atributo          ENABLE ROW LEVEL SECURITY;
+ALTER TABLE productos                 ENABLE ROW LEVEL SECURITY;
+ALTER TABLE producto_atributos        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE variantes_producto        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE variante_valores_atributo ENABLE ROW LEVEL SECURITY;
+ALTER TABLE producto_colecciones      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE imagenes_producto         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE movimientos_inventario    ENABLE ROW LEVEL SECURITY;
+ALTER TABLE canales_venta             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE clientes                  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE metodos_envio             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE zonas_envio               ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pedidos                   ENABLE ROW LEVEL SECURITY;
+ALTER TABLE detalle_pedido            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE historial_estados_pedido  ENABLE ROW LEVEL SECURITY;
+ALTER TABLE pagos                     ENABLE ROW LEVEL SECURITY;
 
--- ── PUBLIC READ (anon) ──────────────────────────────────────
+-- ── LECTURA PUBLICA (anon) ──────────────────────────────────
 
--- store_settings
-CREATE POLICY "public_read_store_settings" ON store_settings
+-- configuracion_tienda
+CREATE POLICY "lectura_publica_configuracion_tienda" ON configuracion_tienda
   FOR SELECT USING (true);
 
--- categories (active only)
-CREATE POLICY "public_read_active_categories" ON categories
-  FOR SELECT USING (is_active = true);
+-- categorias (solo activas)
+CREATE POLICY "lectura_publica_categorias_activas" ON categorias
+  FOR SELECT USING (activo = true);
 
--- collections (active only)
-CREATE POLICY "public_read_active_collections" ON collections
-  FOR SELECT USING (is_active = true);
+-- colecciones (solo activas)
+CREATE POLICY "lectura_publica_colecciones_activas" ON colecciones
+  FOR SELECT USING (activo = true);
 
--- attributes
-CREATE POLICY "public_read_attributes" ON attributes
+-- atributos
+CREATE POLICY "lectura_publica_atributos" ON atributos
   FOR SELECT USING (true);
 
--- attribute_values (active only)
-CREATE POLICY "public_read_active_attribute_values" ON attribute_values
-  FOR SELECT USING (is_active = true);
+-- valores_atributo (solo activos)
+CREATE POLICY "lectura_publica_valores_atributo_activos" ON valores_atributo
+  FOR SELECT USING (activo = true);
 
--- sales_channels (active only)
-CREATE POLICY "public_read_active_sales_channels" ON sales_channels
-  FOR SELECT USING (is_active = true);
+-- canales_venta (solo activos)
+CREATE POLICY "lectura_publica_canales_venta_activos" ON canales_venta
+  FOR SELECT USING (activo = true);
 
--- shipping_methods (active only)
-CREATE POLICY "public_read_active_shipping_methods" ON shipping_methods
-  FOR SELECT USING (is_active = true);
+-- metodos_envio (solo activos)
+CREATE POLICY "lectura_publica_metodos_envio_activos" ON metodos_envio
+  FOR SELECT USING (activo = true);
 
--- shipping_zones (active only)
-CREATE POLICY "public_read_active_shipping_zones" ON shipping_zones
-  FOR SELECT USING (is_active = true);
+-- zonas_envio (solo activas)
+CREATE POLICY "lectura_publica_zonas_envio_activas" ON zonas_envio
+  FOR SELECT USING (activo = true);
 
--- products (active only)
-CREATE POLICY "public_read_active_products" ON products
-  FOR SELECT USING (status = 'active');
+-- productos (solo activos)
+CREATE POLICY "lectura_publica_productos_activos" ON productos
+  FOR SELECT USING (estado = 'activo');
 
--- product_attributes (for active products)
-CREATE POLICY "public_read_product_attributes" ON product_attributes
+-- producto_atributos (de productos activos)
+CREATE POLICY "lectura_publica_producto_atributos" ON producto_atributos
   FOR SELECT USING (
-    EXISTS (SELECT 1 FROM products p WHERE p.id = product_attributes.product_id AND p.status = 'active')
+    EXISTS (SELECT 1 FROM productos p WHERE p.id = producto_atributos.producto_id AND p.estado = 'activo')
   );
 
--- product_variants (active variants of active products)
-CREATE POLICY "public_read_active_product_variants" ON product_variants
+-- variantes_producto (variantes activas de productos activos)
+CREATE POLICY "lectura_publica_variantes_producto_activas" ON variantes_producto
   FOR SELECT USING (
-    is_active = true
-    AND EXISTS (SELECT 1 FROM products p WHERE p.id = product_variants.product_id AND p.status = 'active')
+    activo = true
+    AND EXISTS (SELECT 1 FROM productos p WHERE p.id = variantes_producto.producto_id AND p.estado = 'activo')
   );
 
--- variant_attribute_values
-CREATE POLICY "public_read_variant_attribute_values" ON variant_attribute_values
+-- variante_valores_atributo
+CREATE POLICY "lectura_publica_variante_valores_atributo" ON variante_valores_atributo
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM product_variants pv
-      JOIN products p ON p.id = pv.product_id
-      WHERE pv.id = variant_attribute_values.variant_id
-        AND pv.is_active = true
-        AND p.status = 'active'
+      SELECT 1 FROM variantes_producto vp
+      JOIN productos p ON p.id = vp.producto_id
+      WHERE vp.id = variante_valores_atributo.variante_id
+        AND vp.activo = true
+        AND p.estado = 'activo'
     )
   );
 
--- product_collections
-CREATE POLICY "public_read_product_collections" ON product_collections
+-- producto_colecciones
+CREATE POLICY "lectura_publica_producto_colecciones" ON producto_colecciones
   FOR SELECT USING (
-    EXISTS (SELECT 1 FROM products p WHERE p.id = product_collections.product_id AND p.status = 'active')
-    AND EXISTS (SELECT 1 FROM collections c WHERE c.id = product_collections.collection_id AND c.is_active = true)
+    EXISTS (SELECT 1 FROM productos p WHERE p.id = producto_colecciones.producto_id AND p.estado = 'activo')
+    AND EXISTS (SELECT 1 FROM colecciones c WHERE c.id = producto_colecciones.coleccion_id AND c.activo = true)
   );
 
--- product_images
-CREATE POLICY "public_read_product_images" ON product_images
+-- imagenes_producto
+CREATE POLICY "lectura_publica_imagenes_producto" ON imagenes_producto
   FOR SELECT USING (
-    EXISTS (SELECT 1 FROM products p WHERE p.id = product_images.product_id AND p.status = 'active')
+    EXISTS (SELECT 1 FROM productos p WHERE p.id = imagenes_producto.producto_id AND p.estado = 'activo')
   );
 
--- ── ADMIN FULL ACCESS ───────────────────────────────────────
+-- ── ACCESO COMPLETO PARA ADMIN ──────────────────────────────
 
--- profiles: admins can read/write all profiles; users can read their own
-CREATE POLICY "admin_all_profiles" ON profiles
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- perfiles: admin puede leer/escribir todos; usuarios pueden leer el propio
+CREATE POLICY "admin_todos_perfiles" ON perfiles
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
-CREATE POLICY "self_read_profile" ON profiles
+CREATE POLICY "propio_perfil_lectura" ON perfiles
   FOR SELECT USING (id = auth.uid());
 
--- store_settings
-CREATE POLICY "admin_write_store_settings" ON store_settings
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- configuracion_tienda
+CREATE POLICY "admin_escribe_configuracion_tienda" ON configuracion_tienda
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- categories
-CREATE POLICY "admin_all_categories" ON categories
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- categorias
+CREATE POLICY "admin_todas_categorias" ON categorias
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- collections
-CREATE POLICY "admin_all_collections" ON collections
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- colecciones
+CREATE POLICY "admin_todas_colecciones" ON colecciones
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- attributes
-CREATE POLICY "admin_all_attributes" ON attributes
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- atributos
+CREATE POLICY "admin_todos_atributos" ON atributos
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- attribute_values
-CREATE POLICY "admin_all_attribute_values" ON attribute_values
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- valores_atributo
+CREATE POLICY "admin_todos_valores_atributo" ON valores_atributo
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- products
-CREATE POLICY "admin_all_products" ON products
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- productos
+CREATE POLICY "admin_todos_productos" ON productos
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- product_attributes
-CREATE POLICY "admin_all_product_attributes" ON product_attributes
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- producto_atributos
+CREATE POLICY "admin_todos_producto_atributos" ON producto_atributos
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- product_variants
-CREATE POLICY "admin_all_product_variants" ON product_variants
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- variantes_producto
+CREATE POLICY "admin_todas_variantes_producto" ON variantes_producto
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- variant_attribute_values
-CREATE POLICY "admin_all_variant_attribute_values" ON variant_attribute_values
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- variante_valores_atributo
+CREATE POLICY "admin_todos_variante_valores_atributo" ON variante_valores_atributo
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- product_collections
-CREATE POLICY "admin_all_product_collections" ON product_collections
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- producto_colecciones
+CREATE POLICY "admin_todos_producto_colecciones" ON producto_colecciones
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- product_images
-CREATE POLICY "admin_all_product_images" ON product_images
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- imagenes_producto
+CREATE POLICY "admin_todas_imagenes_producto" ON imagenes_producto
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- inventory_movements: admins only (immutability enforced by trigger in 000003)
-CREATE POLICY "admin_all_inventory_movements" ON inventory_movements
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- movimientos_inventario: solo admin (inmutabilidad aplicada por trigger en 000003)
+CREATE POLICY "admin_todos_movimientos_inventario" ON movimientos_inventario
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- sales_channels
-CREATE POLICY "admin_all_sales_channels" ON sales_channels
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- canales_venta
+CREATE POLICY "admin_todos_canales_venta" ON canales_venta
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- customers
-CREATE POLICY "admin_all_customers" ON customers
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- clientes
+CREATE POLICY "admin_todos_clientes" ON clientes
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- shipping_methods
-CREATE POLICY "admin_all_shipping_methods" ON shipping_methods
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- metodos_envio
+CREATE POLICY "admin_todos_metodos_envio" ON metodos_envio
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- shipping_zones
-CREATE POLICY "admin_all_shipping_zones" ON shipping_zones
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- zonas_envio
+CREATE POLICY "admin_todas_zonas_envio" ON zonas_envio
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- orders
-CREATE POLICY "admin_all_orders" ON orders
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- pedidos
+CREATE POLICY "admin_todos_pedidos" ON pedidos
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- order_items
-CREATE POLICY "admin_all_order_items" ON order_items
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- detalle_pedido
+CREATE POLICY "admin_todos_detalle_pedido" ON detalle_pedido
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- order_status_history
-CREATE POLICY "admin_all_order_status_history" ON order_status_history
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- historial_estados_pedido
+CREATE POLICY "admin_todos_historial_estados_pedido" ON historial_estados_pedido
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());
 
--- payments
-CREATE POLICY "admin_all_payments" ON payments
-  FOR ALL USING (is_admin()) WITH CHECK (is_admin());
+-- pagos
+CREATE POLICY "admin_todos_pagos" ON pagos
+  FOR ALL USING (es_admin()) WITH CHECK (es_admin());

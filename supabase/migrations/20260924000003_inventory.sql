@@ -1,54 +1,55 @@
 -- ============================================================
--- Block 3: Inventory movements (immutable ledger) + stock view
+-- Bloque 3: Movimientos de inventario (libro mayor inmutable) + vista de stock
 -- ============================================================
 
-CREATE TABLE inventory_movements (
+CREATE TABLE movimientos_inventario (
   id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  variant_id  uuid        NOT NULL REFERENCES product_variants(id) ON DELETE RESTRICT,
-  quantity    integer     NOT NULL,
-  type        text        NOT NULL CHECK (type IN ('purchase', 'sale', 'adjustment', 'return')),
-  order_id    uuid,
-  note        text,
-  created_by  uuid,
-  created_at  timestamptz NOT NULL DEFAULT now()
+  variante_id uuid        NOT NULL REFERENCES variantes_producto(id) ON DELETE RESTRICT,
+  cantidad    integer     NOT NULL,
+  tipo        text        NOT NULL CHECK (tipo IN ('compra', 'venta', 'ajuste', 'devolucion')),
+  pedido_id   uuid,
+  nota        text,
+  creado_por  uuid,
+  creado_en   timestamptz NOT NULL DEFAULT now()
 );
 
--- Immutability enforced by a trigger (preferred over RULES, which can be
--- bypassed by superusers and are harder to introspect)
-CREATE OR REPLACE FUNCTION inventory_movements_immutable()
+-- Inmutabilidad aplicada por trigger (preferido sobre RULES: mas claro, mas dificil de eludir,
+-- visible en introspection). La funcion es reemplazada en la migracion 000007 para admitir
+-- el bypass de limpieza de datos de prueba.
+CREATE OR REPLACE FUNCTION movimientos_inventario_inmutable()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
 BEGIN
-  RAISE EXCEPTION 'inventory_movements es inmutable; registra un movimiento de ajuste';
+  RAISE EXCEPTION 'movimientos_inventario es inmutable; registra un movimiento de ajuste';
 END;
 $$;
 
-CREATE TRIGGER inventory_movements_no_update_delete
-  BEFORE UPDATE OR DELETE ON inventory_movements
-  FOR EACH ROW EXECUTE FUNCTION inventory_movements_immutable();
+CREATE TRIGGER movimientos_inventario_sin_modificar
+  BEFORE UPDATE OR DELETE ON movimientos_inventario
+  FOR EACH ROW EXECUTE FUNCTION movimientos_inventario_inmutable();
 
--- variant_stock view: current stock level per variant.
--- security_invoker = true means the view evaluates the caller's RLS context,
--- so anon sees nothing (inventory_movements blocks anon via RLS).
-CREATE VIEW variant_stock
+-- stock_variantes: nivel de stock actual por variante.
+-- security_invoker = true evalua el RLS del llamador:
+-- anon no ve nada porque movimientos_inventario bloquea anon via RLS.
+CREATE VIEW stock_variantes
   WITH (security_invoker = true)
 AS
   SELECT
-    variant_id,
-    COALESCE(SUM(quantity), 0)::integer AS stock
-  FROM inventory_movements
-  GROUP BY variant_id;
+    variante_id,
+    COALESCE(SUM(cantidad), 0)::integer AS stock
+  FROM movimientos_inventario
+  GROUP BY variante_id;
 
--- get_variant_availability: public-safe availability check.
--- SECURITY DEFINER so it can read inventory_movements regardless of caller
--- permissions, but it intentionally never returns the raw stock count.
-CREATE OR REPLACE FUNCTION get_variant_availability(variant_ids uuid[])
+-- obtener_disponibilidad_variantes: consulta publica de disponibilidad.
+-- SECURITY DEFINER para leer movimientos_inventario sin importar permisos del llamador,
+-- pero nunca retorna el conteo exacto de stock.
+CREATE OR REPLACE FUNCTION obtener_disponibilidad_variantes(variante_ids uuid[])
 RETURNS TABLE (
-  variant_id           uuid,
-  in_stock             boolean,
-  low_stock            boolean,
-  allow_made_to_order  boolean
+  variante_id      uuid,
+  en_stock         boolean,
+  stock_bajo       boolean,
+  permite_a_pedido boolean
 )
 LANGUAGE sql
 SECURITY DEFINER
@@ -56,17 +57,17 @@ STABLE
 SET search_path = public
 AS $$
   SELECT
-    pv.id                                               AS variant_id,
-    (COALESCE(SUM(im.quantity), 0) > 0)                AS in_stock,
-    (COALESCE(SUM(im.quantity), 0) BETWEEN 1 AND 3)    AS low_stock,
-    pv.allow_made_to_order
-  FROM product_variants pv
-  LEFT JOIN inventory_movements im ON im.variant_id = pv.id
-  JOIN products p ON p.id = pv.product_id
-  WHERE pv.id = ANY(variant_ids)
-    AND pv.is_active = true
-    AND p.status = 'active'
-  GROUP BY pv.id, pv.allow_made_to_order;
+    vp.id                                                AS variante_id,
+    (COALESCE(SUM(mi.cantidad), 0) > 0)                 AS en_stock,
+    (COALESCE(SUM(mi.cantidad), 0) BETWEEN 1 AND 3)     AS stock_bajo,
+    vp.permite_a_pedido
+  FROM variantes_producto vp
+  LEFT JOIN movimientos_inventario mi ON mi.variante_id = vp.id
+  JOIN productos p ON p.id = vp.producto_id
+  WHERE vp.id = ANY(variante_ids)
+    AND vp.activo = true
+    AND p.estado = 'activo'
+  GROUP BY vp.id, vp.permite_a_pedido;
 $$;
 
-GRANT EXECUTE ON FUNCTION get_variant_availability(uuid[]) TO anon, authenticated;
+GRANT EXECUTE ON FUNCTION obtener_disponibilidad_variantes(uuid[]) TO anon, authenticated;

@@ -1,132 +1,133 @@
 -- ============================================================
--- Block 2: Full product catalog
+-- Bloque 2: Catalogo de productos completo
 -- ============================================================
 
--- categories ------------------------------------------------
-CREATE TABLE categories (
-  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  name        text        NOT NULL,
-  slug        text        NOT NULL UNIQUE,
-  parent_id   uuid        REFERENCES categories(id) ON DELETE SET NULL,
-  image_url   text,
-  sort_order  integer     NOT NULL DEFAULT 0,
-  is_active   boolean     NOT NULL DEFAULT true,
-  created_at  timestamptz NOT NULL DEFAULT now(),
-  updated_at  timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TRIGGER categories_updated_at
-  BEFORE UPDATE ON categories
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- collections -----------------------------------------------
-CREATE TABLE collections (
-  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  name        text        NOT NULL,
-  slug        text        NOT NULL UNIQUE,
-  description text,
-  image_url   text,
-  is_active   boolean     NOT NULL DEFAULT true,
-  sort_order  integer     NOT NULL DEFAULT 0,
-  created_at  timestamptz NOT NULL DEFAULT now(),
-  updated_at  timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TRIGGER collections_updated_at
-  BEFORE UPDATE ON collections
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- attributes ------------------------------------------------
-CREATE TABLE attributes (
-  id          uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  name        text        NOT NULL,
-  code        text        NOT NULL UNIQUE,
-  sort_order  integer     NOT NULL DEFAULT 0,
-  created_at  timestamptz NOT NULL DEFAULT now()
-);
-
--- attribute_values ------------------------------------------
-CREATE TABLE attribute_values (
-  id            uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  attribute_id  uuid        NOT NULL REFERENCES attributes(id) ON DELETE CASCADE,
-  value         text        NOT NULL,
-  slug          text        NOT NULL,
-  hex_color     text,
-  sort_order    integer     NOT NULL DEFAULT 0,
-  is_active     boolean     NOT NULL DEFAULT true,
-  created_at    timestamptz NOT NULL DEFAULT now(),
-  UNIQUE (attribute_id, slug)
-);
-
--- products --------------------------------------------------
-CREATE TABLE products (
-  id                    uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  name                  text        NOT NULL,
-  slug                  text        NOT NULL UNIQUE,
-  description           text,
-  category_id           uuid        REFERENCES categories(id) ON DELETE SET NULL,
-  base_price            integer     NOT NULL DEFAULT 0,
-  compare_at_price      integer,
-  status                text        NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'active', 'archived')),
-  is_featured           boolean     NOT NULL DEFAULT false,
-  default_lead_time_days integer,
-  seo_title             text,
-  seo_description       text,
-  created_at            timestamptz NOT NULL DEFAULT now(),
-  updated_at            timestamptz NOT NULL DEFAULT now()
-);
-
-CREATE TRIGGER products_updated_at
-  BEFORE UPDATE ON products
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
-
--- product_attributes ----------------------------------------
-CREATE TABLE product_attributes (
-  product_id    uuid NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-  attribute_id  uuid NOT NULL REFERENCES attributes(id) ON DELETE CASCADE,
-  PRIMARY KEY (product_id, attribute_id)
-);
-
--- product_variants ------------------------------------------
-CREATE TABLE product_variants (
+-- categorias ------------------------------------------------
+CREATE TABLE categorias (
   id                  uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  product_id          uuid        NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-  sku                 text        NOT NULL UNIQUE,
-  price               integer     NOT NULL DEFAULT 0,
-  compare_at_price    integer,
-  weight_grams        integer,
-  allow_made_to_order boolean     NOT NULL DEFAULT false,
-  lead_time_days      integer,
-  is_active           boolean     NOT NULL DEFAULT true,
-  created_at          timestamptz NOT NULL DEFAULT now(),
-  updated_at          timestamptz NOT NULL DEFAULT now()
+  nombre              text        NOT NULL,
+  slug                text        NOT NULL UNIQUE,
+  categoria_padre_id  uuid        REFERENCES categorias(id) ON DELETE SET NULL,
+  url_imagen          text,
+  orden               integer     NOT NULL DEFAULT 0,
+  activo              boolean     NOT NULL DEFAULT true,
+  creado_en           timestamptz NOT NULL DEFAULT now(),
+  actualizado_en      timestamptz NOT NULL DEFAULT now()
 );
 
-CREATE TRIGGER product_variants_updated_at
-  BEFORE UPDATE ON product_variants
-  FOR EACH ROW EXECUTE FUNCTION update_updated_at();
+CREATE TRIGGER categorias_actualizado_en
+  BEFORE UPDATE ON categorias
+  FOR EACH ROW EXECUTE FUNCTION actualizar_actualizado_en();
 
--- variant_attribute_values ----------------------------------
-CREATE TABLE variant_attribute_values (
-  variant_id          uuid NOT NULL REFERENCES product_variants(id) ON DELETE CASCADE,
-  attribute_value_id  uuid NOT NULL REFERENCES attribute_values(id) ON DELETE CASCADE,
-  PRIMARY KEY (variant_id, attribute_value_id)
+-- colecciones -----------------------------------------------
+CREATE TABLE colecciones (
+  id             uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre         text        NOT NULL,
+  slug           text        NOT NULL UNIQUE,
+  descripcion    text,
+  url_imagen     text,
+  activo         boolean     NOT NULL DEFAULT true,
+  orden          integer     NOT NULL DEFAULT 0,
+  creado_en      timestamptz NOT NULL DEFAULT now(),
+  actualizado_en timestamptz NOT NULL DEFAULT now()
 );
 
--- product_collections ---------------------------------------
-CREATE TABLE product_collections (
-  product_id     uuid NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-  collection_id  uuid NOT NULL REFERENCES collections(id) ON DELETE CASCADE,
-  PRIMARY KEY (product_id, collection_id)
+CREATE TRIGGER colecciones_actualizado_en
+  BEFORE UPDATE ON colecciones
+  FOR EACH ROW EXECUTE FUNCTION actualizar_actualizado_en();
+
+-- atributos -------------------------------------------------
+CREATE TABLE atributos (
+  id        uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre    text        NOT NULL,
+  codigo    text        NOT NULL UNIQUE,
+  orden     integer     NOT NULL DEFAULT 0,
+  creado_en timestamptz NOT NULL DEFAULT now()
 );
 
--- product_images --------------------------------------------
-CREATE TABLE product_images (
-  id            uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  product_id    uuid        NOT NULL REFERENCES products(id) ON DELETE CASCADE,
-  variant_id    uuid        REFERENCES product_variants(id) ON DELETE SET NULL,
-  storage_path  text        NOT NULL,
-  alt_text      text,
-  sort_order    integer     NOT NULL DEFAULT 0,
-  created_at    timestamptz NOT NULL DEFAULT now()
+-- valores_atributo ------------------------------------------
+CREATE TABLE valores_atributo (
+  id           uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  atributo_id  uuid        NOT NULL REFERENCES atributos(id) ON DELETE CASCADE,
+  valor        text        NOT NULL,
+  slug         text        NOT NULL,
+  color_hex    text,
+  orden        integer     NOT NULL DEFAULT 0,
+  activo       boolean     NOT NULL DEFAULT true,
+  creado_en    timestamptz NOT NULL DEFAULT now(),
+  UNIQUE (atributo_id, slug)
+);
+
+-- productos -------------------------------------------------
+CREATE TABLE productos (
+  id                     uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  nombre                 text        NOT NULL,
+  slug                   text        NOT NULL UNIQUE,
+  descripcion            text,
+  categoria_id           uuid        REFERENCES categorias(id) ON DELETE SET NULL,
+  precio_base            integer     NOT NULL DEFAULT 0,
+  precio_comparacion     integer,
+  estado                 text        NOT NULL DEFAULT 'borrador'
+                                     CHECK (estado IN ('borrador', 'activo', 'archivado')),
+  destacado              boolean     NOT NULL DEFAULT false,
+  dias_tiempo_produccion integer,
+  titulo_seo             text,
+  descripcion_seo        text,
+  creado_en              timestamptz NOT NULL DEFAULT now(),
+  actualizado_en         timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER productos_actualizado_en
+  BEFORE UPDATE ON productos
+  FOR EACH ROW EXECUTE FUNCTION actualizar_actualizado_en();
+
+-- producto_atributos ----------------------------------------
+CREATE TABLE producto_atributos (
+  producto_id  uuid NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
+  atributo_id  uuid NOT NULL REFERENCES atributos(id) ON DELETE CASCADE,
+  PRIMARY KEY (producto_id, atributo_id)
+);
+
+-- variantes_producto ----------------------------------------
+CREATE TABLE variantes_producto (
+  id                     uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  producto_id            uuid        NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
+  sku                    text        NOT NULL UNIQUE,
+  precio                 integer     NOT NULL DEFAULT 0,
+  precio_comparacion     integer,
+  peso_gramos            integer,
+  permite_a_pedido       boolean     NOT NULL DEFAULT false,
+  dias_tiempo_produccion integer,
+  activo                 boolean     NOT NULL DEFAULT true,
+  creado_en              timestamptz NOT NULL DEFAULT now(),
+  actualizado_en         timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE TRIGGER variantes_producto_actualizado_en
+  BEFORE UPDATE ON variantes_producto
+  FOR EACH ROW EXECUTE FUNCTION actualizar_actualizado_en();
+
+-- variante_valores_atributo ---------------------------------
+CREATE TABLE variante_valores_atributo (
+  variante_id       uuid NOT NULL REFERENCES variantes_producto(id) ON DELETE CASCADE,
+  valor_atributo_id uuid NOT NULL REFERENCES valores_atributo(id) ON DELETE CASCADE,
+  PRIMARY KEY (variante_id, valor_atributo_id)
+);
+
+-- producto_colecciones --------------------------------------
+CREATE TABLE producto_colecciones (
+  producto_id  uuid NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
+  coleccion_id uuid NOT NULL REFERENCES colecciones(id) ON DELETE CASCADE,
+  PRIMARY KEY (producto_id, coleccion_id)
+);
+
+-- imagenes_producto -----------------------------------------
+CREATE TABLE imagenes_producto (
+  id                   uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
+  producto_id          uuid        NOT NULL REFERENCES productos(id) ON DELETE CASCADE,
+  variante_id          uuid        REFERENCES variantes_producto(id) ON DELETE SET NULL,
+  ruta_almacenamiento  text        NOT NULL,
+  texto_alt            text,
+  orden                integer     NOT NULL DEFAULT 0,
+  creado_en            timestamptz NOT NULL DEFAULT now()
 );

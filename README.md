@@ -84,32 +84,31 @@ npx supabase gen types typescript --local > src/types/database.ts
 ## Verificar RLS
 
 ```bash
-# Requiere tsx instalado
-pnpm add -D tsx
-
 # Exportar variables de entorno y correr el script
 export $(cat .env.local | xargs)
 npx tsx scripts/test-rls.ts
 ```
 
 El script verifica que:
-- `anon key` **NO** puede leer `orders`, `customers`, `payments`, `inventory_movements`, `profiles`
-- `anon key` **SÍ** puede leer productos con `status = 'active'`
-- `anon key` **NO** puede leer productos con `status = 'draft'`
-- La vista `variant_stock` retorna el stock correcto
+- `anon key` **NO** puede leer `pedidos`, `clientes`, `pagos`, `movimientos_inventario`, `perfiles`
+- `anon key` **SÍ** puede leer productos con `estado = 'activo'`
+- `anon key` **NO** puede leer productos con `estado = 'borrador'`
+- La vista `stock_variantes` retorna el stock correcto
+- Todos los datos de prueba son eliminados al finalizar (`limpiar_datos_prueba()`)
 
 ## Estructura del proyecto
 
 ```
 supabase/
   migrations/
-    20260924000001_admin_config.sql   # profiles, is_admin(), store_settings
-    20260924000002_catalog.sql        # categories, products, variants, etc.
-    20260924000003_inventory.sql      # inventory_movements, variant_stock view
-    20260924000004_sales.sql          # orders, customers, payments, etc.
-    20260924000005_rls.sql            # políticas RLS en todas las tablas
-    20260924000006_storage.sql        # bucket product-images
-  seed.sql                            # canales, atributos, métodos de envío
+    20260924000001_admin_config.sql   # perfiles, es_admin(), configuracion_tienda
+    20260924000002_catalog.sql        # categorias, productos, variantes, etc.
+    20260924000003_inventory.sql      # movimientos_inventario, vista stock_variantes
+    20260924000004_sales.sql          # pedidos, clientes, pagos, etc.
+    20260924000005_rls.sql            # politicas RLS en todas las tablas
+    20260924000006_storage.sql        # bucket imagenes-productos
+    20260924000007_test_cleanup.sql   # limpiar_datos_prueba() y bypass del trigger
+  seed.sql                            # canales, atributos, metodos de envio
   config.toml                         # config para dev local
 
 src/

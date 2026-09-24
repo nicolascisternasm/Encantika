@@ -3,16 +3,16 @@ import { createClient } from '@/lib/supabase/server'
 export default async function AdminDashboardPage() {
   const supabase = await createClient()
 
-  const [ordersRes, productsRes, customersRes] = await Promise.all([
-    supabase.from('orders').select('id', { count: 'exact', head: true }),
-    supabase.from('products').select('id', { count: 'exact', head: true }),
-    supabase.from('customers').select('id', { count: 'exact', head: true }),
+  const [pedidosRes, productosRes, clientesRes] = await Promise.all([
+    supabase.from('pedidos').select('id', { count: 'exact', head: true }),
+    supabase.from('productos').select('id', { count: 'exact', head: true }),
+    supabase.from('clientes').select('id', { count: 'exact', head: true }),
   ])
 
   const stats = [
-    { label: 'Pedidos', value: ordersRes.count ?? 0 },
-    { label: 'Productos', value: productsRes.count ?? 0 },
-    { label: 'Clientes', value: customersRes.count ?? 0 },
+    { label: 'Pedidos', value: pedidosRes.count ?? 0 },
+    { label: 'Productos', value: productosRes.count ?? 0 },
+    { label: 'Clientes', value: clientesRes.count ?? 0 },
   ]
 
   return (

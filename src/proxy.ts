@@ -6,22 +6,22 @@ export async function proxy(request: NextRequest, _event: NextFetchEvent) {
   const response = NextResponse.next({ request })
   const supabase = createMiddlewareClient(request, response)
 
-  // Refresh session so it doesn't expire mid-visit
+  // Refresca la sesion para que no expire entre visitas
   const { data: { user } } = await supabase.auth.getUser()
 
   const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
   const isLoginPage = request.nextUrl.pathname === '/admin/login'
 
   if (isLoginPage) {
-    // Already authenticated admin → redirect to dashboard
+    // Admin ya autenticado → redirigir al dashboard
     if (user) {
-      const { data: profile } = await supabase
-        .from('profiles')
+      const { data: perfil } = await supabase
+        .from('perfiles')
         .select('*')
         .eq('id', user.id)
         .single()
 
-      if (profile && (profile.role === 'owner' || profile.role === 'staff')) {
+      if (perfil && (perfil.rol === 'propietario' || perfil.rol === 'colaborador')) {
         return NextResponse.redirect(new URL('/admin', request.url))
       }
     }
@@ -33,13 +33,13 @@ export async function proxy(request: NextRequest, _event: NextFetchEvent) {
       return NextResponse.redirect(new URL('/admin/login', request.url))
     }
 
-    const { data: profile } = await supabase
-      .from('profiles')
+    const { data: perfil } = await supabase
+      .from('perfiles')
       .select('*')
       .eq('id', user.id)
       .single()
 
-    if (!profile || (profile.role !== 'owner' && profile.role !== 'staff')) {
+    if (!perfil || (perfil.rol !== 'propietario' && perfil.rol !== 'colaborador')) {
       await supabase.auth.signOut()
       return NextResponse.redirect(new URL('/admin/login?error=unauthorized', request.url))
     }

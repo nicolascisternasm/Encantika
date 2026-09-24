@@ -2,274 +2,277 @@
 
 ```mermaid
 erDiagram
-  %% ── Auth (Supabase built-in) ──────────────────────────────
+  %% ── Auth (Supabase nativo) ─────────────────────────────────
   auth_users {
     uuid id PK
   }
 
-  %% ── Block 1: Admin & config ───────────────────────────────
-  profiles {
+  %% ── Bloque 1: Admin y configuracion ─────────────────────────
+  perfiles {
     uuid id PK
-    text full_name
-    text role
-    timestamptz created_at
+    text nombre_completo
+    text rol
+    timestamptz creado_en
   }
-  store_settings {
+  configuracion_tienda {
     integer id PK
-    text store_name
-    text logo_url
-    text currency
-    text whatsapp_number
-    text instagram_url
-    text mercadolibre_url
-    text contact_email
-    text pickup_address
-    text pickup_instructions
-    timestamptz updated_at
+    text nombre_tienda
+    text url_logo
+    text moneda
+    text numero_whatsapp
+    text url_instagram
+    text url_mercadolibre
+    text email_contacto
+    text direccion_retiro
+    text instrucciones_retiro
+    timestamptz actualizado_en
   }
 
-  %% ── Block 2: Catalog ──────────────────────────────────────
-  categories {
+  %% ── Bloque 2: Catalogo ──────────────────────────────────────
+  categorias {
     uuid id PK
-    text name
+    text nombre
     text slug
-    uuid parent_id FK
-    text image_url
-    integer sort_order
-    boolean is_active
-    timestamptz created_at
-    timestamptz updated_at
+    uuid categoria_padre_id FK
+    text url_imagen
+    integer orden
+    boolean activo
+    timestamptz creado_en
+    timestamptz actualizado_en
   }
-  collections {
+  colecciones {
     uuid id PK
-    text name
+    text nombre
     text slug
-    text description
-    text image_url
-    boolean is_active
-    integer sort_order
-    timestamptz created_at
-    timestamptz updated_at
+    text descripcion
+    text url_imagen
+    boolean activo
+    integer orden
+    timestamptz creado_en
+    timestamptz actualizado_en
   }
-  attributes {
+  atributos {
     uuid id PK
-    text name
-    text code
-    integer sort_order
-    timestamptz created_at
+    text nombre
+    text codigo
+    integer orden
+    timestamptz creado_en
   }
-  attribute_values {
+  valores_atributo {
     uuid id PK
-    uuid attribute_id FK
-    text value
+    uuid atributo_id FK
+    text valor
     text slug
-    text hex_color
-    integer sort_order
-    boolean is_active
-    timestamptz created_at
+    text color_hex
+    integer orden
+    boolean activo
+    timestamptz creado_en
   }
-  products {
+  productos {
     uuid id PK
-    text name
+    text nombre
     text slug
-    text description
-    uuid category_id FK
-    integer base_price
-    integer compare_at_price
-    text status
-    boolean is_featured
-    integer default_lead_time_days
-    text seo_title
-    text seo_description
-    timestamptz created_at
-    timestamptz updated_at
+    text descripcion
+    uuid categoria_id FK
+    integer precio_base
+    integer precio_comparacion
+    text estado
+    boolean destacado
+    integer dias_tiempo_produccion
+    text titulo_seo
+    text descripcion_seo
+    timestamptz creado_en
+    timestamptz actualizado_en
   }
-  product_attributes {
-    uuid product_id FK
-    uuid attribute_id FK
+  producto_atributos {
+    uuid producto_id FK
+    uuid atributo_id FK
   }
-  product_variants {
+  variantes_producto {
     uuid id PK
-    uuid product_id FK
+    uuid producto_id FK
     text sku
-    integer price
-    integer compare_at_price
-    integer weight_grams
-    boolean allow_made_to_order
-    integer lead_time_days
-    boolean is_active
-    timestamptz created_at
-    timestamptz updated_at
+    integer precio
+    integer precio_comparacion
+    integer peso_gramos
+    boolean permite_a_pedido
+    integer dias_tiempo_produccion
+    boolean activo
+    timestamptz creado_en
+    timestamptz actualizado_en
   }
-  variant_attribute_values {
-    uuid variant_id FK
-    uuid attribute_value_id FK
+  variante_valores_atributo {
+    uuid variante_id FK
+    uuid valor_atributo_id FK
   }
-  product_collections {
-    uuid product_id FK
-    uuid collection_id FK
+  producto_colecciones {
+    uuid producto_id FK
+    uuid coleccion_id FK
   }
-  product_images {
+  imagenes_producto {
     uuid id PK
-    uuid product_id FK
-    uuid variant_id FK
-    text storage_path
-    text alt_text
-    integer sort_order
-    timestamptz created_at
+    uuid producto_id FK
+    uuid variante_id FK
+    text ruta_almacenamiento
+    text texto_alt
+    integer orden
+    timestamptz creado_en
   }
 
-  %% ── Block 3: Inventory ────────────────────────────────────
-  inventory_movements {
+  %% ── Bloque 3: Inventario ────────────────────────────────────
+  movimientos_inventario {
     uuid id PK
-    uuid variant_id FK
-    integer quantity
-    text type
-    uuid order_id FK
-    text note
-    uuid created_by
-    timestamptz created_at
+    uuid variante_id FK
+    integer cantidad
+    text tipo
+    uuid pedido_id FK
+    text nota
+    uuid creado_por
+    timestamptz creado_en
   }
 
-  %% ── Block 4: Sales ────────────────────────────────────────
-  sales_channels {
+  %% ── Bloque 4: Ventas ────────────────────────────────────────
+  canales_venta {
     uuid id PK
-    text code
-    text name
-    boolean is_active
-    timestamptz created_at
+    text codigo
+    text nombre
+    boolean activo
+    timestamptz creado_en
   }
-  customers {
+  clientes {
     uuid id PK
-    text full_name
+    text nombre_completo
     text email
-    text phone
-    text notes
-    timestamptz created_at
-    timestamptz updated_at
+    text telefono
+    text notas
+    timestamptz creado_en
+    timestamptz actualizado_en
   }
-  shipping_methods {
+  metodos_envio {
     uuid id PK
-    text name
-    text type
-    integer flat_price
-    boolean is_active
-    integer sort_order
-    timestamptz created_at
-    timestamptz updated_at
+    text nombre
+    text tipo
+    integer precio_fijo
+    boolean activo
+    integer orden
+    timestamptz creado_en
+    timestamptz actualizado_en
   }
-  shipping_zones {
+  zonas_envio {
     uuid id PK
-    uuid shipping_method_id FK
-    text name
-    text[] locations
-    integer price
-    integer estimated_days
-    boolean is_active
-    timestamptz created_at
-    timestamptz updated_at
+    uuid metodo_envio_id FK
+    text nombre
+    text[] localidades
+    integer precio
+    integer dias_estimados
+    boolean activo
+    timestamptz creado_en
+    timestamptz actualizado_en
   }
-  orders {
+  pedidos {
     uuid id PK
-    text order_number
-    uuid channel_id FK
-    uuid customer_id FK
-    text status
-    text payment_status
+    text numero_pedido
+    uuid canal_id FK
+    uuid cliente_id FK
+    text estado
+    text estado_pago
     integer subtotal
-    integer shipping_cost
-    integer discount_total
+    integer costo_envio
+    integer descuento_total
     integer total
-    integer amount_paid
-    uuid shipping_method_id FK
-    uuid shipping_zone_id FK
-    jsonb shipping_address
-    text customer_notes
-    text internal_notes
-    uuid created_by
-    timestamptz created_at
-    timestamptz updated_at
+    integer monto_pagado
+    uuid metodo_envio_id FK
+    uuid zona_envio_id FK
+    jsonb direccion_envio
+    text notas_cliente
+    text notas_internas
+    uuid creado_por
+    timestamptz creado_en
+    timestamptz actualizado_en
   }
-  order_items {
+  detalle_pedido {
     uuid id PK
-    uuid order_id FK
-    uuid variant_id FK
-    text item_type
-    text product_name
-    text variant_label
+    uuid pedido_id FK
+    uuid variante_id FK
+    text tipo_item
+    text nombre_producto
+    text etiqueta_variante
     text sku
-    integer unit_price
-    integer quantity
-    integer line_total
-    jsonb configuration
-    text production_status
-    date estimated_ready_date
-    timestamptz created_at
-    timestamptz updated_at
+    integer precio_unitario
+    integer cantidad
+    integer total_linea
+    jsonb configuracion
+    text estado_produccion
+    date fecha_estimada_listo
+    text ruta_imagen_preview
+    timestamptz creado_en
+    timestamptz actualizado_en
   }
-  order_status_history {
+  historial_estados_pedido {
     uuid id PK
-    uuid order_id FK
-    text from_status
-    text to_status
-    uuid changed_by
-    text note
-    timestamptz created_at
+    uuid pedido_id FK
+    text estado_anterior
+    text estado_nuevo
+    uuid cambiado_por
+    text nota
+    timestamptz creado_en
   }
-  payments {
+  pagos {
     uuid id PK
-    uuid order_id FK
-    text provider
-    text provider_payment_id
-    text status
-    integer amount
-    jsonb raw_payload
-    timestamptz created_at
-    timestamptz updated_at
+    uuid pedido_id FK
+    text proveedor
+    text id_pago_proveedor
+    text estado
+    integer monto
+    jsonb datos_crudos
+    timestamptz creado_en
+    timestamptz actualizado_en
   }
 
-  %% ── Relationships ─────────────────────────────────────────
-  auth_users       ||--o| profiles                  : "has profile"
+  %% ── Relaciones ─────────────────────────────────────────────
+  auth_users               ||--o| perfiles                    : "tiene perfil"
 
-  categories       ||--o{ categories                : "parent"
-  categories       ||--o{ products                  : "contains"
+  categorias               ||--o{ categorias                  : "padre"
+  categorias               ||--o{ productos                   : "contiene"
 
-  attributes       ||--o{ attribute_values          : "has values"
-  attributes       ||--o{ product_attributes        : "used by"
-  attribute_values ||--o{ variant_attribute_values  : "assigned to"
+  atributos                ||--o{ valores_atributo            : "tiene valores"
+  atributos                ||--o{ producto_atributos          : "usado por"
+  valores_atributo         ||--o{ variante_valores_atributo   : "asignado a"
 
-  products         ||--o{ product_attributes        : "has"
-  products         ||--o{ product_variants          : "has"
-  products         ||--o{ product_collections       : "in"
-  products         ||--o{ product_images            : "has"
+  productos                ||--o{ producto_atributos          : "tiene"
+  productos                ||--o{ variantes_producto          : "tiene"
+  productos                ||--o{ producto_colecciones        : "en"
+  productos                ||--o{ imagenes_producto           : "tiene"
 
-  product_variants ||--o{ variant_attribute_values  : "has"
-  product_variants ||--o{ product_images            : "has"
-  product_variants ||--o{ inventory_movements       : "tracks"
-  product_variants ||--o{ order_items               : "ordered as"
+  variantes_producto       ||--o{ variante_valores_atributo   : "tiene"
+  variantes_producto       ||--o{ imagenes_producto           : "tiene"
+  variantes_producto       ||--o{ movimientos_inventario      : "registra"
+  variantes_producto       ||--o{ detalle_pedido              : "pedido como"
 
-  collections      ||--o{ product_collections       : "contains"
+  colecciones              ||--o{ producto_colecciones        : "contiene"
 
-  sales_channels   ||--o{ orders                    : "sourced from"
-  customers        ||--o{ orders                    : "places"
+  canales_venta            ||--o{ pedidos                     : "origen"
+  clientes                 ||--o{ pedidos                     : "realiza"
 
-  shipping_methods ||--o{ shipping_zones            : "has zones"
-  shipping_methods ||--o{ orders                    : "used by"
-  shipping_zones   ||--o{ orders                    : "used by"
+  metodos_envio            ||--o{ zonas_envio                 : "tiene zonas"
+  metodos_envio            ||--o{ pedidos                     : "usado en"
+  zonas_envio              ||--o{ pedidos                     : "usado en"
 
-  orders           ||--o{ order_items               : "contains"
-  orders           ||--o{ order_status_history      : "tracks"
-  orders           ||--o{ payments                  : "paid via"
-  orders           ||--o{ inventory_movements       : "triggers"
+  pedidos                  ||--o{ detalle_pedido              : "contiene"
+  pedidos                  ||--o{ historial_estados_pedido    : "registra"
+  pedidos                  ||--o{ pagos                       : "pagado via"
+  pedidos                  ||--o{ movimientos_inventario      : "genera"
 ```
 
 ## Notas
 
-| Tabla | Notas especiales |
-|-------|-----------------|
-| `store_settings` | Fila singleton forzada por `CHECK (id = 1)` |
-| `inventory_movements` | Ledger inmutable — reglas PostgreSQL bloquean UPDATE y DELETE |
-| `variant_stock` | Vista que suma `quantity` de `inventory_movements` por variante |
-| `orders.order_number` | Generado por secuencia SQL (`JY-000001` en adelante) |
-| Precios | Todos en `integer` (centavos CLP — e.g. `3990` = $3.990) |
-| `is_admin()` | Función `SECURITY DEFINER` usada en todas las políticas RLS |
+| Tabla/Vista | Notas especiales |
+|-------------|-----------------|
+| `configuracion_tienda` | Fila singleton forzada por `CHECK (id = 1)` |
+| `movimientos_inventario` | Ledger inmutable — trigger bloquea UPDATE y DELETE (bypass solo via `limpiar_datos_prueba()`) |
+| `stock_variantes` | Vista con `security_invoker=true`; suma `cantidad` de `movimientos_inventario` por variante |
+| `pedidos.numero_pedido` | Generado por secuencia SQL `pedidos_numero_seq` (`JY-000001` en adelante) |
+| Precios | Todos en `integer` (CLP entero — e.g. `3990` = $3.990) |
+| `es_admin()` | Funcion `SECURITY DEFINER` usada en todas las politicas RLS |
+| `obtener_disponibilidad_variantes()` | `SECURITY DEFINER`; expone solo booleanos, nunca el stock exacto |
+| `limpiar_datos_prueba()` | Solo ejecutable con `service_role`; usada por `scripts/test-rls.ts` |

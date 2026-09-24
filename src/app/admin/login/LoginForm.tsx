@@ -28,20 +28,20 @@ export default function LoginForm() {
     })
 
     if (authError) {
-      setError('Credenciales inválidas. Verifica tu correo y contraseña.')
+      setError('Credenciales invalidas. Verifica tu correo y contrasena.')
       setLoading(false)
       return
     }
 
     const { data: { user } } = await supabase.auth.getUser()
     if (user) {
-      const { data: profile } = await supabase
-        .from('profiles')
+      const { data: perfil } = await supabase
+        .from('perfiles')
         .select('*')
         .eq('id', user.id)
         .single()
 
-      if (!profile || (profile.role !== 'owner' && profile.role !== 'staff')) {
+      if (!perfil || (perfil.rol !== 'propietario' && perfil.rol !== 'colaborador')) {
         await supabase.auth.signOut()
         setError('No tienes permisos de administrador.')
         setLoading(false)
@@ -60,7 +60,7 @@ export default function LoginForm() {
           htmlFor="email"
           className="block text-xs tracking-widest uppercase text-stone-500 mb-2"
         >
-          Correo electrónico
+          Correo electronico
         </label>
         <input
           id="email"
@@ -79,7 +79,7 @@ export default function LoginForm() {
           htmlFor="password"
           className="block text-xs tracking-widest uppercase text-stone-500 mb-2"
         >
-          Contraseña
+          Contrasena
         </label>
         <input
           id="password"

@@ -1,32 +1,32 @@
 -- ============================================================
--- Block 7: Test data cleanup helper
+-- Bloque 7: Limpieza de datos de prueba
 -- ============================================================
--- Modifies the immutability trigger to allow a transaction-local
--- bypass via a session variable, then creates limpiar_datos_prueba()
--- (callable only with service_role) so test-rls.ts leaves no rows behind.
+-- Modifica el trigger de inmutabilidad para admitir un bypass
+-- transaction-local via variable de sesion, luego crea
+-- limpiar_datos_prueba() (solo ejecutable con service_role)
+-- para que test-rls.ts no deje filas en la base remota.
 
--- Re-define the immutability guard to respect the session variable.
--- When app.cleanup_test_data = 'true' (transaction-local, set only by
--- limpiar_datos_prueba), the trigger returns OLD instead of raising.
-CREATE OR REPLACE FUNCTION inventory_movements_immutable()
+-- Re-define el trigger de inmutabilidad para respetar la variable de sesion.
+-- Cuando app.limpieza_datos_prueba = 'true' (transaction-local, activado solo por
+-- limpiar_datos_prueba), el trigger devuelve OLD en lugar de lanzar excepcion.
+CREATE OR REPLACE FUNCTION movimientos_inventario_inmutable()
 RETURNS TRIGGER
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  IF current_setting('app.cleanup_test_data', true) = 'true' THEN
+  IF current_setting('app.limpieza_datos_prueba', true) = 'true' THEN
     RETURN OLD;
   END IF;
-  RAISE EXCEPTION 'inventory_movements es inmutable; registra un movimiento de ajuste';
+  RAISE EXCEPTION 'movimientos_inventario es inmutable; registra un movimiento de ajuste';
 END;
 $$;
 
--- limpiar_datos_prueba: removes all rows whose slug starts with '__test__'.
--- 1. Sets a transaction-local session variable so the immutability trigger
---    allows the DELETE on inventory_movements.
--- 2. Deletes inventory_movements for test variants first (ON DELETE RESTRICT).
--- 3. Deletes test products; cascade removes variants, images, attributes, etc.
+-- limpiar_datos_prueba: elimina todas las filas creadas por test-rls.ts.
+-- Solo ejecutable con service_role (REVOKE FROM PUBLIC + GRANT TO service_role).
+-- Activa una variable de sesion transaction-local para que el trigger de
+-- inmutabilidad permita el DELETE en movimientos_inventario.
 CREATE OR REPLACE FUNCTION limpiar_datos_prueba()
 RETURNS void
 LANGUAGE plpgsql
@@ -34,21 +34,21 @@ SECURITY DEFINER
 SET search_path = public
 AS $$
 BEGIN
-  -- Activar bypass del trigger de inmutabilidad (transaction-local: se resetea al commit)
-  PERFORM set_config('app.cleanup_test_data', 'true', true);
+  -- Activar bypass del trigger (transaction-local: se resetea al commit)
+  PERFORM set_config('app.limpieza_datos_prueba', 'true', true);
 
-  -- Movimientos de inventario (ON DELETE RESTRICT → borrar antes que las variantes)
-  DELETE FROM inventory_movements
-  WHERE variant_id IN (
-    SELECT pv.id
-    FROM   product_variants pv
-    JOIN   products p ON p.id = pv.product_id
+  -- Movimientos (ON DELETE RESTRICT → borrar antes que las variantes)
+  DELETE FROM movimientos_inventario
+  WHERE variante_id IN (
+    SELECT vp.id
+    FROM   variantes_producto vp
+    JOIN   productos p ON p.id = vp.producto_id
     WHERE  starts_with(p.slug, '__test__')
   );
 
-  -- Productos → CASCADE borra product_variants, variant_attribute_values,
-  -- product_attributes, product_collections, product_images
-  DELETE FROM products WHERE starts_with(slug, '__test__');
+  -- Productos → CASCADE borra variantes_producto, variante_valores_atributo,
+  -- producto_atributos, producto_colecciones, imagenes_producto
+  DELETE FROM productos WHERE starts_with(slug, '__test__');
 END;
 $$;
 

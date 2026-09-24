@@ -12,19 +12,19 @@ export default async function AdminLayout({
 
   if (!user) redirect('/admin/login')
 
-  const { data: profile } = await supabase
-    .from('profiles')
+  const { data: perfil } = await supabase
+    .from('perfiles')
     .select('*')
     .eq('id', user.id)
     .single()
 
-  if (!profile || (profile.role !== 'owner' && profile.role !== 'staff')) {
+  if (!perfil || (perfil.rol !== 'propietario' && perfil.rol !== 'colaborador')) {
     redirect('/admin/login?error=unauthorized')
   }
 
   return (
     <div className="flex min-h-screen bg-stone-50">
-      <AdminSidebar userEmail={user.email ?? ''} fullName={profile.full_name ?? ''} />
+      <AdminSidebar userEmail={user.email ?? ''} fullName={perfil.nombre_completo ?? ''} />
       <main className="flex-1 p-8">{children}</main>
     </div>
   )

@@ -1,9 +1,9 @@
 /**
- * Verificación de políticas RLS contra el proyecto Supabase remoto.
+ * Verificacion de politicas RLS contra el proyecto Supabase remoto.
  * Uso: npx tsx scripts/test-rls.ts
  *
  * Todo dato creado usa el prefijo __test__ en slug/nombre.
- * limpiar_datos_prueba() (migration 000007) los borra al finalizar,
+ * limpiar_datos_prueba() (migracion 000007) los borra al finalizar,
  * incluso si alguna prueba falla.
  */
 
@@ -23,8 +23,8 @@ const anon = createClient<Database>(SUPABASE_URL, ANON_KEY)
 
 // Slugs con prefijo __test__ para que limpiar_datos_prueba() los identifique
 const ts           = Date.now()
-const SLUG_ACTIVE  = '__test__rls-active'
-const SLUG_DRAFT   = '__test__rls-draft'
+const SLUG_ACTIVO  = '__test__rls-activo'
+const SLUG_BORRADOR = '__test__rls-borrador'
 const SLUG_STOCK   = `__test__stock-${ts}`
 const SKU_STOCK    = `__TEST__STOCK-${ts}`
 
@@ -37,7 +37,7 @@ async function check(label: string, fn: () => Promise<boolean>) {
     if (ok) { console.log(`  ✓  ${label}`); passed++ }
     else     { console.error(`  ✗  ${label}`); failed++ }
   } catch (err) {
-    console.error(`  ✗  ${label}  — lanzó: ${String(err)}`)
+    console.error(`  ✗  ${label}  — lanzo: ${String(err)}`)
     failed++
   }
 }
@@ -46,14 +46,14 @@ async function limpiar(admin: ReturnType<typeof createClient<Database>>) {
   console.log('\nLimpiando datos de prueba...')
   const { error } = await (admin as any).rpc('limpiar_datos_prueba')
   if (error) {
-    console.error(`  ⚠  limpiar_datos_prueba() falló: ${error.message}`)
+    console.error(`  ⚠  limpiar_datos_prueba() fallo: ${error.message}`)
     return
   }
   await check('no quedan productos __test__ en la BD', async () => {
     const { data } = await admin
-      .from('products')
+      .from('productos')
       .select('id')
-      .in('slug', [SLUG_ACTIVE, SLUG_DRAFT, SLUG_STOCK])
+      .in('slug', [SLUG_ACTIVO, SLUG_BORRADOR, SLUG_STOCK])
     return !data || data.length === 0
   })
 }
@@ -65,33 +65,33 @@ function printSummary() {
 }
 
 async function main() {
-  console.log('\n=== Verificación RLS (anon key) ===\n')
+  console.log('\n=== Verificacion RLS (anon key) ===\n')
 
   // ── Tablas bloqueadas para anon ─────────────────────────────
   console.log('Tablas bloqueadas para anon:')
-  for (const tbl of ['orders', 'customers', 'payments', 'inventory_movements', 'profiles'] as const) {
+  for (const tbl of ['pedidos', 'clientes', 'pagos', 'movimientos_inventario', 'perfiles'] as const) {
     await check(`${tbl} → 0 filas`, async () => {
       const { data } = await anon.from(tbl).select('id').limit(1)
       return !data || data.length === 0
     })
   }
-  await check('variant_stock → 0 filas para anon (security_invoker = true)', async () => {
-    const { data } = await (anon as any).from('variant_stock').select('*').limit(1)
+  await check('stock_variantes → 0 filas para anon (security_invoker = true)', async () => {
+    const { data } = await (anon as any).from('stock_variantes').select('*').limit(1)
     return !data || data.length === 0
   })
 
   // ── Tablas legibles para anon ───────────────────────────────
   console.log('\nTablas legibles para anon:')
-  await check('store_settings → legible', async () => {
-    const { error } = await anon.from('store_settings').select('store_name').eq('id', 1).single()
+  await check('configuracion_tienda → legible', async () => {
+    const { error } = await anon.from('configuracion_tienda').select('nombre_tienda').eq('id', 1).single()
     return !error
   })
-  await check('categories (activas) → legibles', async () => {
-    const { error } = await anon.from('categories').select('id').eq('is_active', true)
+  await check('categorias (activas) → legibles', async () => {
+    const { error } = await anon.from('categorias').select('id').eq('activo', true)
     return !error
   })
-  await check('attributes → legibles', async () => {
-    const { error } = await anon.from('attributes').select('id')
+  await check('atributos → legibles', async () => {
+    const { error } = await anon.from('atributos').select('id')
     return !error
   })
 
@@ -104,94 +104,94 @@ async function main() {
   const admin = createClient<Database>(SUPABASE_URL, SERVICE_KEY)
 
   try {
-    // ── Filtrado por status de producto ──────────────────────────
-    console.log('\nFiltrado por status de producto:')
+    // ── Filtrado por estado de producto ──────────────────────────
+    console.log('\nFiltrado por estado de producto:')
 
     // Limpiar posibles restos de ejecuciones previas
-    await admin.from('products').delete().in('slug', [SLUG_ACTIVE, SLUG_DRAFT])
+    await admin.from('productos').delete().in('slug', [SLUG_ACTIVO, SLUG_BORRADOR])
 
-    const { data: activeProd } = await admin.from('products').insert({
-      name: '__Test__ RLS Active', slug: SLUG_ACTIVE, base_price: 1000, status: 'active',
-    }).select('id').single()
+    const { data: prodActivo } = await admin.from('productos').insert({
+      nombre: '__Test__ RLS Activo', slug: SLUG_ACTIVO, precio_base: 1000, estado: 'activo',
+    } as any).select('id').single()
 
-    const { data: draftProd } = await admin.from('products').insert({
-      name: '__Test__ RLS Draft', slug: SLUG_DRAFT, base_price: 1000, status: 'draft',
-    }).select('id').single()
+    const { data: prodBorrador } = await admin.from('productos').insert({
+      nombre: '__Test__ RLS Borrador', slug: SLUG_BORRADOR, precio_base: 1000, estado: 'borrador',
+    } as any).select('id').single()
 
     await check('producto activo → legible para anon', async () => {
-      if (!activeProd) return false
-      const { data } = await anon.from('products').select('id').eq('id', activeProd.id).single()
+      if (!prodActivo) return false
+      const { data } = await anon.from('productos').select('id').eq('id', (prodActivo as any).id).single()
       return !!data
     })
-    await check('producto draft → NO legible para anon', async () => {
-      if (!draftProd) return false
-      const { data } = await anon.from('products').select('id').eq('id', draftProd.id)
+    await check('producto borrador → NO legible para anon', async () => {
+      if (!prodBorrador) return false
+      const { data } = await anon.from('productos').select('id').eq('id', (prodBorrador as any).id)
       return !data || data.length === 0
     })
 
-    // ── vista variant_stock + trigger de inmutabilidad ───────────
-    console.log('\nvista variant_stock + inmutabilidad de inventario:')
+    // ── vista stock_variantes + trigger de inmutabilidad ─────────
+    console.log('\nvista stock_variantes + inmutabilidad de inventario:')
 
-    const { data: prod } = await admin.from('products').insert({
-      name: '__Test__ Stock', slug: SLUG_STOCK, base_price: 1000, status: 'active',
-    }).select('id').single()
+    const { data: prod } = await admin.from('productos').insert({
+      nombre: '__Test__ Stock', slug: SLUG_STOCK, precio_base: 1000, estado: 'activo',
+    } as any).select('id').single()
 
-    const { data: variant } = await admin.from('product_variants').insert({
-      product_id: prod!.id, sku: SKU_STOCK, price: 1000,
-    }).select('id').single()
+    const { data: variante } = await admin.from('variantes_producto').insert({
+      producto_id: (prod as any).id, sku: SKU_STOCK, precio: 1000,
+    } as any).select('id').single()
 
-    const vid = variant!.id
+    const vid = (variante as any).id
 
-    await admin.from('inventory_movements').insert([
-      { variant_id: vid, quantity:  5, type: 'purchase' as const },
-      { variant_id: vid, quantity:  3, type: 'purchase' as const },
-      { variant_id: vid, quantity: -2, type: 'sale'     as const },
-    ])
+    await admin.from('movimientos_inventario').insert([
+      { variante_id: vid, cantidad:  5, tipo: 'compra' },
+      { variante_id: vid, cantidad:  3, tipo: 'compra' },
+      { variante_id: vid, cantidad: -2, tipo: 'venta'  },
+    ] as any)
 
-    await check('variant_stock suma correcta (5+3-2 = 6) vía admin', async () => {
-      const { data } = await admin.from('variant_stock').select('stock').eq('variant_id', vid).single()
+    await check('stock_variantes suma correcta (5+3-2 = 6) via admin', async () => {
+      const { data } = await admin.from('stock_variantes' as any).select('stock').eq('variante_id', vid).single()
       return (data as any)?.stock === 6
     })
 
-    // ── get_variant_availability (SECURITY DEFINER) ──────────────
-    console.log('\nget_variant_availability (SECURITY DEFINER):')
+    // ── obtener_disponibilidad_variantes (SECURITY DEFINER) ───────
+    console.log('\nobtener_disponibilidad_variantes (SECURITY DEFINER):')
 
-    await check('anon PUEDE llamar get_variant_availability', async () => {
-      const { data, error } = await anon.rpc('get_variant_availability', { variant_ids: [vid] })
+    await check('anon PUEDE llamar obtener_disponibilidad_variantes', async () => {
+      const { data, error } = await (anon as any).rpc('obtener_disponibilidad_variantes', { variante_ids: [vid] })
       return !error && Array.isArray(data) && data.length === 1
     })
-    await check('resultado tiene in_stock/low_stock/allow_made_to_order — sin cantidad raw', async () => {
-      const { data } = await anon.rpc('get_variant_availability', { variant_ids: [vid] })
+    await check('resultado tiene en_stock/stock_bajo/permite_a_pedido — sin cantidad raw', async () => {
+      const { data } = await (anon as any).rpc('obtener_disponibilidad_variantes', { variante_ids: [vid] })
       if (!Array.isArray(data) || data.length === 0) return false
       const row = (data as any[])[0]
       return (
-        'in_stock'            in row &&
-        'low_stock'           in row &&
-        'allow_made_to_order' in row &&
-        !('stock'    in row)         &&
-        !('quantity' in row)
+        'en_stock'         in row &&
+        'stock_bajo'       in row &&
+        'permite_a_pedido' in row &&
+        !('stock'    in row)     &&
+        !('cantidad' in row)
       )
     })
-    await check('in_stock=true, low_stock=false para stock=6', async () => {
-      const { data } = await anon.rpc('get_variant_availability', { variant_ids: [vid] })
+    await check('en_stock=true, stock_bajo=false para stock=6', async () => {
+      const { data } = await (anon as any).rpc('obtener_disponibilidad_variantes', { variante_ids: [vid] })
       const row = (data as any[])?.[0]
-      return row?.in_stock === true && row?.low_stock === false
+      return row?.en_stock === true && row?.stock_bajo === false
     })
 
     // ── Trigger de inmutabilidad ─────────────────────────────────
     console.log('\nTrigger de inmutabilidad de inventario:')
 
-    const { data: movement } = await admin
-      .from('inventory_movements').select('id').eq('variant_id', vid).limit(1).single()
+    const { data: movimiento } = await admin
+      .from('movimientos_inventario').select('id').eq('variante_id', vid).limit(1).single()
 
-    await check('UPDATE en inventory_movements lanza excepción', async () => {
+    await check('UPDATE en movimientos_inventario lanza excepcion', async () => {
       const { error } = await admin
-        .from('inventory_movements').update({ note: 'intento de mutación' }).eq('id', movement!.id)
+        .from('movimientos_inventario').update({ nota: 'intento de mutacion' } as any).eq('id', (movimiento as any).id)
       return !!error && error.message.includes('inmutable')
     })
-    await check('DELETE directo en inventory_movements lanza excepción', async () => {
+    await check('DELETE directo en movimientos_inventario lanza excepcion', async () => {
       const { error } = await admin
-        .from('inventory_movements').delete().eq('id', movement!.id)
+        .from('movimientos_inventario').delete().eq('id', (movimiento as any).id)
       return !!error && error.message.includes('inmutable')
     })
 
