@@ -16,14 +16,13 @@ Panel de administración para Encantika, una marca de joyería. Construido con N
 pnpm install
 
 # 2. Variables de entorno
-cp .env.local.example .env.local
-# Edita .env.local con tus credenciales de Supabase
+cp .env.example .env.local
+# Edita .env.local con tus credenciales de Supabase (ver comentarios en el archivo)
 
 # 3. Aplicar migraciones y seed al proyecto remoto
-supabase login
-supabase link --project-ref <TU_PROJECT_REF>
-supabase db push
-supabase db push --include-seed   # datos iniciales
+npx supabase login
+npx supabase link --project-ref <TU_PROJECT_REF>
+npx supabase db push --include-seed
 
 # 4. Correr en desarrollo
 pnpm dev
@@ -47,7 +46,7 @@ O desde SQL Editor:
 
 ### Paso 2 — Insertar el perfil owner
 
-En el **SQL Editor** de Supabase (o con `supabase db execute`):
+En el **SQL Editor** de Supabase (o con `npx supabase db execute`):
 
 ```sql
 INSERT INTO profiles (id, full_name, role)
@@ -73,13 +72,13 @@ Repite los pasos 1 y 2 usando `role = 'staff'`.
 Cada vez que modifiques el schema, regenera los tipos:
 
 ```bash
-supabase gen types typescript --project-id <TU_PROJECT_ID> > src/types/database.ts
+npx supabase gen types typescript --linked > src/types/database.ts
 ```
 
 O si tienes Supabase corriendo localmente:
 
 ```bash
-supabase gen types typescript --local > src/types/database.ts
+npx supabase gen types typescript --local > src/types/database.ts
 ```
 
 ## Verificar RLS
@@ -126,7 +125,7 @@ src/
     client.ts                         # browser client
     server.ts                         # server client (RSC / Server Actions)
     middleware-client.ts              # client para middleware
-  middleware.ts                       # protege /admin/* rutas
+  proxy.ts                            # protege /admin/* rutas (Next.js 16)
   types/database.ts                   # tipos generados por supabase CLI
 
 scripts/
