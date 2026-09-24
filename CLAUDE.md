@@ -52,6 +52,7 @@ docs/
 |---------|-------|
 | Supabase Project Ref | `kfjregtgodpmaexuuvxt` |
 | Supabase Dashboard | https://supabase.com/dashboard/project/kfjregtgodpmaexuuvxt |
+| GitHub | https://github.com/nicolascisternasm/Encantika |
 
 ## Environment variables
 
