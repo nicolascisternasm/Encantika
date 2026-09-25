@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { Toaster } from 'sonner'
 import { createClient } from '@/lib/supabase/server'
 import AdminSidebar from './AdminSidebar'
@@ -11,7 +10,16 @@ export default async function AdminLayout({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  if (!user) redirect('/administracion/login')
+  // Sin sesión: solo se llega aquí en /administracion/login (el proxy redirige el resto).
+  // Renderizar children sin sidebar para no causar un loop de redirección.
+  if (!user) {
+    return (
+      <>
+        {children}
+        <Toaster richColors position="top-right" />
+      </>
+    )
+  }
 
   const { data: perfil } = await supabase
     .from('perfiles')
@@ -19,13 +27,12 @@ export default async function AdminLayout({
     .eq('id', user.id)
     .single()
 
-  if (!perfil || (perfil.rol !== 'propietario' && perfil.rol !== 'colaborador')) {
-    redirect('/administracion/login?error=unauthorized')
-  }
-
   return (
     <div className="flex min-h-screen bg-stone-50">
-      <AdminSidebar userEmail={user.email ?? ''} fullName={perfil.nombre_completo ?? ''} />
+      <AdminSidebar
+        userEmail={user.email ?? ''}
+        fullName={perfil?.nombre_completo ?? ''}
+      />
       <main className="flex-1 p-8">{children}</main>
       <Toaster richColors position="top-right" />
     </div>
