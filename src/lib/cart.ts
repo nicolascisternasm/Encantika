@@ -13,29 +13,48 @@ const CART_KEY = 'encantika_carrito'
 export function getCart(): CartItem[] {
   if (typeof window === 'undefined') return []
   try {
-    return JSON.parse(localStorage.getItem(CART_KEY) ?? '[]')
+    const raw = localStorage.getItem(CART_KEY)
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
   } catch {
     return []
   }
 }
 
 function saveCart(items: CartItem[]): void {
-  localStorage.setItem(CART_KEY, JSON.stringify(items))
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(items))
+  } catch {
+    // localStorage puede estar bloqueado (modo privado, límite de cuota)
+  }
 }
 
 export function addToCart(item: Omit<CartItem, 'id' | 'cantidad'> & { cantidad?: number }): CartItem[] {
-  const itemId = item.productoId
-  const cart = getCart()
-  const existing = cart.find(i => i.id === itemId)
-  if (existing) {
-    existing.cantidad += item.cantidad ?? 1
-    saveCart(cart)
-    return cart
+  try {
+    const itemId = item.productoId
+    const cart = getCart()
+    const existing = cart.find(i => i.id === itemId)
+    if (existing) {
+      existing.cantidad += item.cantidad ?? 1
+      saveCart(cart)
+      return cart
+    }
+    const newItem: CartItem = {
+      id: itemId,
+      productoId: item.productoId,
+      nombre: item.nombre,
+      precio: item.precio,
+      imagenUrl: item.imagenUrl ?? null,
+      cantidad: item.cantidad ?? 1,
+      caracteristicas: item.caracteristicas ?? [],
+    }
+    const updated = [...cart, newItem]
+    saveCart(updated)
+    return updated
+  } catch {
+    return []
   }
-  const newItem: CartItem = { ...item, id: itemId, cantidad: item.cantidad ?? 1 }
-  const updated = [...cart, newItem]
-  saveCart(updated)
-  return updated
 }
 
 export function removeFromCart(itemId: string): CartItem[] {
@@ -45,7 +64,11 @@ export function removeFromCart(itemId: string): CartItem[] {
 }
 
 export function clearCart(): void {
-  localStorage.removeItem(CART_KEY)
+  try {
+    localStorage.removeItem(CART_KEY)
+  } catch {
+    // silencioso
+  }
 }
 
 export function getCartCount(): number {

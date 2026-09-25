@@ -19,8 +19,13 @@ export default function AddToCartButton({
   const router = useRouter()
 
   function doAdd() {
-    addToCart({ productoId, nombre, precio, imagenUrl, caracteristicas })
-    toast.success('Agregado al carrito ✓')
+    try {
+      addToCart({ productoId, nombre, precio, imagenUrl, caracteristicas })
+      toast.success('Agregado al carrito ✓')
+    } catch (err) {
+      console.error('[carrito] error al agregar:', err)
+      toast.error('No se pudo agregar al carrito')
+    }
   }
 
   function handleAdd() {
