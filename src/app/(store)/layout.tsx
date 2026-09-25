@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import StoreHeader from '@/components/store/StoreHeader'
 import WhatsAppButton from '@/components/store/WhatsAppButton'
+import { getTema, getFuente } from '@/lib/temas'
 
 const cormorant = Cormorant_Garamond({
   variable: '--font-cormorant',
@@ -23,11 +24,30 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   const supabase = await createClient()
   const { data: config } = await supabase
     .from('configuracion_tienda')
-    .select('nombre_tienda, numero_whatsapp, url_instagram, url_mercadolibre')
+    .select('nombre_tienda, numero_whatsapp, url_instagram, url_mercadolibre, tema, fuente_titulos')
     .single()
 
+  const temaConfig = getTema(config?.tema)
+  const fuenteConfig = getFuente(config?.fuente_titulos)
+
+  // Fuentes de script de Google (Cormorant ya está cargada via next/font)
+  const scriptFonts = 'Great+Vibes&family=Pinyon+Script&family=Sacramento&family=Tangerine:wght@700&family=Alex+Brush'
+  const googleFontsUrl = `https://fonts.googleapis.com/css2?family=${scriptFonts}&display=swap`
+
+  const themeStyle = {
+    ...temaConfig.vars,
+    '--font-display': fuenteConfig.css,
+  } as React.CSSProperties
+
   return (
-    <div className={`${cormorant.variable} flex flex-col min-h-screen bg-ivory`}>
+    <div className={`${cormorant.variable} flex flex-col min-h-screen bg-ivory`} style={themeStyle}>
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link rel="preconnect" href="https://fonts.googleapis.com" crossOrigin="anonymous" />
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
+      <link rel="stylesheet" href={googleFontsUrl} />
+
       <StoreHeader />
 
       <main className="flex-1">

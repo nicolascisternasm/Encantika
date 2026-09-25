@@ -1,6 +1,15 @@
 @import "tailwindcss";
 
+/* Variables de tema — valores por defecto (dorado_clasico).
+   El layout de la tienda las sobreescribe por cada tema via style prop. */
 :root {
+  --color-fondo: #FAF7F2;
+  --color-texto: #1A1A1A;
+  --color-acento: #C6A15B;
+  --color-tarjeta: #EDE0D4;
+  --color-borde: #D4C4A8;
+  --color-texto-suave: #7C7269;
+
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -10,13 +19,15 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  /* Tokens Encantika */
-  --color-ivory: #FAF7F2;
-  --color-encantika-stone: #7C7269;
-  --color-onyx: #1C1C1E;
-  --color-gold: #C9A035;
-  --color-nude: #E8D5C0;
-  --color-sand: #D4C4A8;
+
+  /* Tokens Encantika — ahora apuntan a las variables de tema */
+  --color-ivory: var(--color-fondo);
+  --color-onyx: var(--color-texto);
+  --color-gold: var(--color-acento);
+  --color-nude: var(--color-tarjeta);
+  --color-sand: var(--color-borde);
+  --color-encantika-stone: var(--color-texto-suave);
+
   --font-display: var(--font-cormorant);
 }
 

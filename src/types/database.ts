@@ -1,4 +1,4 @@
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -202,6 +202,7 @@ export type Database = {
           actualizado_en: string
           direccion_retiro: string | null
           email_contacto: string | null
+          fuente_titulos: string
           historia: string | null
           id: number
           instrucciones_retiro: string | null
@@ -211,6 +212,7 @@ export type Database = {
           numero_whatsapp: string | null
           seo_descripcion: string | null
           seo_titulo: string | null
+          tema: string
           url_instagram: string | null
           url_logo: string | null
           url_mercadolibre: string | null
@@ -219,6 +221,7 @@ export type Database = {
           actualizado_en?: string
           direccion_retiro?: string | null
           email_contacto?: string | null
+          fuente_titulos?: string
           historia?: string | null
           id: number
           instrucciones_retiro?: string | null
@@ -228,6 +231,7 @@ export type Database = {
           numero_whatsapp?: string | null
           seo_descripcion?: string | null
           seo_titulo?: string | null
+          tema?: string
           url_instagram?: string | null
           url_logo?: string | null
           url_mercadolibre?: string | null
@@ -236,6 +240,7 @@ export type Database = {
           actualizado_en?: string
           direccion_retiro?: string | null
           email_contacto?: string | null
+          fuente_titulos?: string
           historia?: string | null
           id?: number
           instrucciones_retiro?: string | null
@@ -245,6 +250,7 @@ export type Database = {
           numero_whatsapp?: string | null
           seo_descripcion?: string | null
           seo_titulo?: string | null
+          tema?: string
           url_instagram?: string | null
           url_logo?: string | null
           url_mercadolibre?: string | null
