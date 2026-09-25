@@ -14,7 +14,7 @@ export default function AdminSidebar({ userEmail, fullName }: AdminSidebarProps)
   async function handleSignOut() {
     const supabase = createClient()
     await supabase.auth.signOut()
-    router.push('/admin/login')
+    router.push('/administracion/login')
     router.refresh()
   }
 
@@ -31,31 +31,31 @@ export default function AdminSidebar({ userEmail, fullName }: AdminSidebarProps)
       {/* Nav */}
       <nav className="flex-1 space-y-1 text-sm">
         <a
-          href="/admin"
+          href="/administracion"
           className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
         >
           Inicio
         </a>
         <a
-          href="/admin/orders"
+          href="/administracion/pedidos"
           className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
         >
           Pedidos
         </a>
         <a
-          href="/admin/products"
+          href="/administracion/productos"
           className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
         >
           Productos
         </a>
         <a
-          href="/admin/customers"
+          href="/administracion/clientes"
           className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
         >
           Clientes
         </a>
         <a
-          href="/admin/settings"
+          href="/administracion/configuracion"
           className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
         >
           Configuración

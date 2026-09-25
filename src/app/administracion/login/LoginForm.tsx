@@ -49,7 +49,7 @@ export default function LoginForm() {
       }
     }
 
-    router.push('/admin')
+    router.push('/administracion')
     router.refresh()
   }
 

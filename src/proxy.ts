@@ -9,8 +9,8 @@ export async function proxy(request: NextRequest, _event: NextFetchEvent) {
   // Refresca la sesion para que no expire entre visitas
   const { data: { user } } = await supabase.auth.getUser()
 
-  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin')
-  const isLoginPage = request.nextUrl.pathname === '/admin/login'
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/administracion')
+  const isLoginPage = request.nextUrl.pathname === '/administracion/login'
 
   if (isLoginPage) {
     // Admin ya autenticado → redirigir al dashboard
@@ -22,7 +22,7 @@ export async function proxy(request: NextRequest, _event: NextFetchEvent) {
         .single()
 
       if (perfil && (perfil.rol === 'propietario' || perfil.rol === 'colaborador')) {
-        return NextResponse.redirect(new URL('/admin', request.url))
+        return NextResponse.redirect(new URL('/administracion', request.url))
       }
     }
     return response
@@ -30,7 +30,7 @@ export async function proxy(request: NextRequest, _event: NextFetchEvent) {
 
   if (isAdminRoute) {
     if (!user) {
-      return NextResponse.redirect(new URL('/admin/login', request.url))
+      return NextResponse.redirect(new URL('/administracion/login', request.url))
     }
 
     const { data: perfil } = await supabase
@@ -41,7 +41,7 @@ export async function proxy(request: NextRequest, _event: NextFetchEvent) {
 
     if (!perfil || (perfil.rol !== 'propietario' && perfil.rol !== 'colaborador')) {
       await supabase.auth.signOut()
-      return NextResponse.redirect(new URL('/admin/login?error=unauthorized', request.url))
+      return NextResponse.redirect(new URL('/administracion/login?error=unauthorized', request.url))
     }
   }
 
@@ -49,5 +49,5 @@ export async function proxy(request: NextRequest, _event: NextFetchEvent) {
 }
 
 export const config: ProxyConfig = {
-  matcher: ['/admin/:path*'],
+  matcher: ['/administracion/:path*'],
 }

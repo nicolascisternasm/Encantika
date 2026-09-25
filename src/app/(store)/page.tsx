@@ -45,6 +45,15 @@ export default function StorePage() {
           ))}
         </div>
       </section>
+      {/* Footer */}
+      <footer className="py-8 text-center">
+        <Link
+          href="/administracion/login"
+          className="text-[11px] text-[#7A7470] no-underline hover:underline decoration-[#7A7470]/50 underline-offset-2 transition-all"
+        >
+          Administración
+        </Link>
+      </footer>
     </main>
   )
 }
