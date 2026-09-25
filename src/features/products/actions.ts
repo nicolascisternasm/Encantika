@@ -88,6 +88,25 @@ export async function deleteProducto(id: string): Promise<ActionState> {
   return { success: 'Producto eliminado' }
 }
 
+export async function guardarCaracteristicas(
+  productoId: string,
+  caracteristicas: Array<{ nombre: string; valor: string }>
+): Promise<ActionState> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from('productos')
+    .update({ caracteristicas } as any)
+    .eq('id', productoId)
+
+  if (error) return { error: 'Error al guardar las características' }
+  revalidatePath(`/administracion/productos/${productoId}`)
+  return { success: 'Características guardadas' }
+}
+
 export async function updateProductoAtributos(productoId: string, atributoIds: string[]): Promise<ActionState> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()

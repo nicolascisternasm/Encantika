@@ -3,11 +3,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { formatCLP } from '@/lib/utils'
-import ProductPageClient, {
-  type ImagenPDP,
-  type AtributoPDP,
-  type VariantePDP,
-} from '@/components/store/ProductPageClient'
+import ProductPageClient, { type ImagenPDP } from '@/components/store/ProductPageClient'
 
 // ── Metadata SEO ──────────────────────────────────────────────────────────────
 
@@ -68,25 +64,16 @@ export default async function ProductoPDPPage({
   const { slug } = await params
   const supabase = await createClient()
 
-  // Producto completo
   const { data: raw } = await supabase
     .from('productos')
     .select(`
       id, nombre, slug, descripcion, precio_base, precio_comparacion,
       estado, destacado, tipo_producto, dias_tiempo_produccion,
       titulo_seo, descripcion_seo, categoria_id,
+      caracteristicas,
       categorias(id, nombre, slug),
-      imagenes_producto(id, ruta_almacenamiento, texto_alt, orden, variante_id),
-      variantes_producto(
-        id, sku, precio, precio_comparacion, activo, permite_a_pedido,
-        dias_tiempo_produccion,
-        variante_valores_atributo(
-          valor_atributo_id,
-          valores_atributo(id, valor, slug, color_hex, atributo_id,
-            atributos(id, nombre, codigo, orden)
-          )
-        )
-      ),
+      imagenes_producto(id, ruta_almacenamiento, texto_alt, orden),
+      variantes_producto(id, activo, permite_a_pedido),
       producto_colecciones(coleccion_id, colecciones(id, nombre, slug))
     `)
     .eq('slug', slug)
@@ -94,10 +81,10 @@ export default async function ProductoPDPPage({
 
   if (!raw || raw.estado !== 'activo') notFound()
 
+  // Stock: sumar todas las variantes activas
   const variantesRaw = (raw.variantes_producto as any[]) ?? []
   const varianteIds = variantesRaw.map((v: any) => v.id as string)
 
-  // Stock
   const { data: stockData } =
     varianteIds.length > 0
       ? await supabase
@@ -106,11 +93,10 @@ export default async function ProductoPDPPage({
           .in('variante_id', varianteIds)
       : { data: [] as { variante_id: string | null; stock: number | null }[] }
 
-  const stockMap = new Map(
-    (stockData ?? []).map(s => [s.variante_id!, s.stock ?? 0])
-  )
+  const totalStock = (stockData ?? []).reduce((sum, s) => sum + (s.stock ?? 0), 0)
+  const permiteAPedido = variantesRaw.some((v: any) => v.permite_a_pedido)
 
-  // Config de tienda (dirección retiro)
+  // Config tienda (dirección retiro)
   const { data: tienda } = await supabase
     .from('configuracion_tienda')
     .select('direccion_retiro')
@@ -121,7 +107,7 @@ export default async function ProductoPDPPage({
   const { data: relacionadosRaw } = categoriaId
     ? await supabase
         .from('productos')
-        .select('id, nombre, slug, precio_base, imagenes_producto(ruta_almacenamiento, orden), variantes_producto(precio, activo)')
+        .select('id, nombre, slug, precio_base, imagenes_producto(ruta_almacenamiento, orden)')
         .eq('estado', 'activo')
         .eq('categoria_id', categoriaId)
         .neq('id', raw.id)
@@ -129,7 +115,7 @@ export default async function ProductoPDPPage({
         .limit(4)
     : { data: [] }
 
-  // ── Procesamiento de datos ────────────────────────────────────────────────
+  // ── Procesamiento ─────────────────────────────────────────────────────────
 
   const storageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''}/storage/v1/object/public/imagenes-productos`
 
@@ -140,61 +126,14 @@ export default async function ProductoPDPPage({
       ruta_almacenamiento: img.ruta_almacenamiento,
       texto_alt: img.texto_alt,
       orden: img.orden,
-      variante_id: img.variante_id,
+      variante_id: null,
     }))
 
-  // Solo variantes que el cliente puede seleccionar (activas o a pedido)
-  const variantes: VariantePDP[] = variantesRaw
-    .filter((v: any) => v.activo || v.permite_a_pedido)
-    .map((v: any) => ({
-      id: v.id,
-      sku: v.sku,
-      precio: v.precio,
-      precio_comparacion: v.precio_comparacion,
-      activo: v.activo,
-      permite_a_pedido: v.permite_a_pedido,
-      dias_tiempo_produccion: v.dias_tiempo_produccion,
-      stock: stockMap.get(v.id) ?? 0,
-      valores: Object.fromEntries(
-        (v.variante_valores_atributo as any[]).map((vva: any) => [
-          vva.valores_atributo.atributos.id as string,
-          vva.valores_atributo.id as string,
-        ])
-      ) as Record<string, string>,
-    }))
+  const caracteristicas = ((raw.caracteristicas as any[]) ?? []).map((c: any) => ({
+    nombre: String(c.nombre ?? ''),
+    valor: String(c.valor ?? ''),
+  })).filter(c => c.nombre && c.valor)
 
-  // Atributos únicos ordenados
-  const atributosMap = new Map<string, AtributoPDP>()
-  for (const v of variantesRaw.filter((v: any) => v.activo || v.permite_a_pedido)) {
-    for (const vva of v.variante_valores_atributo as any[]) {
-      const attr = vva.valores_atributo.atributos as any
-      if (!atributosMap.has(attr.id)) {
-        atributosMap.set(attr.id, {
-          id: attr.id,
-          nombre: attr.nombre,
-          codigo: attr.codigo,
-          orden: attr.orden,
-          valores: [],
-        })
-      }
-      const atributo = atributosMap.get(attr.id)!
-      const val = vva.valores_atributo as any
-      if (!atributo.valores.find(vl => vl.id === val.id)) {
-        atributo.valores.push({ id: val.id, valor: val.valor, color_hex: val.color_hex })
-      }
-    }
-  }
-  const atributos: AtributoPDP[] = [...atributosMap.values()].sort(
-    (a, b) => a.orden - b.orden
-  )
-
-  // Mapa de imagen por variante
-  const variantImageMap: Record<string, number> = {}
-  imagenes.forEach((img, idx) => {
-    if (img.variante_id) variantImageMap[img.variante_id] = idx
-  })
-
-  // Colecciones
   const colecciones = ((raw.producto_colecciones as any[]) ?? [])
     .filter((pc: any) => pc.colecciones)
     .map((pc: any) => ({
@@ -251,9 +190,9 @@ export default async function ProductoPDPPage({
             colecciones,
           }}
           imagenes={imagenes}
-          atributos={atributos}
-          variantes={variantes}
-          variantImageMap={variantImageMap}
+          caracteristicas={caracteristicas}
+          stock={totalStock}
+          permiteAPedido={permiteAPedido}
           storageUrl={storageUrl}
           direccionRetiro={(tienda as any)?.direccion_retiro ?? null}
         />
@@ -294,10 +233,6 @@ export default async function ProductoPDPPage({
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
               {(relacionadosRaw as any[]).map(p => {
                 const imgUrl = getMainImg(p.imagenes_producto ?? [])
-                const vs = (p.variantes_producto as { precio: number; activo: boolean }[]) ?? []
-                const precioMin = vs
-                  .filter(v => v.activo)
-                  .reduce((min, v) => Math.min(min, v.precio), p.precio_base)
                 return (
                   <Link key={p.id} href={`/catalogo/${p.slug}`} className="group">
                     <div className="aspect-square overflow-hidden bg-stone-100">
@@ -315,7 +250,7 @@ export default async function ProductoPDPPage({
                       <p className="text-sm text-stone-800 group-hover:text-stone-600 transition-colors">
                         {p.nombre}
                       </p>
-                      <p className="text-sm text-stone-500">{formatCLP(precioMin)}</p>
+                      <p className="text-sm text-stone-500">{formatCLP(p.precio_base)}</p>
                     </div>
                   </Link>
                 )

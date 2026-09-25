@@ -1,12 +1,11 @@
 export type CartItem = {
   id: string
   productoId: string
-  varianteId: string | null
   nombre: string
-  variantLabel: string
   precio: number
   imagenUrl: string | null
   cantidad: number
+  caracteristicas: { nombre: string; valor: string }[]
 }
 
 const CART_KEY = 'encantika_carrito'
@@ -25,7 +24,7 @@ function saveCart(items: CartItem[]): void {
 }
 
 export function addToCart(item: Omit<CartItem, 'id' | 'cantidad'> & { cantidad?: number }): CartItem[] {
-  const itemId = `${item.productoId}:${item.varianteId ?? 'base'}`
+  const itemId = item.productoId
   const cart = getCart()
   const existing = cart.find(i => i.id === itemId)
   if (existing) {

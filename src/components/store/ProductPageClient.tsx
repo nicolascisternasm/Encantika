@@ -1,20 +1,14 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { formatCLP } from '@/lib/utils'
 import ProductGallery, { type ImagenPDP } from './ProductGallery'
-import VariantSelector, { type AtributoPDP, type VariantePDPSelector } from './VariantSelector'
 import AddToCartButton from './AddToCartButton'
 
-export type { ImagenPDP, AtributoPDP }
+export type { ImagenPDP }
 
-export type VariantePDP = VariantePDPSelector & {
-  sku: string
-  precio: number
-  precio_comparacion: number | null
-  dias_tiempo_produccion: number | null
-}
+export type Caracteristica = { nombre: string; valor: string }
 
 interface ProductoData {
   id: string
@@ -30,17 +24,16 @@ interface ProductoData {
 interface Props {
   producto: ProductoData
   imagenes: ImagenPDP[]
-  atributos: AtributoPDP[]
-  variantes: VariantePDP[]
-  variantImageMap: Record<string, number>
+  caracteristicas: Caracteristica[]
+  stock: number
+  permiteAPedido: boolean
   storageUrl: string
   direccionRetiro: string | null
 }
 
 export default function ProductPageClient({
-  producto, imagenes, atributos, variantes, variantImageMap, storageUrl, direccionRetiro,
+  producto, imagenes, caracteristicas, stock, permiteAPedido, storageUrl, direccionRetiro,
 }: Props) {
-  const [selectedValues, setSelectedValues] = useState<Record<string, string>>({})
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [acordeones, setAcordeones] = useState<Record<string, boolean>>({})
   const [copiado, setCopiado] = useState(false)
@@ -48,51 +41,11 @@ export default function ProductPageClient({
 
   useEffect(() => { setPageUrl(window.location.href) }, [])
 
-  // Variante activa: auto-selecciona la primera activa si no hay atributos
-  const isSelectionComplete = atributos.length === 0 || atributos.every(a => selectedValues[a.id])
-
-  const activeVariante: VariantePDP | null = atributos.length === 0
-    ? (variantes.find(v => v.activo) ?? variantes[0] ?? null)
-    : isSelectionComplete
-    ? variantes.find(v => atributos.every(a => v.valores[a.id] === selectedValues[a.id])) ?? null
-    : null
-
-  const handleSelect = useCallback((valorId: string, atributoId: string) => {
-    setSelectedValues(prev => {
-      const next = { ...prev, [atributoId]: valorId }
-      // Si la selección está completa, buscar imagen asociada a la variante
-      if (atributos.every(a => next[a.id])) {
-        const match = variantes.find(v => atributos.every(a => v.valores[a.id] === next[a.id]))
-        if (match && variantImageMap[match.id] !== undefined) {
-          setActiveImageIndex(variantImageMap[match.id])
-        }
-      }
-      return next
-    })
-  }, [atributos, variantes, variantImageMap])
-
-  // Precio
-  const activasConPrecio = variantes.filter(v => v.activo)
-  const hasRangoPrecio = atributos.length > 0 && !activeVariante && activasConPrecio.length > 0
-  const precioMin = hasRangoPrecio ? Math.min(...activasConPrecio.map(v => v.precio)) : null
-  const precioMax = hasRangoPrecio ? Math.max(...activasConPrecio.map(v => v.precio)) : null
-  const precio = activeVariante?.precio ?? producto.precio_base
-  const precioComp = activeVariante?.precio_comparacion ?? producto.precio_comparacion
-
-  // Stock
-  const stock = activeVariante?.stock ?? 0
-  const permiteAPedido = activeVariante?.permite_a_pedido ?? false
-  const dias = activeVariante?.dias_tiempo_produccion ?? producto.dias_tiempo_produccion
+  const precio = producto.precio_base
+  const precioComp = producto.precio_comparacion
+  const dias = producto.dias_tiempo_produccion
   const esFabricado = producto.tipo_producto === 'fabricado'
-
-  const requiresSelection = atributos.length > 0 && !isSelectionComplete
-  const noStock = isSelectionComplete && stock === 0 && !permiteAPedido
-
-  // Label para el carrito
-  const variantLabel = atributos.map(a => {
-    const val = a.valores.find(v => v.id === selectedValues[a.id])
-    return val ? `${a.nombre}: ${val.valor}` : null
-  }).filter(Boolean).join(' / ')
+  const noStock = stock === 0 && !permiteAPedido
 
   const mainImgPath = [...imagenes].sort((a, b) => a.orden - b.orden)[0]?.ruta_almacenamiento
   const mainImgUrl = mainImgPath ? `${storageUrl}/${mainImgPath}` : null
@@ -162,64 +115,63 @@ export default function ProductPageClient({
 
         {/* Precio */}
         <div className="flex items-baseline gap-3">
-          {precioMin !== null ? (
-            <p className="text-xl text-stone-800">
-              {precioMin === precioMax
-                ? formatCLP(precioMin)
-                : `Desde ${formatCLP(precioMin)}`}
-            </p>
-          ) : (
-            <>
-              <p className="text-xl font-medium text-stone-800">{formatCLP(precio)}</p>
-              {precioComp && precioComp > precio && (
-                <p className="text-sm text-stone-400 line-through">{formatCLP(precioComp)}</p>
-              )}
-            </>
+          <p className="text-xl font-medium text-stone-800">{formatCLP(precio)}</p>
+          {precioComp && precioComp > precio && (
+            <p className="text-sm text-stone-400 line-through">{formatCLP(precioComp)}</p>
           )}
         </div>
 
-        {/* Selectores de variantes */}
-        {atributos.length > 0 && (
-          <VariantSelector
-            atributos={atributos}
-            variantes={variantes}
-            selectedValues={selectedValues}
-            onSelect={handleSelect}
-          />
+        {/* Características */}
+        {caracteristicas.length > 0 && (
+          <div className="border-t border-stone-100 pt-4">
+            <table className="w-full">
+              <tbody>
+                {caracteristicas.map((c, i) => (
+                  <tr
+                    key={i}
+                    className={i < caracteristicas.length - 1 ? 'border-b border-stone-100' : ''}
+                  >
+                    <td className="py-2 pr-4 text-[11px] uppercase tracking-[.10em] text-stone-400 whitespace-nowrap w-1/3">
+                      {c.nombre}
+                    </td>
+                    <td className="py-2 text-sm text-stone-700">
+                      {c.valor}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
 
         {/* Badge de stock */}
-        {isSelectionComplete && (
-          <div className="space-y-1">
-            {stock > 3 && (
-              <p className="text-sm text-green-700">En stock</p>
-            )}
-            {stock > 0 && stock <= 3 && (
-              <p className="text-sm text-amber-600">Últimas {stock} unidad{stock !== 1 ? 'es' : ''}</p>
-            )}
-            {stock === 0 && permiteAPedido && (
-              <p className="text-sm text-stone-500">Sin stock — disponible a pedido</p>
-            )}
-            {stock === 0 && !permiteAPedido && (
-              <p className="text-sm text-red-500">Sin stock</p>
-            )}
-            {(permiteAPedido || esFabricado) && dias && dias > 0 && (
-              <p className="text-xs text-stone-400 mt-0.5">
-                Tiempo de elaboración: {dias} días hábiles
-              </p>
-            )}
-          </div>
-        )}
+        <div className="space-y-1">
+          {stock > 3 && (
+            <p className="text-sm text-green-700">En stock</p>
+          )}
+          {stock > 0 && stock <= 3 && (
+            <p className="text-sm text-amber-600">Últimas {stock} unidad{stock !== 1 ? 'es' : ''}</p>
+          )}
+          {stock === 0 && permiteAPedido && (
+            <p className="text-sm text-stone-500">Sin stock — disponible a pedido</p>
+          )}
+          {stock === 0 && !permiteAPedido && (
+            <p className="text-sm text-red-500">Sin stock</p>
+          )}
+          {(permiteAPedido || esFabricado) && dias && dias > 0 && (
+            <p className="text-xs text-stone-400 mt-0.5">
+              Tiempo de elaboración: {dias} días hábiles
+            </p>
+          )}
+        </div>
 
         {/* Botones */}
         <AddToCartButton
           productoId={producto.id}
           nombre={producto.nombre}
           precio={precio}
-          varianteId={activeVariante?.id ?? null}
-          variantLabel={variantLabel}
           imagenUrl={mainImgUrl}
-          requiresSelection={requiresSelection}
+          caracteristicas={caracteristicas}
           noStock={noStock}
         />
 

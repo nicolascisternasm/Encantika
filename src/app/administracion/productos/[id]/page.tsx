@@ -6,11 +6,10 @@ import AdditionalGallery from '@/components/admin/AdditionalGallery'
 import CollapsibleSection from '@/components/admin/CollapsibleSection'
 import InventoryPanel from '@/components/admin/InventoryPanel'
 import ColeccionesSelector from '@/components/admin/ColeccionesSelector'
-import VariantManager from '@/components/admin/VariantManager'
+import CaracteristicasEditor from '@/components/admin/CaracteristicasEditor'
 import { getProducto } from '@/features/products/queries'
 import { getCategorias } from '@/features/categories/queries'
 import { createClient } from '@/lib/supabase/server'
-import { createAdminClient } from '@/lib/supabase/admin'
 
 type ImagenRow = {
   id: string
@@ -35,9 +34,6 @@ export default async function EditarProductoPage({
     { data: todosInsumosData },
     { data: coleccionesActivasData },
     { data: coleccionesProductoData },
-    { data: atributosData },
-    { data: productoAtributosData },
-    { data: variantesData },
   ] = await Promise.all([
     getProducto(id),
     getCategorias(),
@@ -64,20 +60,6 @@ export default async function EditarProductoPage({
       .from('producto_colecciones')
       .select('coleccion_id')
       .eq('producto_id', id),
-    supabase
-      .from('atributos')
-      .select('id, nombre, codigo, orden, valores_atributo(id, valor, slug, activo)')
-      .eq('valores_atributo.activo', true)
-      .order('orden', { ascending: true }),
-    supabase
-      .from('producto_atributos')
-      .select('atributo_id')
-      .eq('producto_id', id),
-    createAdminClient()
-      .from('variantes_producto')
-      .select(`id, sku, precio, activo, permite_a_pedido,
-        variante_valores_atributo(valor_atributo_id, valores_atributo(id, valor, slug))`)
-      .eq('producto_id', id),
   ])
 
   if (!producto) notFound()
@@ -86,8 +68,8 @@ export default async function EditarProductoPage({
   const mainImage = imagenes.find(img => img.orden === 0) ?? null
   const additionalImages = imagenes.filter(img => img.orden > 0)
 
-  // Stock: sum of all active variants
-  const variantesRaw = (producto as any).variantes_produto ?? (producto as any).variantes_producto ?? []
+  // Stock: suma de variantes activas (incluye variante std si existe)
+  const variantesRaw = (producto as any).variantes_producto ?? []
   const activeVariants = variantesRaw.filter((v: any) => v.activo)
   const varianteIds: string[] = variantesRaw.map((v: any) => v.id)
 
@@ -105,7 +87,7 @@ export default async function EditarProductoPage({
   )
   const varianteId: string | null = activeVariants[0]?.id ?? null
 
-  // Insumos for fabricado products
+  // Insumos para productos fabricados
   const insumos = (productoInsumosData ?? []).map((pi: any) => ({
     insumo_id: pi.insumo_id as string,
     nombre: (pi.insumos as any)?.nombre as string ?? '',
@@ -121,8 +103,6 @@ export default async function EditarProductoPage({
   }))
 
   const tipoProducto = (producto as any).tipo_producto as string ?? 'terminado'
-
-  // Keys ensure client components remount with fresh state when data changes
   const inventoryKey = `s:${stockActual}|v:${varianteId ?? 'none'}`
 
   const storageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''}/storage/v1/object/public`
@@ -130,38 +110,9 @@ export default async function EditarProductoPage({
   const coleccionesActivas = (coleccionesActivasData ?? []).map(c => ({ id: c.id, nombre: c.nombre }))
   const coleccionesSeleccionadas = (coleccionesProductoData ?? []).map(c => c.coleccion_id)
 
-  // VariantManager data
-  const atributosDisponibles = (atributosData ?? [])
-    .map((a: any) => ({
-      id: a.id as string,
-      nombre: a.nombre as string,
-      codigo: a.codigo as string,
-      valores_atributo: ((a.valores_atributo as any[]) ?? []).map((v: any) => ({
-        id: v.id as string,
-        valor: v.valor as string,
-        slug: v.slug as string,
-      })),
-    }))
-    .filter((a: any) => a.valores_atributo.length > 0)
-
-  const atributosAsignados = (productoAtributosData ?? []).map((pa: any) => pa.atributo_id as string)
-
-  const variantesParaManager = (variantesData ?? []).map((v: any) => ({
-    id: v.id as string,
-    sku: v.sku as string,
-    precio: v.precio as number,
-    activo: v.activo as boolean,
-    permite_a_pedido: v.permite_a_pedido as boolean,
-    stock: stockMap.get(v.id) ?? 0,
-    variante_valores_atributo: ((v.variante_valores_atributo as any[]) ?? []).map((vva: any) => ({
-      valor_atributo_id: vva.valor_atributo_id as string,
-      valores_atributo: vva.valores_atributo
-        ? { id: vva.valores_atributo.id as string, valor: vva.valores_atributo.valor as string, slug: vva.valores_atributo.slug as string }
-        : null,
-    })),
-  }))
-
-  const variantManagerKey = variantesParaManager.map(v => `${v.id}:${v.stock}`).join('|')
+  const caracteristicasIniciales = ((producto as any).caracteristicas as any[] ?? [])
+    .map((c: any) => ({ nombre: String(c.nombre ?? ''), valor: String(c.valor ?? '') }))
+    .filter((c: any) => c.nombre || c.valor)
 
   return (
     <div className="max-w-2xl space-y-5">
@@ -200,7 +151,14 @@ export default async function EditarProductoPage({
         }}
       />
 
-      <CollapsibleSection title="Inventario">
+      <CollapsibleSection title="Características del producto" defaultOpen>
+        <CaracteristicasEditor
+          productoId={id}
+          inicial={caracteristicasIniciales}
+        />
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Stock">
         <InventoryPanel
           key={inventoryKey}
           productoId={id}
@@ -210,18 +168,6 @@ export default async function EditarProductoPage({
           varianteId={varianteId}
           insumos={insumos}
           todosInsumos={todosInsumos}
-        />
-      </CollapsibleSection>
-
-      <CollapsibleSection title="Atributos y Variantes" defaultOpen>
-        <VariantManager
-          key={variantManagerKey}
-          productoId={id}
-          productoSlug={producto.slug}
-          precioBase={producto.precio_base}
-          atributosDisponibles={atributosDisponibles}
-          atributosAsignados={atributosAsignados}
-          variantes={variantesParaManager}
         />
       </CollapsibleSection>
 
