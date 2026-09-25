@@ -100,6 +100,7 @@ export async function savePaginas(
     contacto_titulo: en('contacto_titulo'),
     contacto_subtitulo: en('contacto_subtitulo'),
     contacto_email: en('contacto_email'),
+    contacto_maps_url: en('contacto_maps_url'),
   }
 
   const supabase = createAdminClient()

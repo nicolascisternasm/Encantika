@@ -27,6 +27,7 @@ type ConfigExtra = {
   contacto_titulo: string | null
   contacto_subtitulo: string | null
   contacto_email: string | null
+  contacto_maps_url: string | null
 }
 
 export default async function ConfiguracionPage() {
@@ -102,6 +103,7 @@ export default async function ConfiguracionPage() {
       titulo: extra?.contacto_titulo ?? null,
       subtitulo: extra?.contacto_subtitulo ?? null,
       email: extra?.contacto_email ?? null,
+      maps_url: extra?.contacto_maps_url ?? null,
     },
   }
 

@@ -34,6 +34,7 @@ interface PaginasFormProps {
     titulo: string | null
     subtitulo: string | null
     email: string | null
+    maps_url: string | null
   }
 }
 
@@ -257,6 +258,19 @@ export default function PaginasForm({ nosotros, seccion1: s1, seccion2: s2, secc
           <Field label="Título" name="contacto_titulo" defaultValue={contacto.titulo} placeholder="¿Tienes alguna pregunta?" />
           <TextareaField label="Subtítulo" name="contacto_subtitulo" defaultValue={contacto.subtitulo} rows={2} />
           <Field label="Email de contacto" name="contacto_email" defaultValue={contacto.email} placeholder="contacto@encantika.cl" />
+          <div>
+            <label className="block text-xs tracking-widests uppercase text-stone-500 mb-1">URL embed Google Maps</label>
+            <p className="text-[11px] text-stone-400 mb-1.5">
+              En Google Maps → Compartir → Insertar mapa → copia solo el valor del atributo <code className="bg-stone-100 px-1">src="..."</code>
+            </p>
+            <textarea
+              name="contacto_maps_url"
+              rows={3}
+              defaultValue={contacto.maps_url ?? ''}
+              placeholder="https://www.google.com/maps/embed?pb=..."
+              className="w-full px-3 py-2 border border-sand text-sm text-stone-800 focus:outline-none focus:border-gold transition-colors resize-none font-mono text-[11px]"
+            />
+          </div>
         </div>
       )}
 
