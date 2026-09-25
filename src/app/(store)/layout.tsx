@@ -36,7 +36,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
 
   const themeStyle = {
     ...temaConfig.vars,
-    '--font-display': fuenteConfig.css,
+    '--font-titulos': fuenteConfig.css,
   } as React.CSSProperties
 
   return (

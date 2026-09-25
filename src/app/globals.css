@@ -10,6 +10,9 @@
   --color-borde: #D4C4A8;
   --color-texto-suave: #7C7269;
 
+  /* Variable de fuente dinámica — sobreescrita por el store layout */
+  --font-titulos: 'Cormorant Garamond', Georgia, serif;
+
   --background: #ffffff;
   --foreground: #171717;
 }
@@ -20,7 +23,7 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 
-  /* Tokens Encantika — ahora apuntan a las variables de tema */
+  /* Tokens Encantika — apuntan a las variables de tema */
   --color-ivory: var(--color-fondo);
   --color-onyx: var(--color-texto);
   --color-gold: var(--color-acento);
@@ -28,7 +31,8 @@
   --color-sand: var(--color-borde);
   --color-encantika-stone: var(--color-texto-suave);
 
-  --font-display: var(--font-cormorant);
+  /* font-display usa nuestra variable dinámica, no la de next/font directamente */
+  --font-display: var(--font-titulos);
 }
 
 @media (prefers-color-scheme: dark) {
