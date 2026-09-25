@@ -4,8 +4,8 @@ import ProductForm from '@/components/admin/ProductForm'
 import MainImageUpload from '@/components/admin/MainImageUpload'
 import AdditionalGallery from '@/components/admin/AdditionalGallery'
 import CollapsibleSection from '@/components/admin/CollapsibleSection'
-import VariantMatrix from '@/components/admin/VariantMatrix'
-import InventoryForm from '@/components/admin/InventoryForm'
+import VariantManager from '@/components/admin/VariantManager'
+import InventoryPanel from '@/components/admin/InventoryPanel'
 import { getProducto } from '@/features/products/queries'
 import { getCategorias } from '@/features/categories/queries'
 import { createClient } from '@/lib/supabase/server'
@@ -25,13 +25,17 @@ export default async function EditarProductoPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [producto, categorias, { data: imagesData }] = await Promise.all([
+  const [producto, categorias, { data: imagesData }, { data: allAttrsData }] = await Promise.all([
     getProducto(id),
     getCategorias(),
     supabase
       .from('imagenes_producto')
       .select('id, ruta_almacenamiento, orden, texto_alt')
       .eq('producto_id', id)
+      .order('orden', { ascending: true }),
+    supabase
+      .from('atributos')
+      .select('id, nombre, orden, valores_atributo(id, valor, slug, orden, activo)')
       .order('orden', { ascending: true }),
   ])
 
@@ -59,9 +63,26 @@ export default async function EditarProductoPage({
     .filter((v: any) => v.activo)
     .map((v: any) => ({ id: v.id, sku: v.sku, precio: v.precio, stock: v.stock }))
 
-  const atributos = ((producto as any).producto_atributos ?? [])
-    .map((pa: any) => pa.atributos)
+  // All available attributes with active values (for VariantManager checkboxes)
+  const atributosDisponibles = (allAttrsData ?? [])
+    .map((a: any) => ({
+      id: a.id as string,
+      nombre: a.nombre as string,
+      valores_atributo: ((a.valores_atributo ?? []) as any[])
+        .filter((v: any) => v.activo)
+        .sort((a: any, b: any) => a.orden - b.orden)
+        .map((v: any) => ({ id: v.id as string, valor: v.valor as string, slug: v.slug as string })),
+    }))
+    .filter((a: any) => a.valores_atributo.length > 0)
+
+  // Current product-attribute assignments
+  const atributosAsignados = ((producto as any).producto_atributos ?? [])
+    .map((pa: any) => pa.atributo_id as string)
     .filter(Boolean)
+
+  // Keys ensure components remount with fresh state when data changes
+  const variantManagerKey = variantesConStock.map((v: any) => v.id).sort().join('_') || 'empty'
+  const inventoryPanelKey = variantesInventario.map((v: any) => `${v.id}:${v.stock}`).join('_') || 'empty'
 
   const storageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''}/storage/v1/object/public`
 
@@ -102,11 +123,23 @@ export default async function EditarProductoPage({
       />
 
       <CollapsibleSection title="Variantes">
-        <VariantMatrix productoId={id} atributos={atributos} variantes={variantesConStock} />
+        <VariantManager
+          key={variantManagerKey}
+          productoId={id}
+          productoSlug={producto.slug}
+          precioBase={producto.precio_base}
+          atributosDisponibles={atributosDisponibles}
+          atributosAsignados={atributosAsignados}
+          variantes={variantesConStock}
+        />
       </CollapsibleSection>
 
       <CollapsibleSection title="Inventario">
-        <InventoryForm productoId={id} variantes={variantesInventario} />
+        <InventoryPanel
+          key={inventoryPanelKey}
+          productoId={id}
+          variantes={variantesInventario}
+        />
       </CollapsibleSection>
     </div>
   )
