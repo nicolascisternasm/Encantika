@@ -96,6 +96,12 @@ export default function AdminSidebar({ userEmail, fullName }: AdminSidebarProps)
         >
           Diseño
         </a>
+        <a
+          href="/administracion/imagenes"
+          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs"
+        >
+          Imágenes
+        </a>
       </nav>
 
       {/* User info + sign-out */}

@@ -1,6 +1,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { formatCLP } from '@/lib/utils'
 import ScrollIndicator from '@/components/store/ScrollIndicator'
 
@@ -55,8 +56,9 @@ const CATEGORIAS = [
 
 export default async function StorePage() {
   const supabase = await createClient()
+  const admin = createAdminClient()
 
-  const [{ data: productosRaw }, { data: config }] = await Promise.all([
+  const [{ data: productosRaw }, { data: configRaw }] = await Promise.all([
     supabase
       .from('productos')
       .select(`
@@ -68,11 +70,48 @@ export default async function StorePage() {
       .eq('destacado', true)
       .order('creado_en', { ascending: false })
       .limit(4),
-    supabase
+    admin
       .from('configuracion_tienda')
-      .select('nombre_tienda, historia, mostrar_historia')
+      .select('nombre_tienda, historia, mostrar_historia, hero_imagen_id, hero_posicion, banner_joya_imagen_id, banner_joya_posicion, historia_imagen_id, historia_posicion')
       .single(),
   ])
+
+  const config = configRaw as {
+    nombre_tienda: string
+    historia: string | null
+    mostrar_historia: boolean
+    hero_imagen_id: string | null
+    hero_posicion: string
+    banner_joya_imagen_id: string | null
+    banner_joya_posicion: string
+    historia_imagen_id: string | null
+    historia_posicion: string
+  } | null
+
+  // Resolver URLs de imágenes configuradas
+  const imageIds = [
+    config?.hero_imagen_id,
+    config?.banner_joya_imagen_id,
+    config?.historia_imagen_id,
+  ].filter(Boolean) as string[]
+
+  let imagenUrlMap: Record<string, string> = {}
+  if (imageIds.length > 0) {
+    const { data: imgs } = await admin
+      .from('imagenes_sitio')
+      .select('id, url')
+      .in('id', imageIds)
+    if (imgs) {
+      for (const img of imgs as { id: string; url: string }[]) imagenUrlMap[img.id] = img.url
+    }
+  }
+
+  const heroUrl = config?.hero_imagen_id ? (imagenUrlMap[config.hero_imagen_id] ?? null) : null
+  const heroPos = config?.hero_posicion ?? 'center center'
+  const bannerUrl = config?.banner_joya_imagen_id ? (imagenUrlMap[config.banner_joya_imagen_id] ?? null) : null
+  const bannerPos = config?.banner_joya_posicion ?? 'center center'
+  const historiaUrl = config?.historia_imagen_id ? (imagenUrlMap[config.historia_imagen_id] ?? null) : null
+  const historiaPos = config?.historia_posicion ?? 'center center'
 
   const productos = productosRaw ?? []
   const storageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''}/storage/v1/object/public/imagenes-productos`
@@ -87,17 +126,17 @@ export default async function StorePage() {
       {/* ── Sección 1: Hero ────────────────────────────────────────────────── */}
       <section className="relative overflow-hidden" style={{ height: '100svh', minHeight: 600 }}>
         <Image
-          src="/hero-1.jpg"
+          src={heroUrl ?? '/hero-1.jpg'}
           alt="Encantika — Brilla con magia"
           fill
-          className="object-cover object-top"
+          className="object-cover"
+          style={{ objectPosition: heroPos }}
           sizes="100vw"
           priority
+          unoptimized={!!heroUrl}
         />
-        {/* Overlay degradado */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/35" />
 
-        {/* Contenido */}
         <div className="absolute inset-0 flex items-center">
           <div className="pl-[8%] pr-8 max-w-2xl">
             <p className="text-white/80 text-[11px] tracking-[.20em] uppercase mb-5">
@@ -169,7 +208,6 @@ export default async function StorePage() {
 
                 return (
                   <Link key={p.id} href={`/catalogo/${p.slug}`} className="group">
-                    {/* Imagen */}
                     <div className="relative aspect-square overflow-hidden bg-nude">
                       {imgSrc ? (
                         <Image
@@ -183,13 +221,9 @@ export default async function StorePage() {
                         <div className="absolute inset-0 bg-nude" />
                       )}
                     </div>
-
-                    {/* Info */}
                     <div className="mt-3 space-y-1">
                       {cat && (
-                        <p className="text-[10px] uppercase tracking-[.12em] text-encantika-stone">
-                          {cat}
-                        </p>
+                        <p className="text-[10px] uppercase tracking-[.12em] text-encantika-stone">{cat}</p>
                       )}
                       <h3 className="font-display text-xl text-onyx leading-tight">{p.nombre}</h3>
                       <p className="text-sm text-encantika-stone">{formatCLP(p.precio_base)}</p>
@@ -212,20 +246,20 @@ export default async function StorePage() {
       )}
 
       {/* ── Sección 4: Banner "Arma tu joya" ──────────────────────────────── */}
-      <section className="relative flex items-center justify-center text-center overflow-hidden"
+      <section
+        className="relative flex items-center justify-center text-center overflow-hidden"
         style={{ height: 'clamp(280px, 40vw, 400px)' }}
       >
         <Image
-          src="/hero-2.jpg"
+          src={bannerUrl ?? '/hero-2.jpg'}
           alt="Crea tu joya única"
           fill
           className="object-cover"
+          style={{ objectPosition: bannerPos }}
           sizes="100vw"
+          unoptimized={!!bannerUrl}
         />
-        <div
-          className="absolute inset-0"
-          style={{ backgroundColor: 'rgba(201,160,53,0.72)' }}
-        />
+        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(201,160,53,0.72)' }} />
         <div className="relative z-10 px-6 max-w-xl">
           <h2 className="font-display text-white font-normal tracking-[.06em] text-[40px] sm:text-[52px] leading-[1.1]">
             Crea tu joya única
@@ -246,18 +280,18 @@ export default async function StorePage() {
       {config?.mostrar_historia && config?.historia && (
         <section className="bg-ivory py-20 px-6 sm:px-8">
           <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
-            {/* Imagen */}
             <div className="relative rounded overflow-hidden" style={{ height: 'clamp(320px, 50vw, 500px)' }}>
               <Image
-                src="/hero-3.jpg"
+                src={historiaUrl ?? '/hero-3.jpg'}
                 alt="Nuestra historia"
                 fill
                 className="object-cover"
+                style={{ objectPosition: historiaPos }}
                 sizes="(max-width: 768px) 100vw, 50vw"
+                unoptimized={!!historiaUrl}
               />
             </div>
 
-            {/* Texto */}
             <div>
               <p className="text-[11px] uppercase tracking-[.15em] text-gold">
                 Nuestra historia

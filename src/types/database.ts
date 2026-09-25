@@ -1,4 +1,4 @@
-﻿export type Json =
+export type Json =
   | string
   | number
   | boolean
@@ -200,10 +200,16 @@ export type Database = {
       configuracion_tienda: {
         Row: {
           actualizado_en: string
+          banner_joya_imagen_id: string | null
+          banner_joya_posicion: string | null
           direccion_retiro: string | null
           email_contacto: string | null
           fuente_titulos: string
+          hero_imagen_id: string | null
+          hero_posicion: string | null
           historia: string | null
+          historia_imagen_id: string | null
+          historia_posicion: string | null
           id: number
           instrucciones_retiro: string | null
           moneda: string
@@ -219,10 +225,16 @@ export type Database = {
         }
         Insert: {
           actualizado_en?: string
+          banner_joya_imagen_id?: string | null
+          banner_joya_posicion?: string | null
           direccion_retiro?: string | null
           email_contacto?: string | null
           fuente_titulos?: string
+          hero_imagen_id?: string | null
+          hero_posicion?: string | null
           historia?: string | null
+          historia_imagen_id?: string | null
+          historia_posicion?: string | null
           id: number
           instrucciones_retiro?: string | null
           moneda?: string
@@ -238,10 +250,16 @@ export type Database = {
         }
         Update: {
           actualizado_en?: string
+          banner_joya_imagen_id?: string | null
+          banner_joya_posicion?: string | null
           direccion_retiro?: string | null
           email_contacto?: string | null
           fuente_titulos?: string
+          hero_imagen_id?: string | null
+          hero_posicion?: string | null
           historia?: string | null
+          historia_imagen_id?: string | null
+          historia_posicion?: string | null
           id?: number
           instrucciones_retiro?: string | null
           moneda?: string
@@ -255,7 +273,29 @@ export type Database = {
           url_logo?: string | null
           url_mercadolibre?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "configuracion_tienda_banner_joya_imagen_id_fkey"
+            columns: ["banner_joya_imagen_id"]
+            isOneToOne: false
+            referencedRelation: "imagenes_sitio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "configuracion_tienda_hero_imagen_id_fkey"
+            columns: ["hero_imagen_id"]
+            isOneToOne: false
+            referencedRelation: "imagenes_sitio"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "configuracion_tienda_historia_imagen_id_fkey"
+            columns: ["historia_imagen_id"]
+            isOneToOne: false
+            referencedRelation: "imagenes_sitio"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       detalle_pedido: {
         Row: {
@@ -411,6 +451,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      imagenes_sitio: {
+        Row: {
+          alto: number
+          ancho: number
+          creado_en: string | null
+          id: string
+          nombre: string
+          orientacion: string | null
+          storage_path: string
+          tamano_bytes: number | null
+          url: string
+          usos_sugeridos: string[] | null
+        }
+        Insert: {
+          alto: number
+          ancho: number
+          creado_en?: string | null
+          id?: string
+          nombre: string
+          orientacion?: string | null
+          storage_path: string
+          tamano_bytes?: number | null
+          url: string
+          usos_sugeridos?: string[] | null
+        }
+        Update: {
+          alto?: number
+          ancho?: number
+          creado_en?: string | null
+          id?: string
+          nombre?: string
+          orientacion?: string | null
+          storage_path?: string
+          tamano_bytes?: number | null
+          url?: string
+          usos_sugeridos?: string[] | null
+        }
+        Relationships: []
       }
       insumos: {
         Row: {
