@@ -92,6 +92,29 @@ supabase gen types typescript --project-id <YOUR_PROJECT_ID> > src/types/databas
 
 See README.md for instructions on creating the first owner user.
 
+## Upload de imágenes
+
+El flujo actual pasa el archivo por una Server Action (`subirImagenInsumo`, `uploadProductImage`). Funciona con `experimental.serverActions.bodySizeLimit: '10mb'` en `next.config.ts`.
+
+**Deuda técnica — migrar a upload directo desde el navegador:**
+El flujo correcto para imágenes grandes es cliente → Supabase Storage directamente, sin pasar por la Server Action:
+
+```ts
+// En el componente cliente:
+import { createClient } from '@/lib/supabase/client'
+
+const supabase = createClient()
+const { data, error } = await supabase.storage
+  .from('imagenes-productos')
+  .upload(path, file, { contentType: file.type })
+
+// Luego una Server Action solo guarda la URL:
+await guardarUrlImagen(recordId, data.path)
+```
+
+Ventajas: sin límite de tamaño en la SA, transfiere datos directo al CDN, no consume memoria del servidor Next.js.
+El bucket ya tiene RLS configurada para admins (`es_admin()`), así que el cliente con sesión de usuario puede subir directamente.
+
 ## RLS summary
 
 | Resource | anon (public) | admin (owner/staff) |
