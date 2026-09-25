@@ -48,13 +48,13 @@ export default function ProductPageClient({
 
   useEffect(() => { setPageUrl(window.location.href) }, [])
 
-  // Variante activa: solo cuando todos los atributos tienen valor seleccionado
+  // Variante activa: auto-selecciona la primera activa si no hay atributos
   const isSelectionComplete = atributos.length === 0 || atributos.every(a => selectedValues[a.id])
 
-  const activeVariante: VariantePDP | null = isSelectionComplete && atributos.length > 0
-    ? variantes.find(v =>
-        atributos.every(a => v.valores[a.id] === selectedValues[a.id])
-      ) ?? null
+  const activeVariante: VariantePDP | null = atributos.length === 0
+    ? (variantes.find(v => v.activo) ?? variantes[0] ?? null)
+    : isSelectionComplete
+    ? variantes.find(v => atributos.every(a => v.valores[a.id] === selectedValues[a.id])) ?? null
     : null
 
   const handleSelect = useCallback((valorId: string, atributoId: string) => {
@@ -80,13 +80,13 @@ export default function ProductPageClient({
   const precioComp = activeVariante?.precio_comparacion ?? producto.precio_comparacion
 
   // Stock
-  const stock = activeVariante?.stock ?? (atributos.length === 0 ? 999 : 0)
+  const stock = activeVariante?.stock ?? 0
   const permiteAPedido = activeVariante?.permite_a_pedido ?? false
   const dias = activeVariante?.dias_tiempo_produccion ?? producto.dias_tiempo_produccion
   const esFabricado = producto.tipo_producto === 'fabricado'
 
   const requiresSelection = atributos.length > 0 && !isSelectionComplete
-  const noStock = isSelectionComplete && stock === 0 && !permiteAPedido && atributos.length > 0
+  const noStock = isSelectionComplete && stock === 0 && !permiteAPedido
 
   // Label para el carrito
   const variantLabel = atributos.map(a => {
@@ -200,7 +200,7 @@ export default function ProductPageClient({
             {stock === 0 && permiteAPedido && (
               <p className="text-sm text-stone-500">Sin stock — disponible a pedido</p>
             )}
-            {stock === 0 && !permiteAPedido && atributos.length > 0 && (
+            {stock === 0 && !permiteAPedido && (
               <p className="text-sm text-red-500">Sin stock</p>
             )}
             {(permiteAPedido || esFabricado) && dias && dias > 0 && (

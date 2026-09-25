@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { generateVariantesV2, upsertVariantes } from '@/features/variants/actions'
+import { generateVariantesV2, upsertVariantes, type ActionState } from '@/features/variants/actions'
+import { ajustarStocks } from '@/features/inventory/actions'
 
 type ValorAtributo = { id: string; valor: string; slug: string }
 type AtributoConValores = { id: string; nombre: string; valores_atributo: ValorAtributo[] }
@@ -37,6 +38,7 @@ type EditableRow = {
   activo: boolean
   permite_a_pedido: boolean
   stock: number
+  nuevoStock: number
 }
 
 function buildRows(variantes: VarianteConStock[]): EditableRow[] {
@@ -52,6 +54,7 @@ function buildRows(variantes: VarianteConStock[]): EditableRow[] {
     activo: v.activo,
     permite_a_pedido: v.permite_a_pedido,
     stock: v.stock,
+    nuevoStock: v.stock,
   }))
 }
 
@@ -93,18 +96,29 @@ export default function VariantManager({
   function handleSave() {
     if (rows.length === 0) return
     startSave(async () => {
-      const result = await upsertVariantes(
-        productoId,
-        rows.map(r => ({
-          id: r.id,
-          sku: r.sku,
-          precio: r.precio,
-          activo: r.activo,
-          permite_a_pedido: r.permite_a_pedido,
-        }))
-      )
-      if (result.error) toast.error(result.error)
-      else toast.success(result.success ?? 'Variantes guardadas')
+      const stockChanges = rows.filter(r => r.nuevoStock !== r.stock)
+      const [saveResult, stockResult] = await Promise.all([
+        upsertVariantes(
+          productoId,
+          rows.map(r => ({
+            id: r.id,
+            sku: r.sku,
+            precio: r.precio,
+            activo: r.activo,
+            permite_a_pedido: r.permite_a_pedido,
+          }))
+        ),
+        stockChanges.length > 0
+          ? ajustarStocks(productoId, stockChanges.map(r => ({
+              varianteId: r.id,
+              nuevoStock: r.nuevoStock,
+              stockActual: r.stock,
+            })))
+          : Promise.resolve({ success: '' } as ActionState),
+      ])
+      if (saveResult.error) toast.error(saveResult.error)
+      else if (stockResult.error) toast.error(stockResult.error)
+      else toast.success('Variantes guardadas')
     })
   }
 
@@ -174,7 +188,8 @@ export default function VariantManager({
                   </th>
                   <th className="text-left pb-2 pr-3 text-xs font-normal text-stone-400">SKU</th>
                   <th className="text-left pb-2 pr-3 text-xs font-normal text-stone-400">Precio</th>
-                  <th className="text-center pb-2 pr-3 text-xs font-normal text-stone-400">Stock</th>
+                  <th className="text-center pb-2 pr-3 text-xs font-normal text-stone-400 whitespace-nowrap">Stock actual</th>
+                  <th className="text-center pb-2 pr-3 text-xs font-normal text-stone-400 whitespace-nowrap">Nuevo stock</th>
                   <th className="text-center pb-2 pr-3 text-xs font-normal text-stone-400 whitespace-nowrap">
                     A pedido
                   </th>
@@ -204,8 +219,22 @@ export default function VariantManager({
                         className="w-24 border border-stone-200 px-2 py-1 text-xs focus:outline-none focus:border-stone-400"
                       />
                     </td>
-                    <td className="py-2 pr-3 text-center text-xs text-stone-600 font-medium tabular-nums">
+                    <td className="py-2 pr-3 text-center text-xs text-stone-500 tabular-nums">
                       {row.stock}
+                    </td>
+                    <td className="py-2 pr-3">
+                      <input
+                        type="number"
+                        value={row.nuevoStock}
+                        min={0}
+                        step={1}
+                        onChange={e => updateRow(i, 'nuevoStock', Number(e.target.value))}
+                        className={`w-20 border px-2 py-1 text-xs text-center focus:outline-none ${
+                          row.nuevoStock !== row.stock
+                            ? 'border-stone-400 bg-stone-50'
+                            : 'border-stone-200'
+                        }`}
+                      />
                     </td>
                     <td className="py-2 pr-3 text-center">
                       <input
