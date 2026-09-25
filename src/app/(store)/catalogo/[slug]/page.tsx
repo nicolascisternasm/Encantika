@@ -183,6 +183,7 @@ export default async function ProductoPDPPage({
         <ProductPageClient
           producto={{
             id: raw.id,
+            slug: raw.slug as string,
             nombre: raw.nombre as string,
             descripcion: raw.descripcion as string | null,
             precio_base: raw.precio_base as number,

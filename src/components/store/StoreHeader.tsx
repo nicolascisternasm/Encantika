@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 import Image from 'next/image'
 import Link from 'next/link'
+import { obtenerCantidadTotal } from '@/lib/cart'
 
 const NAV_LINKS = [
   { label: 'Catálogo', href: '/catalogo' },
@@ -20,6 +21,7 @@ interface StoreHeaderProps {
 export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
   const pathname = usePathname()
 
   // Solo aplica efectos de scroll en la home
@@ -33,6 +35,13 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
       return () => window.removeEventListener('scroll', onScroll)
     }
   }, [effectiveVariant])
+
+  useEffect(() => {
+    const actualizar = () => setCartCount(obtenerCantidadTotal())
+    actualizar()
+    window.addEventListener('carritoActualizado', actualizar)
+    return () => window.removeEventListener('carritoActualizado', actualizar)
+  }, [])
 
   const isTransparentNow = effectiveVariant === 'transparent' && !scrolled
   const isHiddenNow = effectiveVariant === 'hidden-scroll' && !scrolled
@@ -71,13 +80,18 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
                 <path d="M15.5 15.5 L20 20" strokeLinecap="round" />
               </svg>
             </button>
-            <button className="hidden sm:flex p-1.5 text-encantika-stone hover:text-onyx transition-colors relative" aria-label="Carrito">
+            <Link href="/carrito" className="hidden sm:flex p-1.5 text-encantika-stone hover:text-onyx transition-colors relative" aria-label="Carrito">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                 <path d="M6 2 L3 6 v14 a2 2 0 0 0 2 2 h14 a2 2 0 0 0 2-2 V6 l-3-4 z" strokeLinejoin="round" />
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <path d="M16 10 a4 4 0 0 1-8 0" strokeLinecap="round" />
               </svg>
-            </button>
+              {cartCount > 0 && (
+                <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 bg-onyx text-ivory text-[9px] font-medium flex items-center justify-center rounded-full leading-none">
+                  {cartCount > 9 ? '9+' : cartCount}
+                </span>
+              )}
+            </Link>
             <button className="sm:hidden p-1.5 text-onyx" onClick={() => setIsOpen(true)} aria-label="Abrir menú">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                 <line x1="3" y1="6" x2="21" y2="6" strokeLinecap="round" />
@@ -109,6 +123,15 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
                   {label}
                 </Link>
               ))}
+              <Link href="/carrito" onClick={() => setIsOpen(false)}
+                className="text-sm tracking-[.10em] uppercase text-onyx hover:text-encantika-stone transition-colors flex items-center gap-2">
+                Carrito
+                {cartCount > 0 && (
+                  <span className="min-w-[18px] h-[18px] px-0.5 bg-onyx text-ivory text-[9px] font-medium flex items-center justify-center rounded-full leading-none">
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </span>
+                )}
+              </Link>
             </nav>
             <div className="mt-auto px-6 pb-8">
               <Link href="/administracion" onClick={() => setIsOpen(false)}

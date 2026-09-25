@@ -1,8 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import { obtenerCantidadTotal } from '@/lib/cart'
 
 const NAV_LINKS = [
   { label: 'Catálogo', href: '/catalogo' },
@@ -12,6 +13,14 @@ const NAV_LINKS = [
 
 export default function StoreSidebar() {
   const [isOpen, setIsOpen] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
+
+  useEffect(() => {
+    const actualizar = () => setCartCount(obtenerCantidadTotal())
+    actualizar()
+    window.addEventListener('carritoActualizado', actualizar)
+    return () => window.removeEventListener('carritoActualizado', actualizar)
+  }, [])
 
   return (
     <>
@@ -40,13 +49,18 @@ export default function StoreSidebar() {
               <path d="M15.5 15.5 L20 20" strokeLinecap="round" />
             </svg>
           </button>
-          <button className="p-1.5 text-encantika-stone hover:text-onyx transition-colors" aria-label="Carrito">
+          <Link href="/carrito" className="p-1.5 text-encantika-stone hover:text-onyx transition-colors relative" aria-label="Carrito">
             <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
               <path d="M6 2 L3 6 v14 a2 2 0 0 0 2 2 h14 a2 2 0 0 0 2-2 V6 l-3-4 z" strokeLinejoin="round" />
               <line x1="3" y1="6" x2="21" y2="6" />
               <path d="M16 10 a4 4 0 0 1-8 0" strokeLinecap="round" />
             </svg>
-          </button>
+            {cartCount > 0 && (
+              <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 px-0.5 bg-onyx text-ivory text-[9px] font-medium flex items-center justify-center rounded-full leading-none">
+                {cartCount > 9 ? '9+' : cartCount}
+              </span>
+            )}
+          </Link>
         </div>
       </aside>
 
@@ -92,6 +106,15 @@ export default function StoreSidebar() {
                   {label}
                 </Link>
               ))}
+              <Link href="/carrito" onClick={() => setIsOpen(false)}
+                className="text-sm tracking-[.10em] uppercase text-onyx hover:text-encantika-stone transition-colors flex items-center gap-2">
+                Carrito
+                {cartCount > 0 && (
+                  <span className="min-w-[18px] h-[18px] px-0.5 bg-onyx text-ivory text-[9px] font-medium flex items-center justify-center rounded-full leading-none">
+                    {cartCount > 9 ? '9+' : cartCount}
+                  </span>
+                )}
+              </Link>
             </nav>
           </div>
         </div>

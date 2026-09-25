@@ -12,6 +12,7 @@ export type Caracteristica = { nombre: string; valor: string }
 
 interface ProductoData {
   id: string
+  slug: string
   nombre: string
   descripcion: string | null
   precio_base: number
@@ -168,6 +169,7 @@ export default function ProductPageClient({
         {/* Botones */}
         <AddToCartButton
           productoId={producto.id}
+          slug={producto.slug}
           nombre={producto.nombre}
           precio={precio}
           imagenUrl={mainImgUrl}

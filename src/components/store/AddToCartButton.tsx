@@ -6,6 +6,7 @@ import { addToCart } from '@/lib/cart'
 
 interface Props {
   productoId: string
+  slug: string
   nombre: string
   precio: number
   imagenUrl: string | null
@@ -14,13 +15,13 @@ interface Props {
 }
 
 export default function AddToCartButton({
-  productoId, nombre, precio, imagenUrl, caracteristicas, noStock,
+  productoId, slug, nombre, precio, imagenUrl, caracteristicas, noStock,
 }: Props) {
   const router = useRouter()
 
   function doAdd() {
     try {
-      addToCart({ productoId, nombre, precio, imagenUrl, caracteristicas })
+      addToCart({ productoId, slug, nombre, precio, imagenUrl, caracteristicas })
       toast.success('Agregado al carrito ✓')
     } catch (err) {
       console.error('[carrito] error al agregar:', err)
