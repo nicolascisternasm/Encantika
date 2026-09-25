@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useRef, useTransition, useActionState } from 'react'
+import { useState, useRef, useEffect, useCallback, useTransition, useActionState } from 'react'
 import { toast } from 'sonner'
 import {
   createInsumo,
+  actualizarInsumo,
   registrarEntradaInsumo,
   subirImagenInsumo,
   eliminarImagenInsumo,
@@ -25,10 +26,15 @@ function StockBadge({ stock }: { stock: number }) {
   return <span className="text-xs px-2 py-0.5 bg-red-50 text-red-600">Sin stock</span>
 }
 
+// ── Formulario nuevo insumo ────────────────────────────────────────────────────
+
 function NuevoInsumoForm({ onClose }: { onClose: () => void }) {
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(createInsumo, {})
 
-  if (state.success) onClose()
+  // React 19: never call setState during render — use effect for side effects
+  useEffect(() => {
+    if (state.success) onClose()
+  }, [state.success, onClose])
 
   return (
     <form action={formAction} className="bg-stone-50 border border-stone-100 p-4 space-y-3">
@@ -73,11 +79,7 @@ function NuevoInsumoForm({ onClose }: { onClose: () => void }) {
         >
           {isPending ? 'Creando...' : 'Crear insumo'}
         </button>
-        <button
-          type="button"
-          onClick={onClose}
-          className="px-4 py-1.5 text-xs border border-stone-200 text-stone-600 hover:bg-stone-50"
-        >
+        <button type="button" onClick={onClose} className="px-4 py-1.5 text-xs border border-stone-200 text-stone-600 hover:bg-stone-50">
           Cancelar
         </button>
       </div>
@@ -85,57 +87,7 @@ function NuevoInsumoForm({ onClose }: { onClose: () => void }) {
   )
 }
 
-function EntradaForm({ insumoId }: { insumoId: string }) {
-  const [cantidad, setCantidad] = useState<number>(1)
-  const [nota, setNota] = useState('')
-  const [saving, startSave] = useTransition()
-
-  function handleSubmit() {
-    if (cantidad <= 0) return
-    startSave(async () => {
-      const result = await registrarEntradaInsumo(insumoId, cantidad, nota || undefined)
-      if (result.error) toast.error(result.error)
-      else {
-        toast.success(result.success ?? 'Entrada registrada')
-        setCantidad(1)
-        setNota('')
-      }
-    })
-  }
-
-  return (
-    <div className="flex items-end gap-2">
-      <div>
-        <label className="block text-xs text-stone-400 mb-1">Cantidad</label>
-        <input
-          type="number"
-          value={cantidad}
-          min={1}
-          onChange={e => setCantidad(Number(e.target.value))}
-          className="w-20 border border-stone-200 px-2 py-1.5 text-xs focus:outline-none focus:border-stone-400"
-        />
-      </div>
-      <div className="flex-1">
-        <label className="block text-xs text-stone-400 mb-1">Nota (opcional)</label>
-        <input
-          type="text"
-          value={nota}
-          onChange={e => setNota(e.target.value)}
-          placeholder="ej: lote enero"
-          className="w-full border border-stone-200 px-2 py-1.5 text-xs focus:outline-none focus:border-stone-400"
-        />
-      </div>
-      <button
-        type="button"
-        onClick={handleSubmit}
-        disabled={saving || cantidad <= 0}
-        className="px-3 py-1.5 text-xs bg-stone-700 text-white hover:bg-stone-600 transition-colors disabled:opacity-50 whitespace-nowrap"
-      >
-        {saving ? '...' : 'Registrar entrada'}
-      </button>
-    </div>
-  )
-}
+// ── Uploader de imagen ─────────────────────────────────────────────────────────
 
 function InsumoImageUploader({
   insumoId,
@@ -192,18 +144,13 @@ function InsumoImageUploader({
         className="hidden"
         onChange={handleFile}
       />
-
       {isPending ? (
         <div className="w-full h-full flex items-center justify-center bg-stone-50">
           <span className="text-xs text-stone-400">...</span>
         </div>
       ) : url ? (
         <>
-          <img
-            src={`${storageUrl}/${url}`}
-            alt=""
-            className="w-full h-full object-cover"
-          />
+          <img src={`${storageUrl}/${url}`} alt="" className="w-full h-full object-cover" />
           <button
             type="button"
             onClick={handleDelete}
@@ -231,6 +178,152 @@ function InsumoImageUploader({
   )
 }
 
+// ── Formulario de edición inline ───────────────────────────────────────────────
+
+function InsumoEditForm({
+  insumo,
+  storageUrl,
+  onClose,
+}: {
+  insumo: InsumoConStock
+  storageUrl: string
+  onClose: () => void
+}) {
+  const [nombre, setNombre] = useState(insumo.nombre)
+  const [descripcion, setDescripcion] = useState(insumo.descripcion ?? '')
+  const [unidad, setUnidad] = useState(insumo.unidad)
+  const [isPending, startTransition] = useTransition()
+
+  function handleSave() {
+    startTransition(async () => {
+      const result = await actualizarInsumo(insumo.id, nombre, descripcion || null, unidad)
+      if (result.error) toast.error(result.error)
+      else {
+        toast.success(result.success ?? 'Insumo actualizado')
+        onClose()
+      }
+    })
+  }
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-start gap-4">
+        <InsumoImageUploader
+          key={insumo.imagen_url ?? 'sin-imagen'}
+          insumoId={insumo.id}
+          initialUrl={insumo.imagen_url}
+          storageUrl={storageUrl}
+        />
+        <div className="flex-1 grid grid-cols-2 gap-2">
+          <div className="col-span-2">
+            <label className="block text-xs text-stone-400 mb-1">Nombre</label>
+            <input
+              value={nombre}
+              onChange={e => setNombre(e.target.value)}
+              className="w-full border border-stone-200 px-2 py-1.5 text-sm focus:outline-none focus:border-stone-400"
+            />
+          </div>
+          <div>
+            <label className="block text-xs text-stone-400 mb-1">Unidad</label>
+            <select
+              value={unidad}
+              onChange={e => setUnidad(e.target.value)}
+              className="w-full border border-stone-200 px-2 py-1.5 text-sm bg-white focus:outline-none focus:border-stone-400"
+            >
+              <option value="unidad">Unidad</option>
+              <option value="metro">Metro</option>
+              <option value="gramo">Gramo</option>
+              <option value="ml">Mililitro</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs text-stone-400 mb-1">Descripción</label>
+            <input
+              value={descripcion}
+              onChange={e => setDescripcion(e.target.value)}
+              className="w-full border border-stone-200 px-2 py-1.5 text-sm focus:outline-none focus:border-stone-400"
+              placeholder="Opcional"
+            />
+          </div>
+        </div>
+      </div>
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isPending || !nombre.trim()}
+          className="px-4 py-1.5 text-xs bg-stone-800 text-white hover:bg-stone-700 disabled:opacity-50 transition-colors"
+        >
+          {isPending ? 'Guardando...' : 'Guardar'}
+        </button>
+        <button
+          type="button"
+          onClick={onClose}
+          className="px-4 py-1.5 text-xs border border-stone-200 text-stone-600 hover:bg-stone-50"
+        >
+          Cancelar
+        </button>
+      </div>
+    </div>
+  )
+}
+
+// ── Formulario de entrada de stock ─────────────────────────────────────────────
+
+function EntradaForm({ insumoId }: { insumoId: string }) {
+  const [cantidad, setCantidad] = useState<number>(1)
+  const [nota, setNota] = useState('')
+  const [saving, startSave] = useTransition()
+
+  function handleSubmit() {
+    if (cantidad <= 0) return
+    startSave(async () => {
+      const result = await registrarEntradaInsumo(insumoId, cantidad, nota || undefined)
+      if (result.error) toast.error(result.error)
+      else {
+        toast.success(result.success ?? 'Entrada registrada')
+        setCantidad(1)
+        setNota('')
+      }
+    })
+  }
+
+  return (
+    <div className="flex items-end gap-2">
+      <div>
+        <label className="block text-xs text-stone-400 mb-1">Cantidad</label>
+        <input
+          type="number"
+          value={cantidad}
+          min={1}
+          onChange={e => setCantidad(Number(e.target.value))}
+          className="w-20 border border-stone-200 px-2 py-1.5 text-xs focus:outline-none focus:border-stone-400"
+        />
+      </div>
+      <div className="flex-1">
+        <label className="block text-xs text-stone-400 mb-1">Nota (opcional)</label>
+        <input
+          type="text"
+          value={nota}
+          onChange={e => setNota(e.target.value)}
+          placeholder="ej: lote enero"
+          className="w-full border border-stone-200 px-2 py-1.5 text-xs focus:outline-none focus:border-stone-400"
+        />
+      </div>
+      <button
+        type="button"
+        onClick={handleSubmit}
+        disabled={saving || cantidad <= 0}
+        className="px-3 py-1.5 text-xs bg-stone-700 text-white hover:bg-stone-600 transition-colors disabled:opacity-50 whitespace-nowrap"
+      >
+        {saving ? '...' : 'Registrar entrada'}
+      </button>
+    </div>
+  )
+}
+
+// ── Manager principal ──────────────────────────────────────────────────────────
+
 interface InsumosManagerProps {
   insumos: InsumoConStock[]
   storageUrl: string
@@ -238,10 +331,26 @@ interface InsumosManagerProps {
 
 export default function InsumosManager({ insumos, storageUrl }: InsumosManagerProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [showNewForm, setShowNewForm] = useState(false)
+
+  // Stable callback references to avoid useEffect loops in children
+  const handleCloseNewForm = useCallback(() => setShowNewForm(false), [])
 
   function toggleRow(id: string) {
     setExpandedId(prev => (prev === id ? null : id))
+    // Exit edit mode when collapsing
+    setEditingId(prev => (prev === id && expandedId === id ? null : prev))
+  }
+
+  function handleEditar(e: React.MouseEvent, id: string) {
+    e.stopPropagation()
+    setExpandedId(id)
+    setEditingId(prev => (prev === id ? null : id))
+  }
+
+  function handleCloseEdit() {
+    setEditingId(null)
   }
 
   return (
@@ -257,7 +366,7 @@ export default function InsumosManager({ insumos, storageUrl }: InsumosManagerPr
         </button>
       </div>
 
-      {showNewForm && <NuevoInsumoForm onClose={() => setShowNewForm(false)} />}
+      {showNewForm && <NuevoInsumoForm onClose={handleCloseNewForm} />}
 
       <div className="bg-white border border-stone-100">
         {insumos.length === 0 ? (
@@ -265,11 +374,13 @@ export default function InsumosManager({ insumos, storageUrl }: InsumosManagerPr
         ) : (
           insumos.map((insumo, idx) => (
             <div key={insumo.id} className={idx > 0 ? 'border-t border-stone-100' : ''}>
-              {/* Row header */}
-              <button
-                type="button"
+              {/* Fila */}
+              <div
+                role="button"
+                tabIndex={0}
                 onClick={() => toggleRow(insumo.id)}
-                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-stone-50 transition-colors text-left"
+                onKeyDown={e => e.key === 'Enter' && toggleRow(insumo.id)}
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-stone-50 transition-colors cursor-pointer"
               >
                 {/* Miniatura 48×48 */}
                 {insumo.imagen_url ? (
@@ -281,33 +392,60 @@ export default function InsumosManager({ insumos, storageUrl }: InsumosManagerPr
                 ) : (
                   <div className="w-12 h-12 bg-stone-50 border border-stone-100 flex-shrink-0" />
                 )}
+
                 <span className="flex-1 text-sm text-stone-800">{insumo.nombre}</span>
-                <span className="text-xs text-stone-400 mr-2">{insumo.unidad}</span>
+                <span className="text-xs text-stone-400">{insumo.unidad}</span>
                 <StockBadge stock={insumo.stock} />
+
+                {/* Botón Editar */}
+                <button
+                  type="button"
+                  onClick={e => handleEditar(e, insumo.id)}
+                  className={`ml-1 px-2.5 py-1 text-xs border transition-colors ${
+                    editingId === insumo.id
+                      ? 'bg-stone-800 text-white border-stone-800'
+                      : 'border-stone-200 text-stone-500 hover:bg-stone-50'
+                  }`}
+                >
+                  Editar
+                </button>
+
                 <svg
-                  className={`w-4 h-4 text-stone-400 transition-transform duration-150 ml-2 ${expandedId === insumo.id ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 text-stone-400 transition-transform duration-150 ml-1 flex-shrink-0 ${expandedId === insumo.id ? 'rotate-180' : ''}`}
                   fill="none" stroke="currentColor" viewBox="0 0 24 24"
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </button>
+              </div>
 
-              {/* Expanded content */}
+              {/* Contenido expandido */}
               {expandedId === insumo.id && (
                 <div className="px-4 pb-4 pt-3 space-y-4 bg-stone-50 border-t border-stone-100">
-                  {/* Foto + descripción */}
-                  <div className="flex items-start gap-4">
-                    <InsumoImageUploader
-                      key={insumo.imagen_url ?? 'sin-imagen'}
-                      insumoId={insumo.id}
-                      initialUrl={insumo.imagen_url}
-                      storageUrl={storageUrl}
-                    />
-                    {insumo.descripcion && (
-                      <p className="text-xs text-stone-500 pt-1">{insumo.descripcion}</p>
-                    )}
-                  </div>
 
+                  {/* Modo edición */}
+                  {editingId === insumo.id ? (
+                    <>
+                      <div>
+                        <p className="text-xs font-medium text-stone-500 mb-3 uppercase tracking-wider">
+                          Editar insumo
+                        </p>
+                        <InsumoEditForm
+                          key={insumo.id}
+                          insumo={insumo}
+                          storageUrl={storageUrl}
+                          onClose={handleCloseEdit}
+                        />
+                      </div>
+                      <hr className="border-stone-200" />
+                    </>
+                  ) : (
+                    /* Modo lectura: mostrar descripción */
+                    insumo.descripcion && (
+                      <p className="text-xs text-stone-500">{insumo.descripcion}</p>
+                    )
+                  )}
+
+                  {/* Registrar entrada */}
                   <div>
                     <p className="text-xs font-medium text-stone-500 mb-2 uppercase tracking-wider">
                       Registrar entrada
@@ -315,6 +453,7 @@ export default function InsumosManager({ insumos, storageUrl }: InsumosManagerPr
                     <EntradaForm insumoId={insumo.id} />
                   </div>
 
+                  {/* Historial */}
                   <div>
                     <p className="text-xs font-medium text-stone-500 mb-2 uppercase tracking-wider">
                       Últimos movimientos

@@ -7,6 +7,33 @@ export type ActionState = { error?: string; success?: string }
 
 // ── Crear insumo ───────────────────────────────────────────────────────────────
 
+export async function actualizarInsumo(
+  insumoId: string,
+  nombre: string,
+  descripcion: string | null,
+  unidad: string
+): Promise<ActionState> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  if (!nombre?.trim()) return { error: 'El nombre es requerido' }
+
+  const UNIDADES = ['unidad', 'metro', 'gramo', 'ml']
+  if (!UNIDADES.includes(unidad)) return { error: 'Unidad inválida' }
+
+  const admin = createAdminClient()
+  const { error } = await admin
+    .from('insumos')
+    .update({ nombre: nombre.trim(), descripcion: descripcion?.trim() || null, unidad })
+    .eq('id', insumoId)
+
+  if (error) return { error: 'Error al actualizar el insumo' }
+
+  revalidatePath('/administracion/insumos')
+  return { success: 'Insumo actualizado' }
+}
+
 export async function createInsumo(prevState: ActionState, formData: FormData): Promise<ActionState> {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
