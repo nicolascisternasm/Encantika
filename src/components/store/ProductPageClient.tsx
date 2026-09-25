@@ -27,12 +27,13 @@ interface Props {
   caracteristicas: Caracteristica[]
   stock: number
   permiteAPedido: boolean
+  noStock: boolean
   storageUrl: string
   direccionRetiro: string | null
 }
 
 export default function ProductPageClient({
-  producto, imagenes, caracteristicas, stock, permiteAPedido, storageUrl, direccionRetiro,
+  producto, imagenes, caracteristicas, stock, permiteAPedido, noStock, storageUrl, direccionRetiro,
 }: Props) {
   const [activeImageIndex, setActiveImageIndex] = useState(0)
   const [acordeones, setAcordeones] = useState<Record<string, boolean>>({})
@@ -45,7 +46,6 @@ export default function ProductPageClient({
   const precioComp = producto.precio_comparacion
   const dias = producto.dias_tiempo_produccion
   const esFabricado = producto.tipo_producto === 'fabricado'
-  const noStock = stock === 0 && !permiteAPedido
 
   const mainImgPath = [...imagenes].sort((a, b) => a.orden - b.orden)[0]?.ruta_almacenamiento
   const mainImgUrl = mainImgPath ? `${storageUrl}/${mainImgPath}` : null

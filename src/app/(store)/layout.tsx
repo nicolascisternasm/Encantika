@@ -1,6 +1,7 @@
 import { Cormorant_Garamond } from 'next/font/google'
 import Image from 'next/image'
 import Link from 'next/link'
+import { Toaster } from 'sonner'
 import { createClient } from '@/lib/supabase/server'
 import StoreHeader, { type HeaderVariant } from '@/components/store/StoreHeader'
 import StoreSidebar from '@/components/store/StoreSidebar'
@@ -142,6 +143,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
           {footer}
         </div>
         {whatsapp}
+        <Toaster position="top-center" />
       </div>
     )
   }
@@ -154,6 +156,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
       <main className="flex-1">{children}</main>
       {footer}
       {whatsapp}
+      <Toaster position="top-center" />
     </div>
   )
 }

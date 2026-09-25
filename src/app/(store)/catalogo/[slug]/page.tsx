@@ -95,6 +95,8 @@ export default async function ProductoPDPPage({
 
   const totalStock = (stockData ?? []).reduce((sum, s) => sum + (s.stock ?? 0), 0)
   const permiteAPedido = variantesRaw.some((v: any) => v.permite_a_pedido)
+  // Si aún no hay variantes (stock no configurado), el producto se trata como disponible
+  const noStock = varianteIds.length > 0 && totalStock === 0 && !permiteAPedido
 
   // Config tienda (dirección retiro)
   const { data: tienda } = await supabase
@@ -193,6 +195,7 @@ export default async function ProductoPDPPage({
           caracteristicas={caracteristicas}
           stock={totalStock}
           permiteAPedido={permiteAPedido}
+          noStock={noStock}
           storageUrl={storageUrl}
           direccionRetiro={(tienda as any)?.direccion_retiro ?? null}
         />
