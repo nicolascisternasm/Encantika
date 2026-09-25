@@ -174,31 +174,33 @@ export default async function NosotrosPage() {
     <main className="min-h-screen">
       {/* Hero */}
       <section
-        className="px-8 py-20 text-center"
+        className="px-6 py-12 text-center"
         style={{ backgroundColor: 'var(--color-tarjeta, #F5F0EB)' }}
       >
-        <p
-          className="text-[11px] uppercase tracking-[.15em] mb-4"
-          style={{ color: 'var(--color-acento, #C9A035)' }}
-        >
-          Encantika
-        </p>
-        <h1 className="font-display text-[52px] font-normal leading-tight text-stone-800 mb-5 max-w-xl mx-auto">
-          {c?.nosotros_titulo ?? 'Nuestra historia'}
-        </h1>
-        <p className="text-[18px] text-stone-600 max-w-lg mx-auto leading-relaxed">
-          {c?.nosotros_subtitulo ?? 'Joyas hechas con amor desde el corazón de Chile'}
-        </p>
+        <div className="max-w-sm mx-auto">
+          <p
+            className="text-[11px] uppercase tracking-[.15em] mb-3"
+            style={{ color: 'var(--color-acento, #C9A035)' }}
+          >
+            Encantika
+          </p>
+          <h1 className="font-display text-[42px] sm:text-[48px] font-normal leading-tight text-stone-800 mb-4">
+            {c?.nosotros_titulo ?? 'Nuestra historia'}
+          </h1>
+          <p className="text-[15px] text-stone-600 leading-relaxed">
+            {c?.nosotros_subtitulo ?? 'Joyas hechas con amor desde el corazón de Chile'}
+          </p>
+        </div>
       </section>
 
       {/* Historia y visión */}
-      <section className="bg-white px-8 py-16">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-12 items-start">
+      <section className="bg-white px-6 sm:px-10 py-16">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           <FadeIn>
             <h2 className="font-display text-[32px] font-normal text-stone-800 mb-5">
               Nuestra historia
             </h2>
-            <p className="text-[15px] text-stone-600 leading-[1.8]">
+            <p className="text-[15px] text-stone-600 leading-[1.9]">
               {c?.nosotros_historia ?? ''}
             </p>
           </FadeIn>
@@ -213,7 +215,7 @@ export default async function NosotrosPage() {
               >
                 Nuestra visión
               </h2>
-              <p className="text-[15px] text-stone-600 leading-[1.8] italic">
+              <p className="text-[15px] text-stone-600 leading-[1.9] italic">
                 {c?.nosotros_vision ?? ''}
               </p>
             </div>
