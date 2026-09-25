@@ -1,13 +1,30 @@
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/server'
+import { formatCLP } from '@/lib/utils'
 
-const PLACEHOLDER_PRODUCTS = [
-  { id: 1, nombre: 'Collar Luna', precio: '$29.990', categoria: 'Collares' },
-  { id: 2, nombre: 'Anillo Sol', precio: '$19.990', categoria: 'Anillos' },
-  { id: 3, nombre: 'Aros Estrella', precio: '$14.990', categoria: 'Aros' },
-  { id: 4, nombre: 'Pulsera Mar', precio: '$24.990', categoria: 'Pulseras' },
-]
+export default async function StorePage() {
+  const supabase = await createClient()
 
-export default function StorePage() {
+  const { data: productos } = await supabase
+    .from('productos')
+    .select(`
+      id, nombre, slug, precio_base,
+      categorias(nombre),
+      imagenes_producto(ruta_almacenamiento, orden)
+    `)
+    .eq('estado', 'activo')
+    .eq('destacado', true)
+    .order('creado_en', { ascending: false })
+    .limit(4)
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+
+  function getMainImage(imgs: { ruta_almacenamiento: string; orden: number }[] | null) {
+    if (!imgs || imgs.length === 0) return null
+    const sorted = [...imgs].sort((a, b) => a.orden - b.orden)
+    return `${supabaseUrl}/storage/v1/object/public/imagenes-productos/${sorted[0].ruta_almacenamiento}`
+  }
+
   return (
     <main className="min-h-screen bg-ivory">
       {/* Hero */}
@@ -26,25 +43,46 @@ export default function StorePage() {
         </Link>
       </section>
 
-      {/* Grilla placeholder */}
+      {/* Productos destacados */}
       <section className="mx-auto max-w-6xl px-6 pb-24">
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {PLACEHOLDER_PRODUCTS.map((product) => (
-            <article key={product.id} className="group cursor-pointer">
-              <div className="relative aspect-square overflow-hidden bg-stone-200">
-                <div className="absolute inset-0 bg-gradient-to-br from-stone-200 to-stone-300 transition-colors group-hover:from-stone-300 group-hover:to-stone-400" />
-              </div>
-              <div className="mt-3 space-y-1">
-                <p className="text-xs tracking-widest uppercase text-stone-400">
-                  {product.categoria}
-                </p>
-                <h3 className="text-sm font-medium text-stone-800">{product.nombre}</h3>
-                <p className="text-sm text-stone-500">{product.precio}</p>
-              </div>
-            </article>
-          ))}
-        </div>
+        {!productos || productos.length === 0 ? (
+          <p className="text-center text-sm text-stone-400 tracking-widest uppercase py-12">
+            Próximamente nuevas joyas
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {productos.map((p) => {
+              const imgUrl = getMainImage(
+                (p.imagenes_producto as { ruta_almacenamiento: string; orden: number }[]) ?? []
+              )
+              const cat = (p.categorias as { nombre: string } | null)?.nombre
+              return (
+                <Link key={p.id} href={`/catalogo/${p.slug}`} className="group cursor-pointer">
+                  <div className="relative aspect-square overflow-hidden bg-stone-200">
+                    {imgUrl ? (
+                      <img
+                        src={imgUrl}
+                        alt={p.nombre}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-stone-200 to-stone-300 transition-colors group-hover:from-stone-300 group-hover:to-stone-400" />
+                    )}
+                  </div>
+                  <div className="mt-3 space-y-1">
+                    {cat && (
+                      <p className="text-xs tracking-widest uppercase text-stone-400">{cat}</p>
+                    )}
+                    <h3 className="text-sm font-medium text-stone-800">{p.nombre}</h3>
+                    <p className="text-sm text-stone-500">{formatCLP(p.precio_base)}</p>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        )}
       </section>
+
       {/* Footer */}
       <footer className="py-8 text-center">
         <Link

@@ -202,11 +202,15 @@ export type Database = {
           actualizado_en: string
           direccion_retiro: string | null
           email_contacto: string | null
+          historia: string | null
           id: number
           instrucciones_retiro: string | null
           moneda: string
+          mostrar_historia: boolean
           nombre_tienda: string
           numero_whatsapp: string | null
+          seo_descripcion: string | null
+          seo_titulo: string | null
           url_instagram: string | null
           url_logo: string | null
           url_mercadolibre: string | null
@@ -215,11 +219,15 @@ export type Database = {
           actualizado_en?: string
           direccion_retiro?: string | null
           email_contacto?: string | null
+          historia?: string | null
           id: number
           instrucciones_retiro?: string | null
           moneda?: string
+          mostrar_historia?: boolean
           nombre_tienda?: string
           numero_whatsapp?: string | null
+          seo_descripcion?: string | null
+          seo_titulo?: string | null
           url_instagram?: string | null
           url_logo?: string | null
           url_mercadolibre?: string | null
@@ -228,11 +236,15 @@ export type Database = {
           actualizado_en?: string
           direccion_retiro?: string | null
           email_contacto?: string | null
+          historia?: string | null
           id?: number
           instrucciones_retiro?: string | null
           moneda?: string
+          mostrar_historia?: boolean
           nombre_tienda?: string
           numero_whatsapp?: string | null
+          seo_descripcion?: string | null
+          seo_titulo?: string | null
           url_instagram?: string | null
           url_logo?: string | null
           url_mercadolibre?: string | null

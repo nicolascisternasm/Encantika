@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'El archivo supera los 5 MB' }, { status: 400 })
   }
 
-  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif']
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
   if (!ALLOWED_TYPES.includes(file.type)) {
     return NextResponse.json({ error: 'Formato de archivo no permitido' }, { status: 400 })
   }
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   const buffer = new Uint8Array(arrayBuffer)
 
   const { error: storageError } = await admin.storage
-    .from('imagenes-producto')
+    .from('imagenes-productos')
     .upload(ruta, buffer, { contentType: file.type, upsert: false })
 
   if (storageError) {
@@ -60,14 +60,17 @@ export async function POST(req: NextRequest) {
 
   const orden = existing ? (existing.orden ?? 0) + 1 : 0
 
+  const textoAlt = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ')
+
   const { error: dbError } = await admin.from('imagenes_producto').insert({
     producto_id: productoId,
     ruta_almacenamiento: ruta,
+    texto_alt: textoAlt,
     orden,
   })
 
   if (dbError) {
-    await admin.storage.from('imagenes-producto').remove([ruta])
+    await admin.storage.from('imagenes-productos').remove([ruta])
     return NextResponse.json({ error: 'Error al guardar la imagen en la base de datos' }, { status: 500 })
   }
 
