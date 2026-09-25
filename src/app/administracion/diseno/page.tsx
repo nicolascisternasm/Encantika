@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { TEMA_DEFAULT, FUENTE_DEFAULT } from '@/lib/temas'
+import { LAYOUT_DEFAULT } from '@/lib/layouts'
 import DesignEditor from './DesignEditor'
 
 export default async function DisenoPaginaPage() {
@@ -12,7 +13,7 @@ export default async function DisenoPaginaPage() {
   const admin = createAdminClient()
   const { data: config } = await admin
     .from('configuracion_tienda')
-    .select('tema, fuente_titulos, hero_imagen_id, hero_posicion, banner_joya_imagen_id, banner_joya_posicion, historia_imagen_id, historia_posicion')
+    .select('tema, fuente_titulos, layout, hero_imagen_id, hero_posicion, banner_joya_imagen_id, banner_joya_posicion, historia_imagen_id, historia_posicion')
     .limit(1)
     .single()
 
@@ -46,6 +47,7 @@ export default async function DisenoPaginaPage() {
       <DesignEditor
         currentTema={config?.tema ?? TEMA_DEFAULT}
         currentFuente={config?.fuente_titulos ?? FUENTE_DEFAULT}
+        currentLayout={(config as { layout?: string } | null)?.layout ?? LAYOUT_DEFAULT}
         hero={{
           imagenId: config?.hero_imagen_id ?? null,
           posicion: config?.hero_posicion ?? 'center center',

@@ -212,6 +212,7 @@ export type Database = {
           historia_posicion: string | null
           id: number
           instrucciones_retiro: string | null
+          layout: string
           moneda: string
           mostrar_historia: boolean
           nombre_tienda: string
@@ -237,6 +238,7 @@ export type Database = {
           historia_posicion?: string | null
           id: number
           instrucciones_retiro?: string | null
+          layout?: string
           moneda?: string
           mostrar_historia?: boolean
           nombre_tienda?: string
@@ -262,6 +264,7 @@ export type Database = {
           historia_posicion?: string | null
           id?: number
           instrucciones_retiro?: string | null
+          layout?: string
           moneda?: string
           mostrar_historia?: boolean
           nombre_tienda?: string
