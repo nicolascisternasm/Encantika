@@ -146,9 +146,8 @@ export default function DesignEditor({ currentTema, currentFuente, currentLayout
               Elige cómo se organiza el menú, el hero y la grilla de productos.
             </p>
 
-            {/* Primera fila: 3 layouts */}
-            <div className="grid grid-cols-3 gap-4 mb-4 max-w-3xl">
-              {(Object.keys(LAYOUTS) as LayoutKey[]).slice(0, 3).map((key) => (
+            <div className="grid grid-cols-3 gap-4 max-w-3xl">
+              {(Object.keys(LAYOUTS) as LayoutKey[]).map((key) => (
                 <LayoutCard
                   key={key}
                   layoutKey={key}
@@ -157,21 +156,6 @@ export default function DesignEditor({ currentTema, currentFuente, currentLayout
                   onSelect={() => setLayout(key)}
                 />
               ))}
-            </div>
-            {/* Segunda fila: 2 layouts centrados */}
-            <div className="flex gap-4 max-w-3xl">
-              <div className="flex-1" />
-              {(Object.keys(LAYOUTS) as LayoutKey[]).slice(3).map((key) => (
-                <div key={key} className="flex-[2] max-w-[calc(33.333%-8px)]">
-                  <LayoutCard
-                    layoutKey={key}
-                    temaVars={TEMAS[tema].vars}
-                    selected={layout === key}
-                    onSelect={() => setLayout(key)}
-                  />
-                </div>
-              ))}
-              <div className="flex-1" />
             </div>
           </section>
 
@@ -325,6 +309,32 @@ function LayoutSVGPreview({ layoutKey, vars }: { layoutKey: LayoutKey; vars: Tem
           <rect x="40" y="37" width="80" height="11" fill="white" opacity="0.8" rx="1" />
           <rect x="50" y="52" width="60" height="7" fill="white" opacity="0.7" rx="1" />
           <rect x="60" y="65" width="40" height="8" fill="transparent" stroke="white" strokeWidth="1" rx="1" opacity="0.7" />
+        </svg>
+      )
+
+    case 'landing':
+      return (
+        <svg viewBox="0 0 160 100" style={{ width: '100%', height: 100, display: 'block', background: bg }}>
+          {/* Header */}
+          <rect x="0" y="0" width="160" height="11" fill="#fff" />
+          <rect x="0" y="0" width="160" height="11" fill={borde} opacity="0.3" />
+          <rect x="8" y="4" width="18" height="3" fill={texto} opacity="0.5" rx="1" />
+          {/* Hero: imagen izquierda + texto derecha */}
+          <rect x="0" y="12" width="86" height="44" fill={tarjeta} />
+          <rect x="0" y="12" width="86" height="44" fill={acento} opacity="0.12" />
+          <rect x="92" y="18" width="12" height="2.5" fill={acento} opacity="0.6" rx="1" />
+          <rect x="92" y="24" width="56" height="8" fill={texto} opacity="0.55" rx="1" />
+          <rect x="92" y="36" width="44" height="3" fill={texto} opacity="0.3" rx="1" />
+          <rect x="92" y="43" width="24" height="5" fill="transparent" stroke={texto} strokeWidth="0.8" rx="1" opacity="0.5" />
+          {/* Stats strip */}
+          <rect x="0" y="57" width="160" height="13" fill={tarjeta} />
+          {[0, 1, 2, 3].map(i => (
+            <rect key={i} x={10 + i * 38} y="60" width="18" height="4" fill={acento} opacity="0.45" rx="1" />
+          ))}
+          {/* Product grid (tabs) */}
+          {[0, 1, 2, 3].map(i => (
+            <rect key={i} x={4 + i * 38.5} y="72" width="35" height="25" fill={tarjeta} rx="2" />
+          ))}
         </svg>
       )
   }

@@ -4,6 +4,10 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { formatCLP } from '@/lib/utils'
 import ScrollIndicator from '@/components/store/ScrollIndicator'
+import { FadeIn, FadeInStagger, FadeInItem } from '@/components/store/FadeIn'
+import StatsCounter from '@/components/store/StatsCounter'
+import LandingHero from '@/components/store/LandingHero'
+import LandingCategoriasSection, { type ProductoLanding } from '@/components/store/LandingCategoriasSection'
 
 // ── Íconos de categoría ────────────────────────────────────────────────────────
 
@@ -124,20 +128,125 @@ export default async function StorePage() {
     return [...imgs].sort((a, b) => a.orden - b.orden)[0].ruta_almacenamiento
   }
 
+  // ── Datos extra para layout landing ──────────────────────────────────────────
+
+  let landingCategorias: { nombre: string; slug: string }[] = []
+  let landingProductos: ProductoLanding[] = []
+
+  if (layout === 'landing') {
+    const [{ data: cats }, { data: prodsLanding }] = await Promise.all([
+      supabase
+        .from('categorias')
+        .select('nombre, slug')
+        .eq('activo', true)
+        .order('orden')
+        .limit(8),
+      supabase
+        .from('productos')
+        .select(`
+          id, nombre, slug, precio_base,
+          categorias(nombre, slug),
+          imagenes_producto(ruta_almacenamiento, orden)
+        `)
+        .eq('estado', 'activo')
+        .order('destacado', { ascending: false })
+        .order('creado_en', { ascending: false })
+        .limit(32),
+    ])
+
+    landingCategorias = (cats ?? []) as { nombre: string; slug: string }[]
+    landingProductos = (prodsLanding ?? []).map((p) => {
+      const cat = (p.categorias as { nombre: string; slug: string } | null)
+      const imgs = (p.imagenes_producto as { ruta_almacenamiento: string; orden: number }[] | null) ?? []
+      const mainImg = imgs.length > 0
+        ? [...imgs].sort((a, b) => a.orden - b.orden)[0].ruta_almacenamiento
+        : null
+      return {
+        id: p.id as string,
+        nombre: p.nombre as string,
+        slug: p.slug as string,
+        precio_base: p.precio_base as number,
+        categoria_slug: cat?.slug ?? '',
+        imagen: mainImg,
+      }
+    }).filter((p) => p.categoria_slug !== '')
+  }
+
   // Columnas de productos según layout
   const productGridCols = layout === 'magazine'
     ? 'grid-cols-1 sm:grid-cols-3'
     : 'grid-cols-2 sm:grid-cols-2 lg:grid-cols-4'
 
-  // ── Hero section según heroStyle ────────────────────────────────────────────
+  // ── Secciones reutilizables ───────────────────────────────────────────────────
+
+  const bannerSection = (
+    <section className="relative flex items-center justify-center text-center overflow-hidden"
+      style={{ height: 'clamp(280px, 40vw, 400px)' }}>
+      <Image src={bannerUrl ?? '/hero-2.jpg'} alt="Crea tu joya única" fill
+        className="object-cover" style={{ objectPosition: bannerPos }}
+        sizes="100vw" unoptimized={!!bannerUrl} />
+      <div className="absolute inset-0" style={{ backgroundColor: 'rgba(201,160,53,0.72)' }} />
+      <FadeIn className="relative z-10 px-6 max-w-xl">
+        <h2 className="font-display text-white font-normal tracking-[.06em] text-[40px] sm:text-[52px] leading-[1.1]">
+          Crea tu joya única
+        </h2>
+        <p className="mt-4 text-white/85 text-base">Elige cada detalle y diseña la pieza perfecta para ti</p>
+        <Link href="/arma-tu-joya"
+          className="inline-block mt-8 border border-white text-white text-xs tracking-[.12em] uppercase px-8 py-3 hover:bg-white hover:text-onyx transition-all duration-300">
+          Comenzar ahora
+        </Link>
+      </FadeIn>
+    </section>
+  )
+
+  const historiaSection = config?.mostrar_historia && config?.historia ? (
+    <section className="bg-ivory py-20 px-6 sm:px-8">
+      <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
+        <FadeIn className="relative rounded overflow-hidden" style={{ height: 'clamp(320px, 50vw, 500px)' } as React.CSSProperties}>
+          <Image src={historiaUrl ?? '/hero-3.jpg'} alt="Nuestra historia" fill
+            className="object-cover" style={{ objectPosition: historiaPos }}
+            sizes="(max-width: 768px) 100vw, 50vw" unoptimized={!!historiaUrl} />
+        </FadeIn>
+        <FadeIn delay={0.15}>
+          <p className="text-[11px] uppercase tracking-[.15em] text-gold">Nuestra historia</p>
+          <h2 className="font-display text-4xl sm:text-5xl font-normal text-onyx mt-4 leading-tight">
+            {config.nombre_tienda}
+          </h2>
+          <p className="mt-6 text-[15px] text-encantika-stone leading-[1.8]">{config.historia}</p>
+          <Link href="/nosotros"
+            className="inline-block mt-8 text-sm text-onyx border-b border-onyx pb-0.5 hover:text-encantika-stone hover:border-encantika-stone transition-colors duration-200">
+            Conoce más →
+          </Link>
+        </FadeIn>
+      </div>
+    </section>
+  ) : null
+
+  // ── Layout landing ────────────────────────────────────────────────────────────
+
+  if (layout === 'landing') {
+    return (
+      <>
+        <LandingHero heroUrl={heroUrl} heroPos={heroPos} />
+        <StatsCounter />
+        <LandingCategoriasSection
+          categorias={landingCategorias}
+          productos={landingProductos}
+          storageUrl={storageUrl}
+        />
+        {bannerSection}
+        {historiaSection}
+      </>
+    )
+  }
+
+  // ── Hero section según layout ─────────────────────────────────────────────────
 
   let heroSection: React.ReactNode
 
   if (layout === 'split') {
-    // Hero partido: texto izquierda, imagen derecha
     heroSection = (
       <section className="flex min-h-[100svh]">
-        {/* Lado texto */}
         <div className="w-full md:w-[45%] flex flex-col justify-center px-10 md:px-16 py-20 bg-ivory">
           <p className="text-[11px] tracking-[.20em] uppercase mb-5 text-encantika-stone">
             Nueva colección
@@ -153,7 +262,6 @@ export default async function StorePage() {
             Ver colección
           </Link>
         </div>
-        {/* Lado imagen */}
         <div className="hidden md:block md:w-[55%] relative">
           <Image
             src={heroUrl ?? '/hero-1.jpg'}
@@ -169,7 +277,6 @@ export default async function StorePage() {
       </section>
     )
   } else if (layout === 'magazine') {
-    // Hero compacto
     heroSection = (
       <section className="relative overflow-hidden" style={{ height: '45vh', minHeight: 300 }}>
         <Image
@@ -196,7 +303,6 @@ export default async function StorePage() {
       </section>
     )
   } else if (layout === 'inmersivo') {
-    // Hero fullscreen con logo centrado
     heroSection = (
       <section className="relative overflow-hidden" style={{ height: '100svh', minHeight: 600 }}>
         <Image
@@ -225,7 +331,7 @@ export default async function StorePage() {
       </section>
     )
   } else {
-    // clasico y lateral: hero 100svh estándar
+    // clasico y lateral
     heroSection = (
       <section className="relative overflow-hidden" style={{ height: '100svh', minHeight: 600 }}>
         <Image
@@ -266,22 +372,26 @@ export default async function StorePage() {
       {/* ── Sección 2: Categorías ──────────────────────────────────────────── */}
       <section className="bg-ivory py-20 px-6 sm:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="font-display text-4xl font-normal tracking-wide text-onyx text-center">
-            Explora nuestra colección
-          </h2>
-          <p className="mt-3 text-sm text-encantika-stone text-center">
-            Encuentra la joya perfecta para cada ocasión
-          </p>
-          <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4">
+          <FadeIn className="text-center">
+            <h2 className="font-display text-4xl font-normal tracking-wide text-onyx">
+              Explora nuestra colección
+            </h2>
+            <p className="mt-3 text-sm text-encantika-stone">
+              Encuentra la joya perfecta para cada ocasión
+            </p>
+          </FadeIn>
+          <FadeInStagger className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4" staggerDelay={0.08}>
             {CATEGORIAS.map(({ nombre, slug, Icon }) => (
-              <Link key={slug} href={`/catalogo?categoria=${slug}`}
-                className="group flex flex-col items-center gap-4 bg-nude rounded p-6 sm:p-8 hover:shadow-sm transition-shadow duration-300">
-                <div className="w-10 h-10 text-gold"><Icon /></div>
-                <span className="font-display text-xl text-onyx">{nombre}</span>
-                <span className="text-encantika-stone text-sm group-hover:translate-x-1 transition-transform duration-200">→</span>
-              </Link>
+              <FadeInItem key={slug}>
+                <Link href={`/catalogo?categoria=${slug}`}
+                  className="group flex flex-col items-center gap-4 bg-nude rounded p-6 sm:p-8 hover:shadow-sm transition-shadow duration-300">
+                  <div className="w-10 h-10 text-gold"><Icon /></div>
+                  <span className="font-display text-xl text-onyx">{nombre}</span>
+                  <span className="text-encantika-stone text-sm group-hover:translate-x-1 transition-transform duration-200">→</span>
+                </Link>
+              </FadeInItem>
             ))}
-          </div>
+          </FadeInStagger>
         </div>
       </section>
 
@@ -289,10 +399,12 @@ export default async function StorePage() {
       {productos.length > 0 && (
         <section className="bg-white py-20 px-6 sm:px-8">
           <div className="max-w-7xl mx-auto">
-            <h2 className="font-display text-4xl font-normal text-onyx text-center tracking-wide">
-              Piezas destacadas
-            </h2>
-            <div className={`mt-12 grid gap-4 sm:gap-6 ${productGridCols}`}>
+            <FadeIn className="text-center">
+              <h2 className="font-display text-4xl font-normal text-onyx tracking-wide">
+                Piezas destacadas
+              </h2>
+            </FadeIn>
+            <FadeInStagger className={`mt-12 grid gap-4 sm:gap-6 ${productGridCols}`} staggerDelay={0.07}>
               {productos.map((p) => {
                 const ruta = getMainImage(
                   (p.imagenes_producto as { ruta_almacenamiento: string; orden: number }[]) ?? []
@@ -300,77 +412,42 @@ export default async function StorePage() {
                 const imgSrc = ruta ? `${storageUrl}/${ruta}` : null
                 const cat = (p.categorias as { nombre: string } | null)?.nombre
                 return (
-                  <Link key={p.id} href={`/catalogo/${p.slug}`} className="group">
-                    <div className="relative aspect-square overflow-hidden bg-nude">
-                      {imgSrc ? (
-                        <Image src={imgSrc} alt={p.nombre} fill
-                          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw" />
-                      ) : (
-                        <div className="absolute inset-0 bg-nude" />
-                      )}
-                    </div>
-                    <div className="mt-3 space-y-1">
-                      {cat && <p className="text-[10px] uppercase tracking-[.12em] text-encantika-stone">{cat}</p>}
-                      <h3 className="font-display text-xl text-onyx leading-tight">{p.nombre}</h3>
-                      <p className="text-sm text-encantika-stone">{formatCLP(p.precio_base)}</p>
-                    </div>
-                  </Link>
+                  <FadeInItem key={p.id}>
+                    <Link href={`/catalogo/${p.slug}`} className="group block">
+                      <div className="relative aspect-square overflow-hidden bg-nude">
+                        {imgSrc ? (
+                          <Image src={imgSrc} alt={p.nombre} fill
+                            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw" />
+                        ) : (
+                          <div className="absolute inset-0 bg-nude" />
+                        )}
+                      </div>
+                      <div className="mt-3 space-y-1">
+                        {cat && <p className="text-[10px] uppercase tracking-[.12em] text-encantika-stone">{cat}</p>}
+                        <h3 className="font-display text-xl text-onyx leading-tight">{p.nombre}</h3>
+                        <p className="text-sm text-encantika-stone">{formatCLP(p.precio_base)}</p>
+                      </div>
+                    </Link>
+                  </FadeInItem>
                 )
               })}
-            </div>
-            <div className="mt-12 text-center">
+            </FadeInStagger>
+            <FadeIn className="mt-12 text-center" delay={0.1}>
               <Link href="/catalogo"
                 className="inline-block border border-onyx text-onyx text-xs tracking-[.12em] uppercase px-8 py-3 hover:bg-onyx hover:text-white transition-all duration-300">
                 Ver todo el catálogo
               </Link>
-            </div>
+            </FadeIn>
           </div>
         </section>
       )}
 
       {/* ── Sección 4: Banner "Arma tu joya" ──────────────────────────────── */}
-      <section className="relative flex items-center justify-center text-center overflow-hidden"
-        style={{ height: 'clamp(280px, 40vw, 400px)' }}>
-        <Image src={bannerUrl ?? '/hero-2.jpg'} alt="Crea tu joya única" fill
-          className="object-cover" style={{ objectPosition: bannerPos }}
-          sizes="100vw" unoptimized={!!bannerUrl} />
-        <div className="absolute inset-0" style={{ backgroundColor: 'rgba(201,160,53,0.72)' }} />
-        <div className="relative z-10 px-6 max-w-xl">
-          <h2 className="font-display text-white font-normal tracking-[.06em] text-[40px] sm:text-[52px] leading-[1.1]">
-            Crea tu joya única
-          </h2>
-          <p className="mt-4 text-white/85 text-base">Elige cada detalle y diseña la pieza perfecta para ti</p>
-          <Link href="/arma-tu-joya"
-            className="inline-block mt-8 border border-white text-white text-xs tracking-[.12em] uppercase px-8 py-3 hover:bg-white hover:text-onyx transition-all duration-300">
-            Comenzar ahora
-          </Link>
-        </div>
-      </section>
+      {bannerSection}
 
       {/* ── Sección 5: Historia (condicional) ─────────────────────────────── */}
-      {config?.mostrar_historia && config?.historia && (
-        <section className="bg-ivory py-20 px-6 sm:px-8">
-          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
-            <div className="relative rounded overflow-hidden" style={{ height: 'clamp(320px, 50vw, 500px)' }}>
-              <Image src={historiaUrl ?? '/hero-3.jpg'} alt="Nuestra historia" fill
-                className="object-cover" style={{ objectPosition: historiaPos }}
-                sizes="(max-width: 768px) 100vw, 50vw" unoptimized={!!historiaUrl} />
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-[.15em] text-gold">Nuestra historia</p>
-              <h2 className="font-display text-4xl sm:text-5xl font-normal text-onyx mt-4 leading-tight">
-                {config.nombre_tienda}
-              </h2>
-              <p className="mt-6 text-[15px] text-encantika-stone leading-[1.8]">{config.historia}</p>
-              <Link href="/sobre-nosotros"
-                className="inline-block mt-8 text-sm text-onyx border-b border-onyx pb-0.5 hover:text-encantika-stone hover:border-encantika-stone transition-colors duration-200">
-                Conoce más →
-              </Link>
-            </div>
-          </div>
-        </section>
-      )}
+      {historiaSection}
     </>
   )
 }

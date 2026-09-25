@@ -1,4 +1,4 @@
-export type LayoutKey = 'clasico' | 'lateral' | 'split' | 'magazine' | 'inmersivo'
+export type LayoutKey = 'clasico' | 'lateral' | 'split' | 'magazine' | 'inmersivo' | 'landing'
 
 export interface LayoutConfig {
   nombre: string
@@ -43,6 +43,13 @@ export const LAYOUTS: Record<LayoutKey, LayoutConfig> = {
     badge: 'Premium',
     menu: 'hidden-scroll',
     heroStyle: 'fullscreen',
+  },
+  landing: {
+    nombre: 'Landing animado',
+    descripcion: 'Hero imagen + texto, stats animados, productos por categoría con tabs',
+    badge: 'Nuevo',
+    menu: 'top',
+    heroStyle: 'split',
   },
 }
 

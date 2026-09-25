@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatCLP } from '@/lib/utils'
+import { FadeIn, FadeInStagger, FadeInItem } from '@/components/store/FadeIn'
 
 interface CatalogoPageProps {
   searchParams: Promise<{ categoria?: string }>
@@ -116,7 +117,7 @@ export default async function CatalogoPage({ searchParams }: CatalogoPageProps) 
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <FadeInStagger className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" staggerDelay={0.06}>
             {productos.map(p => {
               const imgUrl = getMainImage(
                 (p.imagenes_producto as { ruta_almacenamiento: string; orden: number }[]) ?? []
@@ -130,31 +131,33 @@ export default async function CatalogoPage({ searchParams }: CatalogoPageProps) 
               )
 
               return (
-                <Link key={p.id} href={`/catalogo/${p.slug}`} className="group">
-                  <div className="relative aspect-square overflow-hidden bg-stone-100">
-                    {imgUrl ? (
-                      <img
-                        src={imgUrl}
-                        alt={p.nombre}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-stone-100 to-stone-200" />
-                    )}
-                  </div>
-                  <div className="mt-3 space-y-0.5">
-                    {cat && (
-                      <p className="text-[10px] tracking-widest uppercase text-stone-400">{cat}</p>
-                    )}
-                    <h2 className="text-sm text-stone-800 group-hover:text-stone-600 transition-colors">
-                      {p.nombre}
-                    </h2>
-                    <p className="text-sm text-stone-500">{formatCLP(precioMin)}</p>
-                  </div>
-                </Link>
+                <FadeInItem key={p.id}>
+                  <Link href={`/catalogo/${p.slug}`} className="group block">
+                    <div className="relative aspect-square overflow-hidden bg-stone-100">
+                      {imgUrl ? (
+                        <img
+                          src={imgUrl}
+                          alt={p.nombre}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-gradient-to-br from-stone-100 to-stone-200" />
+                      )}
+                    </div>
+                    <div className="mt-3 space-y-0.5">
+                      {cat && (
+                        <p className="text-[10px] tracking-widest uppercase text-stone-400">{cat}</p>
+                      )}
+                      <h2 className="text-sm text-stone-800 group-hover:text-stone-600 transition-colors">
+                        {p.nombre}
+                      </h2>
+                      <p className="text-sm text-stone-500">{formatCLP(precioMin)}</p>
+                    </div>
+                  </Link>
+                </FadeInItem>
               )
             })}
-          </div>
+          </FadeInStagger>
         )}
       </div>
 

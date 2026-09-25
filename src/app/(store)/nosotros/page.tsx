@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
+import { FadeIn } from '@/components/store/FadeIn'
 
 type Config = {
   nosotros_titulo: string | null
@@ -193,36 +194,40 @@ export default async function NosotrosPage() {
       {/* Historia y visión */}
       <section className="bg-white px-8 py-16">
         <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-2 gap-12 items-start">
-          <div>
+          <FadeIn>
             <h2 className="font-display text-[32px] font-normal text-stone-800 mb-5">
               Nuestra historia
             </h2>
             <p className="text-[15px] text-stone-600 leading-[1.8]">
               {c?.nosotros_historia ?? ''}
             </p>
-          </div>
-          <div
-            className="p-8 rounded-sm"
-            style={{ backgroundColor: 'var(--color-tarjeta, #F5F0EB)' }}
-          >
-            <h2
-              className="font-display text-[24px] font-normal mb-4"
-              style={{ color: 'var(--color-acento, #C9A035)' }}
+          </FadeIn>
+          <FadeIn delay={0.12}>
+            <div
+              className="p-8 rounded-sm"
+              style={{ backgroundColor: 'var(--color-tarjeta, #F5F0EB)' }}
             >
-              Nuestra visión
-            </h2>
-            <p className="text-[15px] text-stone-600 leading-[1.8] italic">
-              {c?.nosotros_vision ?? ''}
-            </p>
-          </div>
+              <h2
+                className="font-display text-[24px] font-normal mb-4"
+                style={{ color: 'var(--color-acento, #C9A035)' }}
+              >
+                Nuestra visión
+              </h2>
+              <p className="text-[15px] text-stone-600 leading-[1.8] italic">
+                {c?.nosotros_vision ?? ''}
+              </p>
+            </div>
+          </FadeIn>
         </div>
       </section>
 
       {/* Secciones alternadas */}
       {secciones.map((s, i) => (
-        <section key={i} style={{ borderTop: '1px solid var(--color-borde, #E8E2DB)' }}>
-          <SeccionAlternada {...s} />
-        </section>
+        <FadeIn key={i}>
+          <section style={{ borderTop: '1px solid var(--color-borde, #E8E2DB)' }}>
+            <SeccionAlternada {...s} />
+          </section>
+        </FadeIn>
       ))}
     </main>
   )

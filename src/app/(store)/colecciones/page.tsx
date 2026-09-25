@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { getColeccionesActivas } from '@/features/collections/queries'
+import { FadeIn, FadeInStagger, FadeInItem } from '@/components/store/FadeIn'
 
 export default async function ColeccionesPage() {
   const colecciones = await getColeccionesActivas()
@@ -23,31 +24,33 @@ export default async function ColeccionesPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+          <FadeInStagger className="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4" staggerDelay={0.07}>
             {colecciones.map(col => (
-              <Link key={col.id} href={`/colecciones/${col.slug}`} className="group">
-                <div className="relative aspect-square overflow-hidden bg-stone-100">
-                  {col.url_imagen ? (
-                    <img
-                      src={col.url_imagen}
-                      alt={col.nombre}
-                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                  ) : (
-                    <div className="absolute inset-0 bg-gradient-to-br from-stone-100 to-stone-200" />
-                  )}
-                </div>
-                <div className="mt-3 space-y-0.5">
-                  <h2 className="text-sm text-stone-800 group-hover:text-stone-600 transition-colors">
-                    {col.nombre}
-                  </h2>
-                  <p className="text-xs text-stone-400">
-                    {col._count === 1 ? '1 producto' : `${col._count} productos`}
-                  </p>
-                </div>
-              </Link>
+              <FadeInItem key={col.id}>
+                <Link href={`/colecciones/${col.slug}`} className="group block">
+                  <div className="relative aspect-square overflow-hidden bg-stone-100">
+                    {col.url_imagen ? (
+                      <img
+                        src={col.url_imagen}
+                        alt={col.nombre}
+                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                    ) : (
+                      <div className="absolute inset-0 bg-gradient-to-br from-stone-100 to-stone-200" />
+                    )}
+                  </div>
+                  <div className="mt-3 space-y-0.5">
+                    <h2 className="text-sm text-stone-800 group-hover:text-stone-600 transition-colors">
+                      {col.nombre}
+                    </h2>
+                    <p className="text-xs text-stone-400">
+                      {col._count === 1 ? '1 producto' : `${col._count} productos`}
+                    </p>
+                  </div>
+                </Link>
+              </FadeInItem>
             ))}
-          </div>
+          </FadeInStagger>
         )}
       </div>
     </main>
