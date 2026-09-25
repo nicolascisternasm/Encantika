@@ -8,6 +8,7 @@ export type InsumoConStock = {
   unidad: string
   activo: boolean
   creado_en: string
+  imagen_url: string | null
   stock: number
   movimientos: Array<{
     id: string
@@ -23,7 +24,7 @@ export async function getInsumosConStock(): Promise<InsumoConStock[]> {
 
   const { data: insumos, error } = await supabase
     .from('insumos')
-    .select('id, nombre, descripcion, unidad, activo, creado_en')
+    .select('id, nombre, descripcion, unidad, activo, creado_en, imagen_url')
     .order('nombre')
 
   if (error || !insumos || insumos.length === 0) return []
@@ -55,6 +56,7 @@ export async function getInsumosConStock(): Promise<InsumoConStock[]> {
 
   return insumos.map(i => ({
     ...i,
+    imagen_url: i.imagen_url ?? null,
     stock: stockMap.get(i.id) ?? 0,
     movimientos: (movimientosMap.get(i.id) ?? []).slice(0, 10),
   }))

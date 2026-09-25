@@ -412,6 +412,7 @@ export type Database = {
           creado_en: string
           descripcion: string | null
           id: string
+          imagen_url: string | null
           nombre: string
           unidad: string
         }
@@ -420,6 +421,7 @@ export type Database = {
           creado_en?: string
           descripcion?: string | null
           id?: string
+          imagen_url?: string | null
           nombre: string
           unidad?: string
         }
@@ -428,6 +430,7 @@ export type Database = {
           creado_en?: string
           descripcion?: string | null
           id?: string
+          imagen_url?: string | null
           nombre?: string
           unidad?: string
         }

@@ -57,6 +57,65 @@ export async function registrarEntradaInsumo(
   return { success: `Entrada de ${cantidad} u. registrada` }
 }
 
+// ── Imagen de insumo ──────────────────────────────────────────────────────────
+
+export async function subirImagenInsumo(
+  formData: FormData
+): Promise<ActionState & { url?: string }> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  const insumoId = formData.get('insumo_id') as string
+  const file = formData.get('file') as File
+  if (!insumoId || !file || file.size === 0) return { error: 'Datos inválidos' }
+
+  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
+  const path = `insumos/${insumoId}/foto-${Date.now()}.${ext}`
+
+  const admin = createAdminClient()
+  const { error: uploadError } = await admin.storage
+    .from('imagenes-productos')
+    .upload(path, file, { contentType: file.type, upsert: false })
+
+  if (uploadError) return { error: 'Error al subir la imagen' }
+
+  const { error: updateError } = await admin
+    .from('insumos')
+    .update({ imagen_url: path })
+    .eq('id', insumoId)
+
+  if (updateError) {
+    await admin.storage.from('imagenes-productos').remove([path])
+    return { error: 'Error al guardar la imagen' }
+  }
+
+  revalidatePath('/administracion/insumos')
+  return { success: 'Imagen actualizada', url: path }
+}
+
+export async function eliminarImagenInsumo(
+  insumoId: string,
+  imagenUrl: string
+): Promise<ActionState> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  const admin = createAdminClient()
+  await admin.storage.from('imagenes-productos').remove([imagenUrl])
+
+  const { error } = await admin
+    .from('insumos')
+    .update({ imagen_url: null })
+    .eq('id', insumoId)
+
+  if (error) return { error: 'Error al eliminar la imagen' }
+
+  revalidatePath('/administracion/insumos')
+  return { success: 'Imagen eliminada' }
+}
+
 // ── Gestión de insumos en un producto (referencial) ────────────────────────────
 
 export async function upsertProductoInsumo(

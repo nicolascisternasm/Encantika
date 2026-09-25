@@ -1,8 +1,13 @@
 'use client'
 
-import { useState, useTransition, useActionState } from 'react'
+import { useState, useRef, useTransition, useActionState } from 'react'
 import { toast } from 'sonner'
-import { createInsumo, registrarEntradaInsumo } from '@/features/insumos/actions'
+import {
+  createInsumo,
+  registrarEntradaInsumo,
+  subirImagenInsumo,
+  eliminarImagenInsumo,
+} from '@/features/insumos/actions'
 import type { InsumoConStock } from '@/features/insumos/queries'
 
 type ActionState = { error?: string; success?: string }
@@ -132,7 +137,106 @@ function EntradaForm({ insumoId }: { insumoId: string }) {
   )
 }
 
-export default function InsumosManager({ insumos }: { insumos: InsumoConStock[] }) {
+function InsumoImageUploader({
+  insumoId,
+  initialUrl,
+  storageUrl,
+}: {
+  insumoId: string
+  initialUrl: string | null
+  storageUrl: string
+}) {
+  const [url, setUrl] = useState(initialUrl)
+  const [isPending, startTransition] = useTransition()
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const fd = new FormData()
+    fd.append('insumo_id', insumoId)
+    fd.append('file', file)
+    startTransition(async () => {
+      const result = await subirImagenInsumo(fd)
+      if (result.error) toast.error(result.error)
+      else if (result.url) {
+        setUrl(result.url)
+        toast.success('Imagen actualizada')
+      }
+      if (inputRef.current) inputRef.current.value = ''
+    })
+  }
+
+  function handleDelete() {
+    if (!url) return
+    const prev = url
+    startTransition(async () => {
+      const result = await eliminarImagenInsumo(insumoId, prev)
+      if (result.error) toast.error(result.error)
+      else {
+        setUrl(null)
+        toast.success('Imagen eliminada')
+      }
+    })
+  }
+
+  return (
+    <div
+      className="relative w-20 h-20 border-2 border-dashed flex-shrink-0 overflow-hidden"
+      style={{ borderColor: '#D4C4A8' }}
+    >
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={handleFile}
+      />
+
+      {isPending ? (
+        <div className="w-full h-full flex items-center justify-center bg-stone-50">
+          <span className="text-xs text-stone-400">...</span>
+        </div>
+      ) : url ? (
+        <>
+          <img
+            src={`${storageUrl}/${url}`}
+            alt=""
+            className="w-full h-full object-cover"
+          />
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/60 text-white flex items-center justify-center text-sm leading-none hover:bg-black/80 transition-colors"
+            aria-label="Eliminar imagen"
+          >
+            ×
+          </button>
+        </>
+      ) : (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="w-full h-full flex flex-col items-center justify-center gap-1 hover:bg-stone-50 transition-colors"
+          aria-label="Subir foto"
+        >
+          <svg className="w-6 h-6 text-stone-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <span className="text-xs text-stone-300">Foto</span>
+        </button>
+      )}
+    </div>
+  )
+}
+
+interface InsumosManagerProps {
+  insumos: InsumoConStock[]
+  storageUrl: string
+}
+
+export default function InsumosManager({ insumos, storageUrl }: InsumosManagerProps) {
   const [expandedId, setExpandedId] = useState<string | null>(null)
   const [showNewForm, setShowNewForm] = useState(false)
 
@@ -165,8 +269,18 @@ export default function InsumosManager({ insumos }: { insumos: InsumoConStock[] 
               <button
                 type="button"
                 onClick={() => toggleRow(insumo.id)}
-                className="w-full flex items-center gap-4 px-4 py-3 hover:bg-stone-50 transition-colors text-left"
+                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-stone-50 transition-colors text-left"
               >
+                {/* Miniatura 48×48 */}
+                {insumo.imagen_url ? (
+                  <img
+                    src={`${storageUrl}/${insumo.imagen_url}`}
+                    alt=""
+                    className="w-12 h-12 object-cover border border-stone-100 flex-shrink-0"
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-stone-50 border border-stone-100 flex-shrink-0" />
+                )}
                 <span className="flex-1 text-sm text-stone-800">{insumo.nombre}</span>
                 <span className="text-xs text-stone-400 mr-2">{insumo.unidad}</span>
                 <StockBadge stock={insumo.stock} />
@@ -180,10 +294,19 @@ export default function InsumosManager({ insumos }: { insumos: InsumoConStock[] 
 
               {/* Expanded content */}
               {expandedId === insumo.id && (
-                <div className="px-4 pb-4 pt-1 space-y-4 bg-stone-50 border-t border-stone-100">
-                  {insumo.descripcion && (
-                    <p className="text-xs text-stone-500">{insumo.descripcion}</p>
-                  )}
+                <div className="px-4 pb-4 pt-3 space-y-4 bg-stone-50 border-t border-stone-100">
+                  {/* Foto + descripción */}
+                  <div className="flex items-start gap-4">
+                    <InsumoImageUploader
+                      key={insumo.imagen_url ?? 'sin-imagen'}
+                      insumoId={insumo.id}
+                      initialUrl={insumo.imagen_url}
+                      storageUrl={storageUrl}
+                    />
+                    {insumo.descripcion && (
+                      <p className="text-xs text-stone-500 pt-1">{insumo.descripcion}</p>
+                    )}
+                  </div>
 
                   <div>
                     <p className="text-xs font-medium text-stone-500 mb-2 uppercase tracking-wider">

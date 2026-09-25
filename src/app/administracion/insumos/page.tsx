@@ -4,6 +4,7 @@ import { getInsumosConStock } from '@/features/insumos/queries'
 
 export default async function InsumosPage() {
   const insumos = await getInsumosConStock()
+  const storageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''}/storage/v1/object/public/imagenes-productos`
 
   return (
     <div>
@@ -11,7 +12,7 @@ export default async function InsumosPage() {
         title="Insumos"
         description="Materiales y componentes utilizados en la fabricación"
       />
-      <InsumosManager insumos={insumos} />
+      <InsumosManager insumos={insumos} storageUrl={storageUrl} />
     </div>
   )
 }
