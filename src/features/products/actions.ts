@@ -8,12 +8,14 @@ import { generateSlug } from '@/lib/utils'
 export type ActionState = { error?: string; success?: string; id?: string }
 
 const ESTADOS = ['borrador', 'activo', 'archivado']
+const TIPOS_PRODUCTO = ['terminado', 'fabricado']
 
 const productoSchema = z.object({
   nombre: z.string().min(1, 'El nombre es requerido'),
   slug: z.string().min(1, 'El slug es requerido'),
   precio_base: z.coerce.number().int('El precio debe ser un número entero').min(0, 'El precio debe ser 0 o mayor'),
   estado: z.string().refine((v) => ESTADOS.includes(v), 'Estado inválido'),
+  tipo_producto: z.string().refine((v) => TIPOS_PRODUCTO.includes(v), 'Tipo de producto inválido').optional().default('terminado'),
   descripcion: z.string().optional(),
   categoria_id: z.string().uuid('Categoría inválida').nullable().optional(),
   destacado: z.boolean().optional(),
@@ -26,6 +28,7 @@ function parseFormData(formData: FormData, nombreOverride?: string) {
     slug: (formData.get('slug') as string) || generateSlug(nombre),
     precio_base: formData.get('precio_base'),
     estado: formData.get('estado'),
+    tipo_producto: (formData.get('tipo_producto') as string) || 'terminado',
     descripcion: (formData.get('descripcion') as string) || undefined,
     categoria_id: (formData.get('categoria_id') as string) || null,
     destacado: formData.get('destacado') === 'true',

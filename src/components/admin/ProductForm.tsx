@@ -14,6 +14,7 @@ type Product = {
   slug: string
   precio_base: number
   estado: string
+  tipo_producto: string
   descripcion: string | null
   categoria_id: string | null
   destacado: boolean
@@ -116,6 +117,18 @@ export default function ProductForm({ categorias, producto }: ProductFormProps) 
               <option value="archivado">Archivado</option>
             </select>
           </div>
+        </div>
+
+        <div>
+          <label className="block text-xs text-stone-500 mb-1">Tipo de producto *</label>
+          <select
+            name="tipo_producto"
+            defaultValue={producto?.tipo_producto ?? 'terminado'}
+            className="w-full border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400 transition-colors bg-white"
+          >
+            <option value="terminado">Producto terminado (comprado, llega listo)</option>
+            <option value="fabricado">Fabricado por Encantika (lo hacemos nosotros)</option>
+          </select>
         </div>
 
         <div>

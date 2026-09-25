@@ -406,6 +406,33 @@ export type Database = {
           },
         ]
       }
+      insumos: {
+        Row: {
+          activo: boolean
+          creado_en: string
+          descripcion: string | null
+          id: string
+          nombre: string
+          unidad: string
+        }
+        Insert: {
+          activo?: boolean
+          creado_en?: string
+          descripcion?: string | null
+          id?: string
+          nombre: string
+          unidad?: string
+        }
+        Update: {
+          activo?: boolean
+          creado_en?: string
+          descripcion?: string | null
+          id?: string
+          nombre?: string
+          unidad?: string
+        }
+        Relationships: []
+      }
       metodos_envio: {
         Row: {
           activo: boolean
@@ -438,6 +465,44 @@ export type Database = {
           tipo?: string
         }
         Relationships: []
+      }
+      movimientos_insumos: {
+        Row: {
+          cantidad: number
+          creado_en: string
+          creado_por: string | null
+          id: string
+          insumo_id: string
+          nota: string | null
+          tipo: string
+        }
+        Insert: {
+          cantidad: number
+          creado_en?: string
+          creado_por?: string | null
+          id?: string
+          insumo_id: string
+          nota?: string | null
+          tipo: string
+        }
+        Update: {
+          cantidad?: number
+          creado_en?: string
+          creado_por?: string | null
+          id?: string
+          insumo_id?: string
+          nota?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movimientos_insumos_insumo_id_fkey"
+            columns: ["insumo_id"]
+            isOneToOne: false
+            referencedRelation: "insumos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       movimientos_inventario: {
         Row: {
@@ -707,6 +772,42 @@ export type Database = {
           },
         ]
       }
+      producto_insumos: {
+        Row: {
+          cantidad_por_unidad: number
+          insumo_id: string
+          nota: string | null
+          producto_id: string
+        }
+        Insert: {
+          cantidad_por_unidad: number
+          insumo_id: string
+          nota?: string | null
+          producto_id: string
+        }
+        Update: {
+          cantidad_por_unidad?: number
+          insumo_id?: string
+          nota?: string | null
+          producto_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "producto_insumos_insumo_id_fkey"
+            columns: ["insumo_id"]
+            isOneToOne: false
+            referencedRelation: "insumos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "producto_insumos_producto_id_fkey"
+            columns: ["producto_id"]
+            isOneToOne: false
+            referencedRelation: "productos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       productos: {
         Row: {
           actualizado_en: string
@@ -722,6 +823,7 @@ export type Database = {
           precio_base: number
           precio_comparacion: number | null
           slug: string
+          tipo_producto: string
           titulo_seo: string | null
         }
         Insert: {
@@ -738,6 +840,7 @@ export type Database = {
           precio_base?: number
           precio_comparacion?: number | null
           slug: string
+          tipo_producto?: string
           titulo_seo?: string | null
         }
         Update: {
@@ -754,6 +857,7 @@ export type Database = {
           precio_base?: number
           precio_comparacion?: number | null
           slug?: string
+          tipo_producto?: string
           titulo_seo?: string | null
         }
         Relationships: [
@@ -933,6 +1037,21 @@ export type Database = {
       }
     }
     Views: {
+      stock_insumos: {
+        Row: {
+          insumo_id: string | null
+          stock: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movimientos_insumos_insumo_id_fkey"
+            columns: ["insumo_id"]
+            isOneToOne: false
+            referencedRelation: "insumos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stock_variantes: {
         Row: {
           stock: number | null

@@ -67,6 +67,18 @@ export default function AdminSidebar({ userEmail, fullName }: AdminSidebarProps)
           Atributos
         </a>
         <a
+          href="/administracion/inventario"
+          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
+        >
+          Inventario
+        </a>
+        <a
+          href="/administracion/insumos"
+          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
+        >
+          Insumos
+        </a>
+        <a
           href="/administracion/clientes"
           className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
         >

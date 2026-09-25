@@ -6,7 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 
 export type ActionState = { error?: string; success?: string }
 
-// Valid tipos per DB CHECK constraint: ('compra', 'venta', 'ajuste', 'devolucion')
+// Valid tipos per DB CHECK constraint
 const TIPOS = ['compra', 'venta', 'ajuste', 'devolucion']
 
 const movimientoSchema = z.object({
@@ -43,7 +43,66 @@ export async function createMovimientoInventario(prevState: ActionState, formDat
   return { success: 'Movimiento registrado exitosamente' }
 }
 
-// ── Batch stock adjustment (used by InventoryPanel) ───────────────────────────
+// ── Ajuste de stock por producto (usado por InventoryPanel) ───────────────────
+// Si no existe variante activa, crea una variante estándar automáticamente.
+
+export async function ajustarStockProducto(
+  productoId: string,
+  productoSlug: string,
+  nuevoStock: number,
+  stockActual: number,
+  varianteId: string | null
+): Promise<ActionState> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  const delta = nuevoStock - stockActual
+  if (delta === 0) return { success: 'Sin cambios de stock' }
+
+  const admin = createAdminClient()
+  let finalVarianteId = varianteId
+
+  if (!finalVarianteId) {
+    if (nuevoStock <= 0) return { success: 'Sin cambios de stock' }
+
+    const { data: producto } = await admin
+      .from('productos')
+      .select('precio_base')
+      .eq('id', productoId)
+      .single()
+
+    const { data: v, error: vError } = await admin
+      .from('variantes_producto')
+      .insert({
+        producto_id: productoId,
+        sku: `${productoSlug}-std`,
+        precio: producto?.precio_base ?? 0,
+        activo: true,
+      })
+      .select('id')
+      .single()
+
+    if (vError || !v) return { error: 'Error al inicializar la variante de stock' }
+    finalVarianteId = (v as any).id
+  }
+
+  const { error } = await admin.from('movimientos_inventario').insert({
+    variante_id: finalVarianteId!,
+    cantidad: delta,
+    tipo: 'ajuste',
+    creado_por: user.id,
+    nota: 'Ajuste manual desde panel admin',
+  })
+
+  if (error) return { error: 'Error al registrar el ajuste de inventario' }
+
+  revalidatePath(`/administracion/productos/${productoId}`)
+  revalidatePath('/administracion/inventario')
+  return { success: `Stock actualizado (${delta > 0 ? '+' : ''}${delta} u.)` }
+}
+
+// ── Batch para múltiples variantes (usado por InventoryPanel legacy) ───────────
 
 export async function ajustarStocks(
   productoId: string,
@@ -63,9 +122,7 @@ export async function ajustarStocks(
       nota: 'Ajuste manual desde panel admin',
     }))
 
-  if (movimientos.length === 0) {
-    return { success: 'Sin cambios de stock' }
-  }
+  if (movimientos.length === 0) return { success: 'Sin cambios de stock' }
 
   const admin = createAdminClient()
   const { error } = await admin.from('movimientos_inventario').insert(movimientos)

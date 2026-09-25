@@ -2,122 +2,125 @@
 
 import { useState, useTransition } from 'react'
 import { toast } from 'sonner'
-import { ajustarStocks } from '@/features/inventory/actions'
-import { formatCLP } from '@/lib/utils'
+import { ajustarStockProducto } from '@/features/inventory/actions'
+import CollapsibleSection from './CollapsibleSection'
+import InsumoProductoEditor from './InsumoProductoEditor'
 
-type VarianteInventario = {
+type InsumoLink = {
+  insumo_id: string
+  nombre: string
+  unidad: string
+  cantidad_por_unidad: number
+  nota: string | null
+}
+
+type InsumoBasico = {
   id: string
-  sku: string
-  precio: number
-  stock: number
+  nombre: string
+  unidad: string
 }
 
 interface InventoryPanelProps {
   productoId: string
-  variantes: VarianteInventario[]
+  productoSlug: string
+  tipoProducto: string
+  stockActual: number
+  varianteId: string | null
+  insumos: InsumoLink[]
+  todosInsumos: InsumoBasico[]
 }
 
-export default function InventoryPanel({ productoId, variantes }: InventoryPanelProps) {
-  const [stocks, setStocks] = useState<Record<string, number>>(
-    Object.fromEntries(variantes.map(v => [v.id, v.stock]))
-  )
+function stockBadgeClass(stock: number) {
+  if (stock > 3) return 'bg-green-50 text-green-700'
+  if (stock > 0) return 'bg-yellow-50 text-yellow-700'
+  return 'bg-red-50 text-red-600'
+}
+
+function stockBadgeLabel(stock: number) {
+  if (stock > 3) return `En stock (${stock})`
+  if (stock > 0) return `Stock bajo (${stock})`
+  return 'Sin stock'
+}
+
+export default function InventoryPanel({
+  productoId,
+  productoSlug,
+  tipoProducto,
+  stockActual,
+  varianteId,
+  insumos,
+  todosInsumos,
+}: InventoryPanelProps) {
+  const [nuevoStock, setNuevoStock] = useState(stockActual)
   const [saving, startSave] = useTransition()
 
-  const totalActual = variantes.reduce((acc, v) => acc + v.stock, 0)
+  const insumoKey = insumos.map(i => i.insumo_id).sort().join(',') || 'none'
 
   function handleSave() {
-    const ajustes = variantes
-      .map(v => ({ varianteId: v.id, nuevoStock: stocks[v.id] ?? v.stock, stockActual: v.stock }))
-      .filter(a => a.nuevoStock !== a.stockActual)
-
-    if (ajustes.length === 0) {
+    if (nuevoStock === stockActual) {
       toast.info('Sin cambios de stock')
       return
     }
-
     startSave(async () => {
-      const result = await ajustarStocks(productoId, ajustes)
+      const result = await ajustarStockProducto(
+        productoId,
+        productoSlug,
+        nuevoStock,
+        stockActual,
+        varianteId
+      )
       if (result.error) toast.error(result.error)
       else toast.success(result.success ?? 'Stock actualizado')
     })
   }
 
-  if (variantes.length === 0) {
-    return (
-      <p className="text-sm text-stone-400 py-2">
-        Genera variantes primero para gestionar el inventario.
-      </p>
-    )
-  }
-
   return (
-    <div className="space-y-4">
-      <p className="text-xs text-stone-500">
-        Stock total: <span className="font-semibold text-stone-700 tabular-nums">{totalActual}</span> unidades
-      </p>
-
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-stone-100">
-              <th className="text-left pb-2 pr-4 text-xs font-normal text-stone-400">SKU</th>
-              <th className="text-left pb-2 pr-4 text-xs font-normal text-stone-400">Precio</th>
-              <th className="text-center pb-2 pr-4 text-xs font-normal text-stone-400">Stock actual</th>
-              <th className="text-center pb-2 text-xs font-normal text-stone-400">Nuevo stock</th>
-            </tr>
-          </thead>
-          <tbody>
-            {variantes.map(v => {
-              const current = v.stock
-              const nuevo = stocks[v.id] ?? current
-              const changed = nuevo !== current
-
-              return (
-                <tr key={v.id} className="border-b border-stone-50">
-                  <td className="py-2 pr-4 font-mono text-xs text-stone-700">{v.sku}</td>
-                  <td className="py-2 pr-4 text-xs text-stone-600">{formatCLP(v.precio)}</td>
-                  <td className="py-2 pr-4 text-center">
-                    <span
-                      className={`text-xs px-2 py-0.5 ${
-                        current > 3
-                          ? 'bg-green-50 text-green-700'
-                          : current > 0
-                            ? 'bg-yellow-50 text-yellow-700'
-                            : 'bg-stone-100 text-stone-500'
-                      }`}
-                    >
-                      {current}
-                    </span>
-                  </td>
-                  <td className="py-2 text-center">
-                    <input
-                      type="number"
-                      value={nuevo}
-                      min={0}
-                      step={1}
-                      onChange={e =>
-                        setStocks(prev => ({ ...prev, [v.id]: Number(e.target.value) }))
-                      }
-                      className={`w-20 border px-2 py-1 text-xs text-center focus:outline-none transition-colors ${
-                        changed ? 'border-stone-400 bg-stone-50' : 'border-stone-200'
-                      }`}
-                    />
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
+    <div className="space-y-5">
+      {/* Stock input */}
+      <div className="flex items-end gap-4 flex-wrap">
+        <div>
+          <label className="block text-xs text-stone-400 mb-1 uppercase tracking-wider">
+            Unidades en stock
+          </label>
+          <input
+            type="number"
+            value={nuevoStock}
+            min={0}
+            step={1}
+            onChange={e => setNuevoStock(Number(e.target.value))}
+            className={`w-28 border px-3 py-2 text-sm focus:outline-none transition-colors ${
+              nuevoStock !== stockActual ? 'border-stone-400 bg-stone-50' : 'border-stone-200'
+            }`}
+          />
+        </div>
+        <div className="pb-0.5">
+          <span className={`text-xs px-2.5 py-1 ${stockBadgeClass(stockActual)}`}>
+            {stockBadgeLabel(stockActual)}
+          </span>
+        </div>
+        <div className="pb-0.5">
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={saving}
+            className="px-4 py-2 text-xs bg-stone-800 text-white hover:bg-stone-700 transition-colors disabled:opacity-50"
+          >
+            {saving ? 'Guardando…' : 'Guardar stock'}
+          </button>
+        </div>
       </div>
 
-      <button
-        type="button"
-        onClick={handleSave}
-        disabled={saving}
-        className="px-4 py-2 text-xs bg-stone-800 text-white hover:bg-stone-700 transition-colors disabled:opacity-50"
-      >
-        {saving ? 'Guardando…' : 'Guardar ajustes de stock'}
-      </button>
+      {/* Insumos section — only for fabricado */}
+      {tipoProducto === 'fabricado' && (
+        <CollapsibleSection title="Insumos utilizados" defaultOpen={false}>
+          <InsumoProductoEditor
+            key={insumoKey}
+            productoId={productoId}
+            insumos={insumos}
+            todosInsumos={todosInsumos}
+          />
+        </CollapsibleSection>
+      )}
     </div>
   )
 }

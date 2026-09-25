@@ -4,7 +4,6 @@ import ProductForm from '@/components/admin/ProductForm'
 import MainImageUpload from '@/components/admin/MainImageUpload'
 import AdditionalGallery from '@/components/admin/AdditionalGallery'
 import CollapsibleSection from '@/components/admin/CollapsibleSection'
-import VariantManager from '@/components/admin/VariantManager'
 import InventoryPanel from '@/components/admin/InventoryPanel'
 import { getProducto } from '@/features/products/queries'
 import { getCategorias } from '@/features/categories/queries'
@@ -25,19 +24,25 @@ export default async function EditarProductoPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [producto, categorias, { data: imagesData }, { data: allAttrsData }] = await Promise.all([
-    getProducto(id),
-    getCategorias(),
-    supabase
-      .from('imagenes_producto')
-      .select('id, ruta_almacenamiento, orden, texto_alt')
-      .eq('producto_id', id)
-      .order('orden', { ascending: true }),
-    supabase
-      .from('atributos')
-      .select('id, nombre, orden, valores_atributo(id, valor, slug, orden, activo)')
-      .order('orden', { ascending: true }),
-  ])
+  const [producto, categorias, { data: imagesData }, { data: productoInsumosData }, { data: todosInsumosData }] =
+    await Promise.all([
+      getProducto(id),
+      getCategorias(),
+      supabase
+        .from('imagenes_producto')
+        .select('id, ruta_almacenamiento, orden, texto_alt')
+        .eq('producto_id', id)
+        .order('orden', { ascending: true }),
+      supabase
+        .from('producto_insumos')
+        .select('insumo_id, cantidad_por_unidad, nota, insumos(id, nombre, unidad)')
+        .eq('producto_id', id),
+      supabase
+        .from('insumos')
+        .select('id, nombre, unidad')
+        .eq('activo', true)
+        .order('nombre'),
+    ])
 
   if (!producto) notFound()
 
@@ -45,44 +50,44 @@ export default async function EditarProductoPage({
   const mainImage = imagenes.find(img => img.orden === 0) ?? null
   const additionalImages = imagenes.filter(img => img.orden > 0)
 
-  const variantesRaw = (producto as any).variantes_producto ?? []
+  // Stock: sum of all active variants
+  const variantesRaw = (producto as any).variantes_produto ?? (producto as any).variantes_producto ?? []
+  const activeVariants = variantesRaw.filter((v: any) => v.activo)
   const varianteIds: string[] = variantesRaw.map((v: any) => v.id)
+
   const { data: stocks } = varianteIds.length > 0
     ? await supabase
         .from('stock_variantes')
         .select('variante_id, stock')
         .in('variante_id', varianteIds)
-    : { data: [] as { variante_id: string; stock: number }[] }
+    : { data: [] as { variante_id: string | null; stock: number | null }[] }
 
-  const stockMap = new Map((stocks ?? []).map((s) => [s.variante_id, s.stock]))
-  const variantesConStock = variantesRaw.map((v: any) => ({
-    ...v,
-    stock: stockMap.get(v.id) ?? 0,
+  const stockMap = new Map((stocks ?? []).map(s => [s.variante_id!, s.stock ?? 0]))
+  const stockActual = activeVariants.reduce(
+    (sum: number, v: any) => sum + (stockMap.get(v.id) ?? 0),
+    0
+  )
+  const varianteId: string | null = activeVariants[0]?.id ?? null
+
+  // Insumos for fabricado products
+  const insumos = (productoInsumosData ?? []).map((pi: any) => ({
+    insumo_id: pi.insumo_id as string,
+    nombre: (pi.insumos as any)?.nombre as string ?? '',
+    unidad: (pi.insumos as any)?.unidad as string ?? 'unidad',
+    cantidad_por_unidad: pi.cantidad_por_unidad as number,
+    nota: pi.nota as string | null,
   }))
-  const variantesInventario = variantesConStock
-    .filter((v: any) => v.activo)
-    .map((v: any) => ({ id: v.id, sku: v.sku, precio: v.precio, stock: v.stock }))
 
-  // All available attributes with active values (for VariantManager checkboxes)
-  const atributosDisponibles = (allAttrsData ?? [])
-    .map((a: any) => ({
-      id: a.id as string,
-      nombre: a.nombre as string,
-      valores_atributo: ((a.valores_atributo ?? []) as any[])
-        .filter((v: any) => v.activo)
-        .sort((a: any, b: any) => a.orden - b.orden)
-        .map((v: any) => ({ id: v.id as string, valor: v.valor as string, slug: v.slug as string })),
-    }))
-    .filter((a: any) => a.valores_atributo.length > 0)
+  const todosInsumos = (todosInsumosData ?? []).map(i => ({
+    id: i.id,
+    nombre: i.nombre,
+    unidad: i.unidad,
+  }))
 
-  // Current product-attribute assignments
-  const atributosAsignados = ((producto as any).producto_atributos ?? [])
-    .map((pa: any) => pa.atributo_id as string)
-    .filter(Boolean)
+  const tipoProducto = (producto as any).tipo_producto as string ?? 'terminado'
 
-  // Keys ensure components remount with fresh state when data changes
-  const variantManagerKey = variantesConStock.map((v: any) => v.id).sort().join('_') || 'empty'
-  const inventoryPanelKey = variantesInventario.map((v: any) => `${v.id}:${v.stock}`).join('_') || 'empty'
+  // Keys ensure client components remount with fresh state when data changes
+  const inventoryKey = `s:${stockActual}|v:${varianteId ?? 'none'}`
 
   const storageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''}/storage/v1/object/public`
 
@@ -116,29 +121,23 @@ export default async function EditarProductoPage({
           slug: producto.slug,
           precio_base: producto.precio_base,
           estado: producto.estado,
+          tipo_producto: tipoProducto,
           descripcion: producto.descripcion,
           categoria_id: producto.categoria_id ?? null,
           destacado: producto.destacado,
         }}
       />
 
-      <CollapsibleSection title="Variantes">
-        <VariantManager
-          key={variantManagerKey}
-          productoId={id}
-          productoSlug={producto.slug}
-          precioBase={producto.precio_base}
-          atributosDisponibles={atributosDisponibles}
-          atributosAsignados={atributosAsignados}
-          variantes={variantesConStock}
-        />
-      </CollapsibleSection>
-
       <CollapsibleSection title="Inventario">
         <InventoryPanel
-          key={inventoryPanelKey}
+          key={inventoryKey}
           productoId={id}
-          variantes={variantesInventario}
+          productoSlug={producto.slug}
+          tipoProducto={tipoProducto}
+          stockActual={stockActual}
+          varianteId={varianteId}
+          insumos={insumos}
+          todosInsumos={todosInsumos}
         />
       </CollapsibleSection>
     </div>
