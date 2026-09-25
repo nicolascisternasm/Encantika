@@ -202,9 +202,10 @@ export default async function StorePage() {
   const historiaSection = config?.mostrar_historia && config?.historia ? (
     <section className="bg-ivory py-20 px-6 sm:px-8">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
-        <FadeIn className="relative rounded overflow-hidden" style={{ height: 'clamp(320px, 50vw, 500px)' } as React.CSSProperties}>
+        <FadeIn className="relative rounded overflow-hidden group" style={{ height: 'clamp(320px, 50vw, 500px)' } as React.CSSProperties}>
           <Image src={historiaUrl ?? '/hero-3.jpg'} alt="Nuestra historia" fill
-            className="object-cover" style={{ objectPosition: historiaPos }}
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
+            style={{ objectPosition: historiaPos }}
             sizes="(max-width: 768px) 100vw, 50vw" unoptimized={!!historiaUrl} />
         </FadeIn>
         <FadeIn delay={0.15}>

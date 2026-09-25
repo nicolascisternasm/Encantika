@@ -55,14 +55,14 @@ function SeccionAlternada({
 }) {
   const Imagen = (
     <div
-      className="w-full overflow-hidden bg-[var(--color-tarjeta,#F5F0EB)]"
+      className="w-full overflow-hidden bg-[var(--color-tarjeta,#F5F0EB)] group"
       style={{ minHeight: 500 }}
     >
       {imagenUrl ? (
         <img
           src={imagenUrl}
           alt={titulo}
-          className="w-full h-full object-cover object-center"
+          className="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.04]"
           style={{ minHeight: 500 }}
         />
       ) : (
