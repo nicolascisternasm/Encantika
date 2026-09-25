@@ -1,4 +1,5 @@
 import { redirect } from 'next/navigation'
+import { Toaster } from 'sonner'
 import { createClient } from '@/lib/supabase/server'
 import AdminSidebar from './AdminSidebar'
 
@@ -26,6 +27,7 @@ export default async function AdminLayout({
     <div className="flex min-h-screen bg-stone-50">
       <AdminSidebar userEmail={user.email ?? ''} fullName={perfil.nombre_completo ?? ''} />
       <main className="flex-1 p-8">{children}</main>
+      <Toaster richColors position="top-right" />
     </div>
   )
 }

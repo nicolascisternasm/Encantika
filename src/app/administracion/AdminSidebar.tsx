@@ -49,6 +49,24 @@ export default function AdminSidebar({ userEmail, fullName }: AdminSidebarProps)
           Productos
         </a>
         <a
+          href="/administracion/categorias"
+          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs"
+        >
+          Categorías
+        </a>
+        <a
+          href="/administracion/colecciones"
+          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs"
+        >
+          Colecciones
+        </a>
+        <a
+          href="/administracion/atributos"
+          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs"
+        >
+          Atributos
+        </a>
+        <a
           href="/administracion/clientes"
           className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
         >
