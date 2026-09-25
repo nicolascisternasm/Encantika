@@ -13,7 +13,8 @@ export async function getProductos() {
       precio_base,
       destacado,
       creado_en,
-      categorias(nombre)
+      categorias(nombre),
+      imagenes_producto(id, ruta_almacenamiento, orden)
     `)
     .order('creado_en', { ascending: false })
   if (error) throw error

@@ -14,6 +14,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'productoId es requerido' }, { status: 400 })
   }
 
+  const ordenParam = req.nextUrl.searchParams.get('orden')
+  const isMain = ordenParam === '0'
+
   let formData: FormData
   try {
     formData = await req.formData()
@@ -36,9 +39,26 @@ export async function POST(req: NextRequest) {
   }
 
   const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
-  const ruta = `${productoId}/${Date.now()}.${ext}`
+  const ruta = isMain
+    ? `${productoId}/principal-${Date.now()}.${ext}`
+    : `${productoId}/${Date.now()}.${ext}`
 
   const admin = createAdminClient()
+
+  // For the main image: remove the existing orden=0 record first
+  if (isMain) {
+    const { data: existingMain } = await admin
+      .from('imagenes_producto')
+      .select('id, ruta_almacenamiento')
+      .eq('producto_id', productoId)
+      .eq('orden', 0)
+      .maybeSingle()
+    if (existingMain) {
+      await admin.storage.from('imagenes-productos').remove([existingMain.ruta_almacenamiento])
+      await admin.from('imagenes_producto').delete().eq('id', existingMain.id)
+    }
+  }
+
   const arrayBuffer = await file.arrayBuffer()
   const buffer = new Uint8Array(arrayBuffer)
 
@@ -50,15 +70,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Error al subir el archivo al almacenamiento' }, { status: 500 })
   }
 
-  const { data: existing } = await admin
-    .from('imagenes_producto')
-    .select('orden')
-    .eq('producto_id', productoId)
-    .order('orden', { ascending: false })
-    .limit(1)
-    .single()
-
-  const orden = existing ? (existing.orden ?? 0) + 1 : 0
+  let orden: number
+  if (isMain) {
+    orden = 0
+  } else {
+    // Additional images start at orden=1
+    const { data: lastImg } = await admin
+      .from('imagenes_producto')
+      .select('orden')
+      .eq('producto_id', productoId)
+      .gte('orden', 1)
+      .order('orden', { ascending: false })
+      .limit(1)
+      .single()
+    orden = lastImg ? lastImg.orden + 1 : 1
+  }
 
   const textoAlt = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ')
 
