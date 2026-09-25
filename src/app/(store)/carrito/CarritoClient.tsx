@@ -200,7 +200,33 @@ export default function CarritoClient({ whatsapp, candidatos }: Props) {
     setMounted(true)
   }, [])
 
-  if (!mounted) return null
+  if (!mounted) return (
+    <main className="min-h-[70vh] bg-[#F5F0EB] px-6 sm:px-8 py-10 max-w-6xl mx-auto">
+      <div className="h-10 w-48 bg-stone-200 rounded animate-pulse mb-8" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="md:col-span-2 space-y-4">
+          {[1, 2].map(n => (
+            <div key={n} className="bg-white rounded-sm border border-stone-100 p-5 flex gap-5 animate-pulse">
+              <div className="w-[130px] h-[130px] shrink-0 bg-stone-100 rounded-sm" />
+              <div className="flex-1 space-y-3 pt-1">
+                <div className="h-4 w-3/4 bg-stone-100 rounded" />
+                <div className="h-3 w-1/2 bg-stone-100 rounded" />
+                <div className="h-3 w-1/3 bg-stone-100 rounded" />
+              </div>
+            </div>
+          ))}
+        </div>
+        <div className="hidden md:block">
+          <div className="bg-white border border-stone-100 rounded-sm p-6 space-y-4 animate-pulse">
+            <div className="h-4 w-1/2 bg-stone-100 rounded" />
+            <div className="h-3 w-full bg-stone-100 rounded" />
+            <div className="h-3 w-full bg-stone-100 rounded" />
+            <div className="h-12 w-full bg-stone-200 rounded-sm mt-4" />
+          </div>
+        </div>
+      </div>
+    </main>
+  )
 
   function handleCantidad(productoId: string, delta: number) {
     const item = items.find(i => i.productoId === productoId)
@@ -254,137 +280,163 @@ export default function CarritoClient({ whatsapp, candidatos }: Props) {
 
   return (
     <>
-      <main className="bg-ivory px-6 sm:px-8 py-10 max-w-6xl mx-auto pb-32 md:pb-16 min-h-screen">
-        <h1 className="font-display text-[40px] font-normal text-stone-800 mb-1">Carrito</h1>
-        <p className="text-sm text-stone-500 mb-10">
-          {totalItems} {totalItems === 1 ? 'producto' : 'productos'}
-        </p>
+      <main className="min-h-screen pb-32 md:pb-16" style={{ backgroundColor: '#F5F0EB' }}>
+        <div className="max-w-6xl mx-auto px-6 sm:px-8 py-10">
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 items-start">
-          {/* ── Lista de items ── */}
-          <div className="md:col-span-2">
-            {items.map((item, idx) => (
-              <div
-                key={item.productoId}
-                className={`flex gap-5 py-7 ${idx < items.length - 1 ? 'border-b border-stone-100' : ''}`}
-              >
-                {/* Imagen 100×100 */}
-                <div className="w-[100px] h-[100px] shrink-0 bg-stone-100 overflow-hidden">
-                  {item.imagenUrl ? (
-                    <img
-                      src={item.imagenUrl}
-                      alt={item.nombre}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200" />
-                  )}
-                </div>
+          {/* Encabezado */}
+          <div className="mb-8">
+            <h1 className="font-display text-[40px] font-normal text-stone-800 mb-1">Carrito</h1>
+            <p className="text-sm text-stone-500">
+              {totalItems} {totalItems === 1 ? 'producto' : 'productos'}
+            </p>
+          </div>
 
-                {/* Info */}
-                <div className="flex-1 min-w-0">
-                  {/* Nombre + botón eliminar */}
-                  <div className="flex justify-between items-start gap-2">
-                    <Link
-                      href={item.slug ? `/catalogo/${item.slug}` : '/catalogo'}
-                      className="font-display text-[18px] leading-snug text-stone-800 hover:text-stone-500 transition-colors"
-                    >
-                      {item.nombre}
-                    </Link>
-                    <button
-                      onClick={() => handleEliminar(item.productoId)}
-                      className="shrink-0 p-0.5 text-stone-300 hover:text-stone-600 transition-colors mt-1"
-                      aria-label="Eliminar producto"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                        <line x1="18" y1="6" x2="6" y2="18" strokeLinecap="round" />
-                        <line x1="6" y1="6" x2="18" y2="18" strokeLinecap="round" />
-                      </svg>
-                    </button>
-                  </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
 
-                  {/* Características (máx 2) */}
-                  {item.caracteristicas.length > 0 && (
-                    <p className="text-[12px] text-stone-400 mt-1 leading-relaxed">
-                      {item.caracteristicas.slice(0, 2).map(c => `${c.nombre}: ${c.valor}`).join(' · ')}
-                    </p>
-                  )}
+            {/* ── Lista de items ── */}
+            <div className="md:col-span-2 space-y-3">
+              {items.map((item) => (
+                <div
+                  key={item.productoId}
+                  className="bg-white rounded-sm border border-stone-100 p-5 flex gap-5"
+                >
+                  {/* Imagen */}
+                  <Link href={item.slug ? `/catalogo/${item.slug}` : '/catalogo'} className="shrink-0 group">
+                    <div className="w-[120px] sm:w-[130px] h-[120px] sm:h-[130px] overflow-hidden bg-stone-50 rounded-sm">
+                      {item.imagenUrl ? (
+                        <img
+                          src={item.imagenUrl}
+                          alt={item.nombre}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200" />
+                      )}
+                    </div>
+                  </Link>
 
-                  {/* Precio unitario */}
-                  <p className="text-[13px] text-stone-500 mt-2">
-                    {formatCLP(item.precio)} c/u
-                  </p>
+                  {/* Info */}
+                  <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
+                    <div>
+                      {/* Nombre + eliminar */}
+                      <div className="flex justify-between items-start gap-2">
+                        <Link
+                          href={item.slug ? `/catalogo/${item.slug}` : '/catalogo'}
+                          className="font-display text-[18px] leading-snug text-stone-800 hover:text-stone-500 transition-colors"
+                        >
+                          {item.nombre}
+                        </Link>
+                        <button
+                          onClick={() => handleEliminar(item.productoId)}
+                          className="shrink-0 p-1 text-stone-300 hover:text-red-400 transition-colors"
+                          aria-label="Eliminar producto"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                            <line x1="18" y1="6" x2="6" y2="18" strokeLinecap="round" />
+                            <line x1="6" y1="6" x2="18" y2="18" strokeLinecap="round" />
+                          </svg>
+                        </button>
+                      </div>
 
-                  {/* Controles ± y subtotal */}
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => handleCantidad(item.productoId, -1)}
-                        disabled={item.cantidad <= 1}
-                        className="w-8 h-8 rounded-full border border-sand flex items-center justify-center text-stone-500 hover:text-stone-800 hover:border-stone-400 disabled:opacity-30 transition-colors select-none"
-                        aria-label="Reducir cantidad"
-                      >
-                        −
-                      </button>
-                      <span className="w-5 text-center text-sm text-stone-800 select-none tabular-nums">
-                        {item.cantidad}
-                      </span>
-                      <button
-                        onClick={() => handleCantidad(item.productoId, +1)}
-                        disabled={item.cantidad >= 10}
-                        className="w-8 h-8 rounded-full border border-sand flex items-center justify-center text-stone-500 hover:text-stone-800 hover:border-stone-400 disabled:opacity-30 transition-colors select-none"
-                        aria-label="Aumentar cantidad"
-                      >
-                        +
-                      </button>
+                      {/* Variantes */}
+                      {item.caracteristicas.length > 0 && (
+                        <div className="flex flex-wrap gap-1.5 mt-2">
+                          {item.caracteristicas.slice(0, 3).map(c => (
+                            <span key={c.nombre}
+                              className="text-[11px] text-stone-500 border border-stone-200 rounded-full px-2.5 py-0.5">
+                              {c.nombre}: {c.valor}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Precio unitario */}
+                      <p className="text-[13px] text-stone-400 mt-2">
+                        {formatCLP(item.precio)} c/u
+                      </p>
                     </div>
 
-                    <span className="text-[15px] font-medium text-onyx tabular-nums">
-                      {formatCLP(item.precio * item.cantidad)}
-                    </span>
+                    {/* Controles ± y subtotal */}
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center border border-stone-200 rounded-sm overflow-hidden">
+                        <button
+                          onClick={() => handleCantidad(item.productoId, -1)}
+                          disabled={item.cantidad <= 1}
+                          className="w-8 h-8 flex items-center justify-center text-stone-500 hover:bg-stone-50 disabled:opacity-30 transition-colors select-none text-lg leading-none"
+                          aria-label="Reducir cantidad"
+                        >
+                          −
+                        </button>
+                        <span className="w-9 text-center text-sm text-stone-800 select-none tabular-nums border-x border-stone-200">
+                          {item.cantidad}
+                        </span>
+                        <button
+                          onClick={() => handleCantidad(item.productoId, +1)}
+                          disabled={item.cantidad >= 10}
+                          className="w-8 h-8 flex items-center justify-center text-stone-500 hover:bg-stone-50 disabled:opacity-30 transition-colors select-none"
+                          aria-label="Aumentar cantidad"
+                        >
+                          +
+                        </button>
+                      </div>
+                      <span className="text-[16px] font-medium text-onyx tabular-nums">
+                        {formatCLP(item.precio * item.cantidad)}
+                      </span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          {/* ── Panel resumen (solo desktop) ── */}
-          <div className="md:col-span-1 hidden md:block">
-            <PanelResumen subtotal={subtotal} whatsapp={whatsapp} />
-          </div>
-        </div>
-
-        {/* También te puede gustar */}
-        {recomendados.length > 0 && (
-          <section className="mt-16 border-t border-stone-100 pt-12">
-            <h2 className="font-display text-[28px] font-normal text-stone-800 mb-8">
-              También te puede gustar
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-              {recomendados.map(p => (
-                <Link key={p.id} href={`/catalogo/${p.slug}`} className="group">
-                  <div className="aspect-square overflow-hidden bg-stone-100">
-                    {p.imagen ? (
-                      <img
-                        src={p.imagen}
-                        alt={p.nombre}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200" />
-                    )}
-                  </div>
-                  <div className="mt-2 space-y-0.5">
-                    <p className="text-sm text-stone-800 group-hover:text-stone-500 transition-colors leading-snug">
-                      {p.nombre}
-                    </p>
-                    <p className="text-sm text-stone-500">{formatCLP(p.precio_base)}</p>
-                  </div>
-                </Link>
               ))}
+
+              {/* Nota envío */}
+              <div className="bg-white/70 border border-stone-100 rounded-sm px-5 py-3 flex items-center gap-3">
+                <svg className="w-4 h-4 shrink-0 text-stone-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <path d="M5 12H3l9-9 9 9h-2v8a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1v-8z" strokeLinejoin="round" />
+                </svg>
+                <p className="text-[12px] text-stone-500">
+                  Envío calculado al momento del checkout según tu dirección
+                </p>
+              </div>
             </div>
-          </section>
-        )}
+
+            {/* ── Panel resumen (solo desktop) ── */}
+            <div className="md:col-span-1 hidden md:block">
+              <PanelResumen subtotal={subtotal} whatsapp={whatsapp} />
+            </div>
+          </div>
+
+          {/* También te puede gustar */}
+          {recomendados.length > 0 && (
+            <section className="mt-14 pt-10 border-t border-stone-200">
+              <h2 className="font-display text-[26px] font-normal text-stone-800 mb-6">
+                También te puede gustar
+              </h2>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-5">
+                {recomendados.map(p => (
+                  <Link key={p.id} href={`/catalogo/${p.slug}`} className="group">
+                    <div className="aspect-square overflow-hidden bg-white border border-stone-100 rounded-sm">
+                      {p.imagen ? (
+                        <img
+                          src={p.imagen}
+                          alt={p.nombre}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-stone-100 to-stone-200" />
+                      )}
+                    </div>
+                    <div className="mt-2 space-y-0.5 px-0.5">
+                      <p className="text-sm text-stone-800 group-hover:text-stone-500 transition-colors leading-snug">
+                        {p.nombre}
+                      </p>
+                      <p className="text-sm text-stone-400">{formatCLP(p.precio_base)}</p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
+
+        </div>
       </main>
 
       {/* Barra sticky mobile */}
