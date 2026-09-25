@@ -6,9 +6,10 @@ import { createClient } from '@/lib/supabase/client'
 interface AdminSidebarProps {
   userEmail: string
   fullName: string
+  consultasNoLeidas?: number
 }
 
-export default function AdminSidebar({ userEmail, fullName }: AdminSidebarProps) {
+export default function AdminSidebar({ userEmail, fullName, consultasNoLeidas = 0 }: AdminSidebarProps) {
   const router = useRouter()
 
   async function handleSignOut() {
@@ -30,76 +31,61 @@ export default function AdminSidebar({ userEmail, fullName }: AdminSidebarProps)
 
       {/* Nav */}
       <nav className="flex-1 space-y-1 text-sm">
-        <a
-          href="/administracion"
-          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
-        >
+        <a href="/administracion"
+          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors">
           Inicio
         </a>
-        <a
-          href="/administracion/pedidos"
-          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
-        >
+        <a href="/administracion/pedidos"
+          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors">
           Pedidos
         </a>
-        <a
-          href="/administracion/productos"
-          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
-        >
+        <a href="/administracion/productos"
+          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors">
           Productos
         </a>
-        <a
-          href="/administracion/categorias"
-          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs"
-        >
+        <a href="/administracion/categorias"
+          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs">
           Categorías
         </a>
-        <a
-          href="/administracion/colecciones"
-          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs"
-        >
+        <a href="/administracion/colecciones"
+          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs">
           Colecciones
         </a>
-        <a
-          href="/administracion/atributos"
-          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs"
-        >
+        <a href="/administracion/atributos"
+          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs">
           Atributos
         </a>
-        <a
-          href="/administracion/inventario"
-          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
-        >
+        <a href="/administracion/inventario"
+          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors">
           Inventario
         </a>
-        <a
-          href="/administracion/insumos"
-          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
-        >
+        <a href="/administracion/insumos"
+          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors">
           Insumos
         </a>
-        <a
-          href="/administracion/clientes"
-          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
-        >
+        <a href="/administracion/clientes"
+          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors">
           Clientes
         </a>
-        <a
-          href="/administracion/configuracion"
-          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
-        >
+        <a href="/administracion/consultas"
+          className="flex items-center justify-between px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors">
+          <span>Consultas</span>
+          {consultasNoLeidas > 0 && (
+            <span className="min-w-[18px] h-[18px] px-1 bg-stone-800 text-white text-[10px] font-medium flex items-center justify-center rounded-full leading-none">
+              {consultasNoLeidas > 99 ? '99+' : consultasNoLeidas}
+            </span>
+          )}
+        </a>
+        <a href="/administracion/configuracion"
+          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors">
           Configuración
         </a>
-        <a
-          href="/administracion/diseno"
-          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors"
-        >
+        <a href="/administracion/diseno"
+          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors">
           Diseño
         </a>
-        <a
-          href="/administracion/imagenes"
-          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs"
-        >
+        <a href="/administracion/imagenes"
+          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs">
           Imágenes
         </a>
       </nav>

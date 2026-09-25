@@ -1,5 +1,6 @@
 import { Toaster } from 'sonner'
 import { createClient } from '@/lib/supabase/server'
+import { createAdminClient } from '@/lib/supabase/admin'
 import AdminSidebar from './AdminSidebar'
 
 export default async function AdminLayout({
@@ -10,8 +11,6 @@ export default async function AdminLayout({
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
-  // Sin sesión: solo se llega aquí en /administracion/login (el proxy redirige el resto).
-  // Renderizar children sin sidebar para no causar un loop de redirección.
   if (!user) {
     return (
       <>
@@ -21,17 +20,28 @@ export default async function AdminLayout({
     )
   }
 
-  const { data: perfil } = await supabase
-    .from('perfiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  const [perfilResult, consultasResult] = await Promise.all([
+    supabase.from('perfiles').select('*').eq('id', user.id).single(),
+    (async () => {
+      try {
+        const admin = createAdminClient()
+        const { count } = await admin
+          .from('consultas_contacto')
+          .select('*', { count: 'exact', head: true })
+          .eq('leido', false)
+        return count ?? 0
+      } catch {
+        return 0
+      }
+    })(),
+  ])
 
   return (
     <div className="flex min-h-screen bg-stone-50">
       <AdminSidebar
         userEmail={user.email ?? ''}
-        fullName={perfil?.nombre_completo ?? ''}
+        fullName={perfilResult.data?.nombre_completo ?? ''}
+        consultasNoLeidas={consultasResult}
       />
       <main className="flex-1 p-8">{children}</main>
       <Toaster richColors position="top-right" />

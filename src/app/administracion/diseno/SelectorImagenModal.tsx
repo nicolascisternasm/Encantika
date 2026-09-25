@@ -8,7 +8,7 @@ import type { ImagenSitio } from '../imagenes/ImagenesManager'
 type Filtro = 'todas' | 'horizontal' | 'vertical' | 'cuadrada'
 
 interface Props {
-  seccionKey: 'hero' | 'banner_joya' | 'historia'
+  seccionKey: string
   onSelect: (imagen: ImagenSitio) => void
   onClose: () => void
 }
@@ -18,7 +18,7 @@ export default function SelectorImagenModal({ seccionKey, onSelect, onClose }: P
   const [loading, setLoading] = useState(true)
   const [filtro, setFiltro] = useState<Filtro>('todas')
 
-  const preferida: Filtro = seccionKey === 'historia' ? 'vertical' : 'horizontal'
+  const preferida: Filtro = (seccionKey === 'historia' || seccionKey.startsWith('seccion')) ? 'vertical' : 'horizontal'
 
   useEffect(() => {
     obtenerImagenesSitio().then((imgs) => {

@@ -7,9 +7,10 @@ import Link from 'next/link'
 import { obtenerCantidadTotal } from '@/lib/cart'
 
 const NAV_LINKS = [
-  { label: 'Catálogo', href: '/catalogo' },
-  { label: 'Colecciones', href: '/colecciones' },
-  { label: 'Arma tu joya', href: '/arma-tu-joya' },
+  { label: 'Home', href: '/' },
+  { label: 'Nosotros', href: '/nosotros' },
+  { label: 'Joyas', href: '/catalogo' },
+  { label: 'Contacto', href: '/contacto' },
 ]
 
 export type HeaderVariant = 'default' | 'transparent' | 'hidden-scroll'
@@ -18,13 +19,17 @@ interface StoreHeaderProps {
   variant?: HeaderVariant
 }
 
+function isActive(href: string, pathname: string) {
+  if (href === '/') return pathname === '/'
+  return pathname.startsWith(href)
+}
+
 export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [cartCount, setCartCount] = useState(0)
   const pathname = usePathname()
 
-  // Solo aplica efectos de scroll en la home
   const effectiveVariant: HeaderVariant = pathname === '/' ? variant : 'default'
 
   useEffect(() => {
@@ -65,12 +70,23 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
             <Image src="/logo.png" alt="Encantika" width={200} height={50} className="h-10 w-auto" priority />
           </Link>
           <nav className="hidden sm:flex flex-1 items-center justify-center gap-10">
-            {NAV_LINKS.map(({ label, href }) => (
-              <Link key={href} href={href}
-                className="text-xs tracking-[.10em] uppercase text-encantika-stone hover:text-onyx transition-colors duration-200">
-                {label}
-              </Link>
-            ))}
+            {NAV_LINKS.map(({ label, href }) => {
+              const active = isActive(href, pathname)
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={[
+                    'text-[12px] tracking-[.10em] uppercase transition-colors duration-200',
+                    active
+                      ? 'text-onyx border-b border-onyx pb-0.5'
+                      : 'text-encantika-stone hover:text-onyx',
+                  ].join(' ')}
+                >
+                  {label}
+                </Link>
+              )
+            })}
           </nav>
           <div className="flex-1 sm:hidden" />
           <div className="flex items-center gap-3 sm:gap-4">
@@ -117,14 +133,24 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
               </button>
             </div>
             <nav className="flex flex-col px-6 py-8 gap-6">
-              {NAV_LINKS.map(({ label, href }) => (
-                <Link key={href} href={href} onClick={() => setIsOpen(false)}
-                  className="text-sm tracking-[.10em] uppercase text-onyx hover:text-encantika-stone transition-colors">
-                  {label}
-                </Link>
-              ))}
+              {NAV_LINKS.map(({ label, href }) => {
+                const active = isActive(href, pathname)
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    onClick={() => setIsOpen(false)}
+                    className={[
+                      'text-sm tracking-[.10em] uppercase transition-colors',
+                      active ? 'text-onyx' : 'text-stone-600 hover:text-onyx',
+                    ].join(' ')}
+                  >
+                    {label}
+                  </Link>
+                )
+              })}
               <Link href="/carrito" onClick={() => setIsOpen(false)}
-                className="text-sm tracking-[.10em] uppercase text-onyx hover:text-encantika-stone transition-colors flex items-center gap-2">
+                className="text-sm tracking-[.10em] uppercase text-stone-600 hover:text-onyx transition-colors flex items-center gap-2">
                 Carrito
                 {cartCount > 0 && (
                   <span className="min-w-[18px] h-[18px] px-0.5 bg-onyx text-ivory text-[9px] font-medium flex items-center justify-center rounded-full leading-none">

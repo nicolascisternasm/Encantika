@@ -67,3 +67,51 @@ export async function saveSettings(
   revalidatePath('/administracion/configuracion')
   return { success: true }
 }
+
+// ── Guardar páginas institucionales ──────────────────────────────────────────
+
+export type PaginasFormState = { success?: boolean; error?: string }
+
+export async function savePaginas(
+  formData: FormData,
+): Promise<PaginasFormState> {
+  function en(key: string) {
+    const v = formData.get(key)?.toString().trim() ?? ''
+    return v === '' ? null : v
+  }
+
+  const data = {
+    nosotros_titulo: en('nosotros_titulo'),
+    nosotros_subtitulo: en('nosotros_subtitulo'),
+    nosotros_historia: en('nosotros_historia'),
+    nosotros_vision: en('nosotros_vision'),
+    nosotros_seccion1_titulo: en('nosotros_seccion1_titulo'),
+    nosotros_seccion1_texto: en('nosotros_seccion1_texto'),
+    nosotros_seccion1_imagen_id: en('nosotros_seccion1_imagen_id'),
+    nosotros_seccion2_titulo: en('nosotros_seccion2_titulo'),
+    nosotros_seccion2_texto: en('nosotros_seccion2_texto'),
+    nosotros_seccion2_imagen_id: en('nosotros_seccion2_imagen_id'),
+    nosotros_seccion3_titulo: en('nosotros_seccion3_titulo'),
+    nosotros_seccion3_texto: en('nosotros_seccion3_texto'),
+    nosotros_seccion3_imagen_id: en('nosotros_seccion3_imagen_id'),
+    footer_horario: en('footer_horario'),
+    footer_direccion: en('footer_direccion'),
+    footer_telefono: en('footer_telefono'),
+    contacto_titulo: en('contacto_titulo'),
+    contacto_subtitulo: en('contacto_subtitulo'),
+    contacto_email: en('contacto_email'),
+  }
+
+  const supabase = createAdminClient()
+  const { error } = await supabase
+    .from('configuracion_tienda')
+    .update(data as any)
+    .eq('id', 1)
+
+  if (error) return { error: error.message }
+
+  revalidatePath('/(store)/nosotros', 'page')
+  revalidatePath('/(store)/contacto', 'page')
+  revalidatePath('/administracion/configuracion')
+  return { success: true }
+}
