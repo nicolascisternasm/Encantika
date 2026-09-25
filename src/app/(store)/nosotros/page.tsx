@@ -31,6 +31,12 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
+const EYEBROWS = [
+  '01 — Nuestra esencia',
+  '02 — Nuestra promesa',
+  '03 — Nuestra propuesta',
+]
+
 // ── Sección alternada ──────────────────────────────────────────────────────────
 
 function SeccionAlternada({
@@ -38,22 +44,28 @@ function SeccionAlternada({
   texto,
   imagenUrl,
   imagenIzquierda,
+  eyebrow,
 }: {
   titulo: string
   texto: string
   imagenUrl: string | null
   imagenIzquierda: boolean
+  eyebrow: string
 }) {
   const Imagen = (
-    <div className="w-full h-[300px] sm:h-[400px] overflow-hidden bg-[var(--color-tarjeta,#F5F0EB)]">
+    <div
+      className="w-full overflow-hidden bg-[var(--color-tarjeta,#F5F0EB)]"
+      style={{ minHeight: 500 }}
+    >
       {imagenUrl ? (
         <img
           src={imagenUrl}
           alt={titulo}
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover object-center"
+          style={{ minHeight: 500 }}
         />
       ) : (
-        <div className="w-full h-full flex items-center justify-center">
+        <div className="w-full flex items-center justify-center" style={{ minHeight: 500 }}>
           <p className="text-xs text-stone-400 text-center px-6 leading-relaxed">
             Agrega una imagen<br />desde el admin
           </p>
@@ -63,18 +75,31 @@ function SeccionAlternada({
   )
 
   const Texto = (
-    <div className="flex flex-col justify-center px-8 py-12 sm:py-0">
-      <h3 className="font-display text-[32px] font-normal text-stone-800 mb-5 leading-tight">
+    <div
+      className="flex flex-col justify-center py-10 px-8 md:px-16"
+      style={{ minHeight: 500 }}
+    >
+      <p
+        className="text-[11px] uppercase tracking-[.15em] mb-4"
+        style={{ color: 'var(--color-acento, #C9A035)' }}
+      >
+        {eyebrow}
+      </p>
+      <h3 className="font-display text-[32px] font-normal text-stone-800 leading-tight">
         {titulo}
       </h3>
-      <p className="text-[15px] text-stone-600 leading-[1.8]">
+      <div
+        className="mt-4 mb-6"
+        style={{ width: 40, height: 1, backgroundColor: 'var(--color-acento, #C9A035)' }}
+      />
+      <p className="text-[15px] text-stone-600 leading-[1.9]">
         {texto}
       </p>
     </div>
   )
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2">
+    <div className="grid grid-cols-1 md:grid-cols-2">
       {imagenIzquierda ? (
         <>
           <div className="order-1">{Imagen}</div>
@@ -82,8 +107,8 @@ function SeccionAlternada({
         </>
       ) : (
         <>
-          <div className="order-2 sm:order-1">{Texto}</div>
-          <div className="order-1 sm:order-2">{Imagen}</div>
+          <div className="order-2 md:order-1">{Texto}</div>
+          <div className="order-1 md:order-2">{Imagen}</div>
         </>
       )}
     </div>
@@ -122,18 +147,21 @@ export default async function NosotrosPage() {
 
   const secciones = [
     {
+      eyebrow: EYEBROWS[0],
       titulo: c?.nosotros_seccion1_titulo ?? 'Creadas con amor',
       texto: c?.nosotros_seccion1_texto ?? '',
       imagenUrl: c?.nosotros_seccion1_imagen_id ? imagenUrlMap[c.nosotros_seccion1_imagen_id] ?? null : null,
       imagenIzquierda: true,
     },
     {
+      eyebrow: EYEBROWS[1],
       titulo: c?.nosotros_seccion2_titulo ?? 'Materiales de calidad',
       texto: c?.nosotros_seccion2_texto ?? '',
       imagenUrl: c?.nosotros_seccion2_imagen_id ? imagenUrlMap[c.nosotros_seccion2_imagen_id] ?? null : null,
       imagenIzquierda: false,
     },
     {
+      eyebrow: EYEBROWS[2],
       titulo: c?.nosotros_seccion3_titulo ?? 'Para momentos únicos',
       texto: c?.nosotros_seccion3_texto ?? '',
       imagenUrl: c?.nosotros_seccion3_imagen_id ? imagenUrlMap[c.nosotros_seccion3_imagen_id] ?? null : null,
