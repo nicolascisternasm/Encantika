@@ -59,29 +59,31 @@ export default async function CatalogoPage({ searchParams }: CatalogoPageProps) 
 
   return (
     <main className="min-h-screen bg-ivory">
-      {/* Header */}
-      <section className="border-b border-sand px-6 py-12 text-center">
-        <h1 className="font-display text-5xl font-light tracking-[0.15em] text-stone-800">
+      {/* Header — compacto */}
+      <section className="px-6 pt-8 pb-7 text-center" style={{ borderBottom: '1px solid var(--color-borde, #E8E2DB)' }}>
+        <p className="text-[10px] uppercase tracking-[.22em] text-stone-400 mb-1.5">Encantika</p>
+        <h1 className="font-display text-[42px] sm:text-5xl font-light tracking-[0.12em] text-stone-800 leading-tight">
           {categoriaActual ? categoriaActual.nombre : 'Catálogo'}
         </h1>
         {!categoriaActual && (
-          <p className="mt-2 text-sm tracking-widest text-stone-400">
+          <p className="mt-1 text-[12px] tracking-[.14em] text-stone-400">
             Todas las joyas
           </p>
         )}
       </section>
 
-      <div className="mx-auto max-w-6xl px-6 py-10">
-        {/* Filtros por categoría */}
+      <div className="mx-auto max-w-6xl px-6 py-8">
+        {/* Filtros — pills con hover */}
         {categorias && categorias.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-8">
+          <div className="flex flex-wrap gap-2 justify-center mb-10">
             <Link
               href="/catalogo"
-              className={`px-4 py-1.5 text-xs tracking-widest uppercase border transition-colors ${
+              className={`relative px-5 py-2 rounded-full text-[11px] uppercase tracking-[.12em] font-medium transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm ${
                 !categoriaSlug
-                  ? 'border-onyx bg-onyx text-ivory'
-                  : 'border-sand text-stone-600 hover:border-stone-400'
+                  ? 'text-white shadow-sm'
+                  : 'bg-stone-100 text-stone-500 hover:bg-stone-800 hover:text-white'
               }`}
+              style={!categoriaSlug ? { backgroundColor: 'var(--color-acento, #C9A035)' } : undefined}
             >
               Todo
             </Link>
@@ -89,11 +91,12 @@ export default async function CatalogoPage({ searchParams }: CatalogoPageProps) 
               <Link
                 key={cat.id}
                 href={`/catalogo?categoria=${cat.slug}`}
-                className={`px-4 py-1.5 text-xs tracking-widest uppercase border transition-colors ${
+                className={`px-5 py-2 rounded-full text-[11px] uppercase tracking-[.12em] font-medium transition-all duration-200 hover:-translate-y-0.5 hover:shadow-sm ${
                   categoriaSlug === cat.slug
-                    ? 'border-onyx bg-onyx text-ivory'
-                    : 'border-sand text-stone-600 hover:border-stone-400'
+                    ? 'text-white shadow-sm'
+                    : 'bg-stone-100 text-stone-500 hover:bg-stone-800 hover:text-white'
                 }`}
+                style={categoriaSlug === cat.slug ? { backgroundColor: 'var(--color-acento, #C9A035)' } : undefined}
               >
                 {cat.nombre}
               </Link>
