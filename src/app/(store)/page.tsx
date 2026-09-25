@@ -1,97 +1,283 @@
+import Image from 'next/image'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatCLP } from '@/lib/utils'
+import ScrollIndicator from '@/components/store/ScrollIndicator'
+
+// ── Íconos de categoría ────────────────────────────────────────────────────────
+
+function IconCollar() {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="w-full h-full">
+      <path d="M9 12 Q9 36 24 36 Q39 36 39 12" />
+      <circle cx="24" cy="41" r="4" fill="currentColor" stroke="none" />
+    </svg>
+  )
+}
+
+function IconAnillo() {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-full h-full">
+      <ellipse cx="24" cy="22" rx="15" ry="9" />
+      <path d="M9 22 Q9 36 24 36 Q39 36 39 22" strokeLinecap="round" />
+    </svg>
+  )
+}
+
+function IconAros() {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" className="w-full h-full">
+      <circle cx="16" cy="15" r="6" />
+      <path d="M16 21 L16 35" />
+      <circle cx="32" cy="15" r="6" />
+      <path d="M32 21 L32 35" />
+    </svg>
+  )
+}
+
+function IconPulsera() {
+  return (
+    <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth={1.5} className="w-full h-full">
+      <ellipse cx="24" cy="24" rx="18" ry="11" />
+      <ellipse cx="24" cy="24" rx="10" ry="6" />
+    </svg>
+  )
+}
+
+const CATEGORIAS = [
+  { nombre: 'Collares', slug: 'collares', Icon: IconCollar },
+  { nombre: 'Anillos', slug: 'anillos', Icon: IconAnillo },
+  { nombre: 'Aros', slug: 'aros', Icon: IconAros },
+  { nombre: 'Pulseras', slug: 'pulseras', Icon: IconPulsera },
+]
+
+// ── Page ───────────────────────────────────────────────────────────────────────
 
 export default async function StorePage() {
   const supabase = await createClient()
 
-  const { data: productos } = await supabase
-    .from('productos')
-    .select(`
-      id, nombre, slug, precio_base,
-      categorias(nombre),
-      imagenes_producto(ruta_almacenamiento, orden)
-    `)
-    .eq('estado', 'activo')
-    .eq('destacado', true)
-    .order('creado_en', { ascending: false })
-    .limit(4)
+  const [{ data: productosRaw }, { data: config }] = await Promise.all([
+    supabase
+      .from('productos')
+      .select(`
+        id, nombre, slug, precio_base,
+        categorias(nombre),
+        imagenes_producto(ruta_almacenamiento, orden)
+      `)
+      .eq('estado', 'activo')
+      .eq('destacado', true)
+      .order('creado_en', { ascending: false })
+      .limit(4),
+    supabase
+      .from('configuracion_tienda')
+      .select('nombre_tienda, historia, mostrar_historia')
+      .single(),
+  ])
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
+  const productos = productosRaw ?? []
+  const storageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''}/storage/v1/object/public/imagenes-productos`
 
   function getMainImage(imgs: { ruta_almacenamiento: string; orden: number }[] | null) {
     if (!imgs || imgs.length === 0) return null
-    const sorted = [...imgs].sort((a, b) => a.orden - b.orden)
-    return `${supabaseUrl}/storage/v1/object/public/imagenes-productos/${sorted[0].ruta_almacenamiento}`
+    return [...imgs].sort((a, b) => a.orden - b.orden)[0].ruta_almacenamiento
   }
 
   return (
-    <main className="min-h-screen bg-ivory">
-      {/* Hero */}
-      <section className="flex flex-col items-center justify-center px-6 py-24 text-center">
-        <h1 className="font-display text-7xl font-light tracking-[0.18em] text-stone-800 md:text-9xl">
-          Encantika
-        </h1>
-        <p className="mt-4 text-base tracking-widest text-stone-500 md:text-lg">
-          Joyas que cuentan tu historia
-        </p>
-        <Link
-          href="/catalogo"
-          className="mt-10 border border-stone-800 px-8 py-3 text-xs tracking-widest uppercase text-stone-800 transition-colors hover:bg-stone-800 hover:text-ivory"
-        >
-          Ver colección
-        </Link>
-      </section>
+    <>
+      {/* ── Sección 1: Hero ────────────────────────────────────────────────── */}
+      <section className="relative overflow-hidden" style={{ height: '100svh', minHeight: 600 }}>
+        <Image
+          src="/hero-1.jpg"
+          alt="Encantika — Brilla con magia"
+          fill
+          className="object-cover object-top"
+          sizes="100vw"
+          priority
+        />
+        {/* Overlay degradado */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/35" />
 
-      {/* Productos destacados */}
-      <section className="mx-auto max-w-6xl px-6 pb-24">
-        {!productos || productos.length === 0 ? (
-          <p className="text-center text-sm text-stone-400 tracking-widest uppercase py-12">
-            Próximamente nuevas joyas
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {productos.map((p) => {
-              const imgUrl = getMainImage(
-                (p.imagenes_producto as { ruta_almacenamiento: string; orden: number }[]) ?? []
-              )
-              const cat = (p.categorias as { nombre: string } | null)?.nombre
-              return (
-                <Link key={p.id} href={`/catalogo/${p.slug}`} className="group cursor-pointer">
-                  <div className="relative aspect-square overflow-hidden bg-stone-200">
-                    {imgUrl ? (
-                      <img
-                        src={imgUrl}
-                        alt={p.nombre}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                    ) : (
-                      <div className="absolute inset-0 bg-gradient-to-br from-stone-200 to-stone-300 transition-colors group-hover:from-stone-300 group-hover:to-stone-400" />
-                    )}
-                  </div>
-                  <div className="mt-3 space-y-1">
-                    {cat && (
-                      <p className="text-xs tracking-widest uppercase text-stone-400">{cat}</p>
-                    )}
-                    <h3 className="text-sm font-medium text-stone-800">{p.nombre}</h3>
-                    <p className="text-sm text-stone-500">{formatCLP(p.precio_base)}</p>
-                  </div>
-                </Link>
-              )
-            })}
+        {/* Contenido */}
+        <div className="absolute inset-0 flex items-center">
+          <div className="pl-[8%] pr-8 max-w-2xl">
+            <p className="text-white/80 text-[11px] tracking-[.20em] uppercase mb-5">
+              Nueva colección
+            </p>
+            <h1 className="font-display text-white font-normal leading-[1.1] tracking-[.08em] text-5xl sm:text-7xl">
+              Brilla con magia
+            </h1>
+            <p className="mt-5 text-white/75 text-base sm:text-lg">
+              Joyería hecha con amor para momentos únicos
+            </p>
+            <Link
+              href="/catalogo"
+              className="inline-block mt-8 border border-white text-white text-xs tracking-[.12em] uppercase px-8 py-3 hover:bg-white hover:text-onyx transition-all duration-300"
+            >
+              Ver colección
+            </Link>
           </div>
-        )}
+        </div>
+
+        <ScrollIndicator />
       </section>
 
-      {/* Footer */}
-      <footer className="py-8 text-center">
-        <Link
-          href="/administracion/login"
-          className="text-[11px] text-[#7A7470] no-underline hover:underline decoration-[#7A7470]/50 underline-offset-2 transition-all"
-        >
-          Administración
-        </Link>
-      </footer>
-    </main>
+      {/* ── Sección 2: Categorías ──────────────────────────────────────────── */}
+      <section className="bg-ivory py-20 px-6 sm:px-8">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="font-display text-4xl font-normal tracking-wide text-onyx text-center">
+            Explora nuestra colección
+          </h2>
+          <p className="mt-3 text-sm text-encantika-stone text-center">
+            Encuentra la joya perfecta para cada ocasión
+          </p>
+
+          <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {CATEGORIAS.map(({ nombre, slug, Icon }) => (
+              <Link
+                key={slug}
+                href={`/catalogo?categoria=${slug}`}
+                className="group flex flex-col items-center gap-4 bg-nude rounded p-6 sm:p-8 hover:shadow-sm transition-shadow duration-300"
+              >
+                <div className="w-10 h-10 text-gold">
+                  <Icon />
+                </div>
+                <span className="font-display text-xl text-onyx">{nombre}</span>
+                <span className="text-encantika-stone text-sm group-hover:translate-x-1 transition-transform duration-200">
+                  →
+                </span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Sección 3: Destacados (condicional) ───────────────────────────── */}
+      {productos.length > 0 && (
+        <section className="bg-white py-20 px-6 sm:px-8">
+          <div className="max-w-7xl mx-auto">
+            <h2 className="font-display text-4xl font-normal text-onyx text-center tracking-wide">
+              Piezas destacadas
+            </h2>
+
+            <div className="mt-12 grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+              {productos.map((p) => {
+                const ruta = getMainImage(
+                  (p.imagenes_producto as { ruta_almacenamiento: string; orden: number }[]) ?? []
+                )
+                const imgSrc = ruta ? `${storageUrl}/${ruta}` : null
+                const cat = (p.categorias as { nombre: string } | null)?.nombre
+
+                return (
+                  <Link key={p.id} href={`/catalogo/${p.slug}`} className="group">
+                    {/* Imagen */}
+                    <div className="relative aspect-square overflow-hidden bg-nude">
+                      {imgSrc ? (
+                        <Image
+                          src={imgSrc}
+                          alt={p.nombre}
+                          fill
+                          className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 bg-nude" />
+                      )}
+                    </div>
+
+                    {/* Info */}
+                    <div className="mt-3 space-y-1">
+                      {cat && (
+                        <p className="text-[10px] uppercase tracking-[.12em] text-encantika-stone">
+                          {cat}
+                        </p>
+                      )}
+                      <h3 className="font-display text-xl text-onyx leading-tight">{p.nombre}</h3>
+                      <p className="text-sm text-encantika-stone">{formatCLP(p.precio_base)}</p>
+                    </div>
+                  </Link>
+                )
+              })}
+            </div>
+
+            <div className="mt-12 text-center">
+              <Link
+                href="/catalogo"
+                className="inline-block border border-onyx text-onyx text-xs tracking-[.12em] uppercase px-8 py-3 hover:bg-onyx hover:text-white transition-all duration-300"
+              >
+                Ver todo el catálogo
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Sección 4: Banner "Arma tu joya" ──────────────────────────────── */}
+      <section className="relative flex items-center justify-center text-center overflow-hidden"
+        style={{ height: 'clamp(280px, 40vw, 400px)' }}
+      >
+        <Image
+          src="/hero-2.jpg"
+          alt="Crea tu joya única"
+          fill
+          className="object-cover"
+          sizes="100vw"
+        />
+        <div
+          className="absolute inset-0"
+          style={{ backgroundColor: 'rgba(201,160,53,0.72)' }}
+        />
+        <div className="relative z-10 px-6 max-w-xl">
+          <h2 className="font-display text-white font-normal tracking-[.06em] text-[40px] sm:text-[52px] leading-[1.1]">
+            Crea tu joya única
+          </h2>
+          <p className="mt-4 text-white/85 text-base">
+            Elige cada detalle y diseña la pieza perfecta para ti
+          </p>
+          <Link
+            href="/arma-tu-joya"
+            className="inline-block mt-8 border border-white text-white text-xs tracking-[.12em] uppercase px-8 py-3 hover:bg-white hover:text-onyx transition-all duration-300"
+          >
+            Comenzar ahora
+          </Link>
+        </div>
+      </section>
+
+      {/* ── Sección 5: Historia (condicional) ─────────────────────────────── */}
+      {config?.mostrar_historia && config?.historia && (
+        <section className="bg-ivory py-20 px-6 sm:px-8">
+          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 md:gap-16 items-center">
+            {/* Imagen */}
+            <div className="relative rounded overflow-hidden" style={{ height: 'clamp(320px, 50vw, 500px)' }}>
+              <Image
+                src="/hero-3.jpg"
+                alt="Nuestra historia"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            </div>
+
+            {/* Texto */}
+            <div>
+              <p className="text-[11px] uppercase tracking-[.15em] text-gold">
+                Nuestra historia
+              </p>
+              <h2 className="font-display text-4xl sm:text-5xl font-normal text-onyx mt-4 leading-tight">
+                {config.nombre_tienda}
+              </h2>
+              <p className="mt-6 text-[15px] text-encantika-stone leading-[1.8]">
+                {config.historia}
+              </p>
+              <Link
+                href="/sobre-nosotros"
+                className="inline-block mt-8 text-sm text-onyx border-b border-onyx pb-0.5 hover:text-encantika-stone hover:border-encantika-stone transition-colors duration-200"
+              >
+                Conoce más →
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+    </>
   )
 }
