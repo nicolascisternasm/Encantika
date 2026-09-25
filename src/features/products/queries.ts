@@ -14,7 +14,8 @@ export async function getProductos() {
       destacado,
       creado_en,
       categorias(nombre),
-      imagenes_producto(id, ruta_almacenamiento, orden)
+      imagenes_producto(id, ruta_almacenamiento, orden),
+      producto_colecciones(colecciones(id, nombre))
     `)
     .order('creado_en', { ascending: false })
   if (error) throw error
@@ -29,7 +30,8 @@ export async function getProducto(id: string) {
       *,
       categorias(id, nombre),
       producto_atributos(atributo_id, atributos(id, nombre, codigo, valores_atributo(*))),
-      variantes_producto(*, variante_valores_atributo(*, valores_atributo(*)))
+      variantes_producto(*, variante_valores_atributo(*, valores_atributo(*))),
+      producto_colecciones(coleccion_id, colecciones(id, nombre))
     `)
     .eq('id', id)
     .single()

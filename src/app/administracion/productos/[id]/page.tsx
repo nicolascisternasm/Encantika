@@ -5,6 +5,7 @@ import MainImageUpload from '@/components/admin/MainImageUpload'
 import AdditionalGallery from '@/components/admin/AdditionalGallery'
 import CollapsibleSection from '@/components/admin/CollapsibleSection'
 import InventoryPanel from '@/components/admin/InventoryPanel'
+import ColeccionesSelector from '@/components/admin/ColeccionesSelector'
 import { getProducto } from '@/features/products/queries'
 import { getCategorias } from '@/features/categories/queries'
 import { createClient } from '@/lib/supabase/server'
@@ -24,25 +25,41 @@ export default async function EditarProductoPage({
   const { id } = await params
   const supabase = await createClient()
 
-  const [producto, categorias, { data: imagesData }, { data: productoInsumosData }, { data: todosInsumosData }] =
-    await Promise.all([
-      getProducto(id),
-      getCategorias(),
-      supabase
-        .from('imagenes_producto')
-        .select('id, ruta_almacenamiento, orden, texto_alt')
-        .eq('producto_id', id)
-        .order('orden', { ascending: true }),
-      supabase
-        .from('producto_insumos')
-        .select('insumo_id, cantidad_por_unidad, nota, insumos(id, nombre, unidad)')
-        .eq('producto_id', id),
-      supabase
-        .from('insumos')
-        .select('id, nombre, unidad')
-        .eq('activo', true)
-        .order('nombre'),
-    ])
+  const [
+    producto,
+    categorias,
+    { data: imagesData },
+    { data: productoInsumosData },
+    { data: todosInsumosData },
+    { data: coleccionesActivasData },
+    { data: coleccionesProductoData },
+  ] = await Promise.all([
+    getProducto(id),
+    getCategorias(),
+    supabase
+      .from('imagenes_producto')
+      .select('id, ruta_almacenamiento, orden, texto_alt')
+      .eq('producto_id', id)
+      .order('orden', { ascending: true }),
+    supabase
+      .from('producto_insumos')
+      .select('insumo_id, cantidad_por_unidad, nota, insumos(id, nombre, unidad)')
+      .eq('producto_id', id),
+    supabase
+      .from('insumos')
+      .select('id, nombre, unidad')
+      .eq('activo', true)
+      .order('nombre'),
+    supabase
+      .from('colecciones')
+      .select('id, nombre')
+      .eq('activo', true)
+      .order('nombre'),
+    supabase
+      .from('producto_colecciones')
+      .select('coleccion_id')
+      .eq('producto_id', id),
+  ])
 
   if (!producto) notFound()
 
@@ -91,6 +108,9 @@ export default async function EditarProductoPage({
 
   const storageUrl = `${process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''}/storage/v1/object/public`
 
+  const coleccionesActivas = (coleccionesActivasData ?? []).map(c => ({ id: c.id, nombre: c.nombre }))
+  const coleccionesSeleccionadas = (coleccionesProductoData ?? []).map(c => c.coleccion_id)
+
   return (
     <div className="max-w-2xl space-y-5">
       <PageHeader
@@ -138,6 +158,14 @@ export default async function EditarProductoPage({
           varianteId={varianteId}
           insumos={insumos}
           todosInsumos={todosInsumos}
+        />
+      </CollapsibleSection>
+
+      <CollapsibleSection title="Colecciones">
+        <ColeccionesSelector
+          productoId={id}
+          todas={coleccionesActivas}
+          seleccionadas={coleccionesSeleccionadas}
         />
       </CollapsibleSection>
     </div>

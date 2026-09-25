@@ -19,6 +19,7 @@ type ProductRow = {
   creado_en: string
   categorias: { nombre: string } | null
   imagenes_producto: ImagenMini[] | null
+  producto_colecciones: { colecciones: { id: string; nombre: string } | null }[] | null
 }
 
 export default function ProductTable({ productos }: { productos: ProductRow[] }) {
@@ -58,6 +59,7 @@ export default function ProductTable({ productos }: { productos: ProductRow[] })
             <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Categoría</th>
             <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Precio</th>
             <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Estado</th>
+            <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider hidden lg:table-cell">Colecciones</th>
             <th className="text-right px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Acciones</th>
           </tr>
         </thead>
@@ -67,6 +69,10 @@ export default function ProductTable({ productos }: { productos: ProductRow[] })
               p.imagenes_producto?.find(i => i.orden === 0) ??
               p.imagenes_producto?.[0] ??
               null
+
+            const colecciones = (p.producto_colecciones ?? [])
+              .map(pc => pc.colecciones)
+              .filter((c): c is { id: string; nombre: string } => c !== null)
 
             return (
               <tr key={p.id} className="border-b border-stone-50 hover:bg-stone-50 transition-colors">
@@ -94,6 +100,24 @@ export default function ProductTable({ productos }: { productos: ProductRow[] })
                 <td className="px-4 py-3 text-stone-700 text-sm">{formatCLP(p.precio_base)}</td>
                 <td className="px-4 py-3">
                   <StatusBadge estado={p.estado} />
+                </td>
+                <td className="px-4 py-3 hidden lg:table-cell">
+                  {colecciones.length === 0 ? (
+                    <span className="text-stone-300">—</span>
+                  ) : (
+                    <div className="flex flex-wrap gap-1">
+                      {colecciones.slice(0, 2).map(c => (
+                        <span key={c.id} className="text-[10px] px-1.5 py-0.5 bg-stone-100 text-stone-600 rounded">
+                          {c.nombre}
+                        </span>
+                      ))}
+                      {colecciones.length > 2 && (
+                        <span className="text-[10px] px-1.5 py-0.5 bg-stone-100 text-stone-500 rounded">
+                          +{colecciones.length - 2}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </td>
                 <td className="px-4 py-3 text-right space-x-3">
                   <Link
