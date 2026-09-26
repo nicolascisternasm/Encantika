@@ -71,7 +71,7 @@ export default function ConfiguradorPasos({
       <div className="relative z-10 flex flex-col min-h-full lg:flex-row">
 
         {/* ── Panel izquierdo: preview (sticky en desktop, fijo en mobile) ── */}
-        <div className="lg:sticky lg:top-0 lg:h-screen lg:w-[42%] flex flex-col">
+        <div className="lg:sticky lg:top-0 lg:h-[90vh] lg:w-[42%] flex flex-col">
 
           {/* Header móvil */}
           <div className="flex items-center justify-between px-5 pt-5 pb-3 lg:px-8 lg:pt-8">
