@@ -10,12 +10,14 @@ type Props = {
   comp: Componente
   seleccionado: boolean
   config: ConfigArmaJoya
+  ocultarHolistica?: boolean
   onSeleccionar: () => void
+  onHover?: (comp: Componente | null) => void
 }
 
-export default function OpcionComponente({ comp, seleccionado, config, onSeleccionar }: Props) {
+export default function OpcionComponente({ comp, seleccionado, config, ocultarHolistica, onSeleccionar, onHover }: Props) {
   const [expandido, setExpandido] = useState(false)
-  const hasHolistica = Boolean(comp.desc_holistica)
+  const hasHolistica = Boolean(comp.desc_holistica) && !ocultarHolistica
 
   return (
     <motion.div
@@ -27,6 +29,8 @@ export default function OpcionComponente({ comp, seleccionado, config, onSelecci
         transition: 'background 0.25s, border-color 0.25s',
       }}
       whileTap={{ scale: 0.98 }}
+      onMouseEnter={() => onHover?.(comp)}
+      onMouseLeave={() => onHover?.(null)}
       onClick={() => { onSeleccionar(); setExpandido(false) }}
     >
       {/* Indicador de seleccionado */}

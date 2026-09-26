@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { TipoJoya, TipoComponente, Componente, ConfiguradorSelecciones } from '@/features/arma-joya/types'
 import type { ConfigArmaJoya } from '@/app/actions/arma-joya-configuracion'
@@ -31,9 +32,15 @@ export default function ConfiguradorBuilder({
   onVolver,
   onAprobar,
 }: Props) {
+  const [hoveredZodiacal, setHoveredZodiacal] = useState<Componente | null>(null)
+
   const seleccionados = Object.values(selecciones).filter(Boolean) as Componente[]
   const precioTotal = seleccionados.reduce((s, c) => s + c.precio, 0)
   const haySeleccion = seleccionados.length > 0
+
+  // Para el panel izquierdo: mostrar desc_holistica del signo que se está mirando o el seleccionado
+  const zodiacalActivo = hoveredZodiacal ?? (selecciones['signo_zodiacal'] ?? null)
+  const descZodiacal = zodiacalActivo?.desc_holistica ?? null
 
   return (
     <div className="relative min-h-full flex flex-col lg:flex-row" style={{ background: '#0C0A08' }}>
@@ -68,7 +75,7 @@ export default function ConfiguradorBuilder({
         </div>
 
         {/* Selecciones */}
-        <div className="shrink-0 px-5 lg:px-8 pb-5 space-y-2 overflow-y-auto" style={{ maxHeight: '35%' }}>
+        <div className="shrink-0 px-5 lg:px-8 space-y-2 overflow-y-auto" style={{ maxHeight: '30%' }}>
           {seleccionados.length === 0 ? (
             <p className="text-[11px] text-center py-4" style={{ color: 'rgba(245,240,235,0.2)' }}>
               Elige los componentes de tu joya →
@@ -83,7 +90,6 @@ export default function ConfiguradorBuilder({
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-start gap-2.5"
                 >
-                  {/* Swatch de color */}
                   <div
                     className="w-3 h-3 rounded-full mt-0.5 shrink-0"
                     style={{ background: comp.color_primario ?? '#C9A035' }}
@@ -120,6 +126,30 @@ export default function ConfiguradorBuilder({
             </>
           )}
         </div>
+
+        {/* Descripción zodiacal (aparece al pasar el cursor sobre un signo) */}
+        <AnimatePresence>
+          {descZodiacal && (
+            <motion.div
+              key={zodiacalActivo?.id}
+              initial={{ opacity: 0, y: 6 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 6 }}
+              transition={{ duration: 0.25 }}
+              className="shrink-0 mx-5 lg:mx-8 mb-4 mt-2 p-3"
+              style={{ border: '1px solid rgba(201,160,53,0.15)', background: 'rgba(201,160,53,0.04)' }}
+            >
+              {zodiacalActivo && (
+                <p className="text-[10px] uppercase tracking-[.12em] mb-1.5" style={{ color: 'rgba(201,160,53,0.6)' }}>
+                  {zodiacalActivo.nombre}
+                </p>
+              )}
+              <p className="text-[11px] leading-relaxed italic" style={{ color: 'rgba(245,240,235,0.45)' }}>
+                {descZodiacal}
+              </p>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* ── Panel derecho: categorías + opciones ────────────────────────── */}
@@ -154,37 +184,70 @@ export default function ConfiguradorBuilder({
                   )}
                 </div>
 
-                {/* Grid de opciones */}
-                <AnimatePresence mode="popLayout">
-                  <div className={`grid gap-2 ${
-                    tipo.slug === 'signo_zodiacal' ? 'grid-cols-4 sm:grid-cols-6' :
-                    tipo.slug === 'largo' ? 'grid-cols-3 sm:grid-cols-4' :
-                    'grid-cols-2 sm:grid-cols-3'
-                  }`}>
-                    {opciones.map((comp) => (
-                      <motion.div
-                        key={comp.id}
-                        layout
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.2 }}
-                      >
-                        <OpcionComponente
-                          comp={comp}
-                          seleccionado={seleccionado?.id === comp.id}
-                          config={config}
-                          onSeleccionar={() => {
-                            if (seleccionado?.id === comp.id) {
-                              onDeseleccionar(tipo.slug)
-                            } else {
-                              onSeleccionar(tipo.slug, comp)
-                            }
+                {/* Opciones según tipo */}
+                {tipo.slug === 'largo' ? (
+                  /* Largo: lista de píldoras compactas */
+                  <div className="flex flex-wrap gap-2">
+                    {opciones.map((comp) => {
+                      const activo = seleccionado?.id === comp.id
+                      return (
+                        <motion.button
+                          key={comp.id}
+                          layout
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          onClick={() => activo ? onDeseleccionar(tipo.slug) : onSeleccionar(tipo.slug, comp)}
+                          className="px-3 py-1.5 text-[12px] transition-all duration-200 whitespace-nowrap"
+                          style={{
+                            background: activo ? 'rgba(201,160,53,0.15)' : 'rgba(255,255,255,0.04)',
+                            border: `1px solid ${activo ? 'rgba(201,160,53,0.6)' : 'rgba(255,255,255,0.1)'}`,
+                            color: activo ? '#F5F0EB' : 'rgba(245,240,235,0.55)',
                           }}
-                        />
-                      </motion.div>
-                    ))}
+                        >
+                          {comp.nombre}
+                          {config.mostrar_precio && comp.precio > 0 && (
+                            <span className="ml-1.5 text-[10px]" style={{ color: 'rgba(201,160,53,0.7)' }}>
+                              {formatCLP(comp.precio)}
+                            </span>
+                          )}
+                        </motion.button>
+                      )
+                    })}
                   </div>
-                </AnimatePresence>
+                ) : (
+                  <AnimatePresence mode="popLayout">
+                    <div className={`grid gap-2 ${
+                      tipo.slug === 'signo_zodiacal' ? 'grid-cols-4 sm:grid-cols-6' :
+                      tipo.slug === 'piedra' ? 'grid-cols-3 sm:grid-cols-5' :
+                      'grid-cols-2 sm:grid-cols-3'
+                    }`}>
+                      {opciones.map((comp) => (
+                        <motion.div
+                          key={comp.id}
+                          layout
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <OpcionComponente
+                            comp={comp}
+                            seleccionado={seleccionado?.id === comp.id}
+                            config={config}
+                            ocultarHolistica={tipo.slug === 'signo_zodiacal'}
+                            onHover={tipo.slug === 'signo_zodiacal' ? setHoveredZodiacal : undefined}
+                            onSeleccionar={() => {
+                              if (seleccionado?.id === comp.id) {
+                                onDeseleccionar(tipo.slug)
+                              } else {
+                                onSeleccionar(tipo.slug, comp)
+                              }
+                            }}
+                          />
+                        </motion.div>
+                      ))}
+                    </div>
+                  </AnimatePresence>
+                )}
               </div>
             )
           })}
