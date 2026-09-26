@@ -126,27 +126,24 @@ export default function ConfiguradorBuilder({
           )}
         </div>
 
-        {/* Descripción holística (aparece al pasar el cursor sobre cualquier componente) */}
-        <AnimatePresence>
-          {descActiva && (
-            <motion.div
-              key={hoveredComp?.id}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 6 }}
-              transition={{ duration: 0.25 }}
-              className="shrink-0 mx-5 lg:mx-8 mb-4 mt-2 p-3"
-              style={{ border: '1px solid rgba(201,160,53,0.15)', background: 'rgba(201,160,53,0.04)' }}
-            >
-              <p className="text-[10px] uppercase tracking-[.12em] mb-1.5" style={{ color: 'rgba(201,160,53,0.6)' }}>
-                {hoveredComp?.nombre}
-              </p>
-              <p className="text-[11px] leading-relaxed italic" style={{ color: 'rgba(245,240,235,0.45)' }}>
-                {descActiva}
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {/* Descripción holística — siempre reserva espacio, solo cambia opacidad */}
+        <div
+          className="shrink-0 mx-5 lg:mx-8 mb-4 mt-2 p-3 transition-opacity duration-200"
+          style={{
+            border: '1px solid rgba(201,160,53,0.15)',
+            background: 'rgba(201,160,53,0.04)',
+            opacity: descActiva ? 1 : 0,
+            visibility: descActiva ? 'visible' : 'hidden',
+            minHeight: '60px',
+          }}
+        >
+          <p className="text-[10px] uppercase tracking-[.12em] mb-1.5" style={{ color: 'rgba(201,160,53,0.6)' }}>
+            {hoveredComp?.nombre ?? ''}
+          </p>
+          <p className="text-[11px] leading-relaxed italic" style={{ color: 'rgba(245,240,235,0.45)' }}>
+            {descActiva ?? ''}
+          </p>
+        </div>
       </div>
 
       {/* ── Panel derecho: categorías + opciones ────────────────────────── */}
@@ -249,6 +246,8 @@ export default function ConfiguradorBuilder({
                                 if (seleccionado?.id === comp.id) {
                                   onDeseleccionar(tipo.slug)
                                 } else {
+                                  // Seleccionar cadena limpia la piedra
+                                  if (tipo.slug === 'cadena') onDeseleccionar('piedra')
                                   onSeleccionar(tipo.slug, comp)
                                 }
                               }}
@@ -302,6 +301,8 @@ export default function ConfiguradorBuilder({
                                   if (seleccionadoPiedra?.id === comp.id) {
                                     onDeseleccionar(tipoPiedra.slug)
                                   } else {
+                                    // Seleccionar piedra limpia la cadena
+                                    onDeseleccionar('cadena')
                                     onSeleccionar(tipoPiedra.slug, comp)
                                   }
                                 }}
