@@ -237,6 +237,68 @@ export default async function StorePage() {
           productos={landingProductos}
           storageUrl={storageUrl}
         />
+        {colecciones.length > 0 && (
+          <section className="py-20 px-6 sm:px-8" style={{ backgroundColor: 'var(--color-tarjeta, #F5F0EB)' }}>
+            <div className="max-w-7xl mx-auto">
+              <FadeIn className="text-center mb-12">
+                <p className="text-[10px] uppercase tracking-[.22em] mb-2 text-gold">Encantika</p>
+                <h2 className="font-display text-4xl font-normal tracking-wide text-onyx">
+                  Nuestras colecciones
+                </h2>
+              </FadeIn>
+              <FadeInStagger
+                className={`grid gap-5 ${
+                  colecciones.length === 1 ? 'grid-cols-1 max-w-lg mx-auto' :
+                  colecciones.length === 2 ? 'grid-cols-1 sm:grid-cols-2' :
+                  'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+                }`}
+                staggerDelay={0.1}
+              >
+                {colecciones.map((col) => (
+                  <FadeInItem key={col.id}>
+                    <Link href={`/colecciones/${col.slug}`} className="group block bg-white overflow-hidden hover:shadow-md transition-shadow duration-300">
+                      <div className="relative aspect-[4/3] overflow-hidden bg-nude">
+                        {col.url_imagen ? (
+                          <img
+                            src={col.url_imagen}
+                            alt={col.nombre}
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                          />
+                        ) : (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <svg className="w-10 h-10 opacity-20" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
+                              <rect x="3" y="3" width="18" height="18" rx="2" />
+                              <circle cx="8.5" cy="8.5" r="1.5" />
+                              <path d="m21 15-5-5L5 21" />
+                            </svg>
+                          </div>
+                        )}
+                        {col._count > 0 && (
+                          <div className="absolute top-3 right-3 bg-white/90 px-2.5 py-1 text-[10px] tracking-[.1em] uppercase text-stone-600">
+                            {col._count} {col._count === 1 ? 'pieza' : 'piezas'}
+                          </div>
+                        )}
+                      </div>
+                      <div className="p-5">
+                        <h3 className="font-display text-[22px] font-normal text-onyx leading-tight mb-2">
+                          {col.nombre}
+                        </h3>
+                        {col.descripcion && (
+                          <p className="text-[13px] text-encantika-stone leading-relaxed line-clamp-2">
+                            {col.descripcion}
+                          </p>
+                        )}
+                        <p className="mt-4 text-[11px] uppercase tracking-[.12em] text-gold group-hover:tracking-[.18em] transition-all duration-300">
+                          Ver colección →
+                        </p>
+                      </div>
+                    </Link>
+                  </FadeInItem>
+                ))}
+              </FadeInStagger>
+            </div>
+          </section>
+        )}
         {bannerSection}
         {historiaSection}
       </>
