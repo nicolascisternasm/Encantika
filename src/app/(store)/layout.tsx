@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server'
 import StoreHeader, { type HeaderVariant } from '@/components/store/StoreHeader'
 import StoreSidebar from '@/components/store/StoreSidebar'
 import WhatsAppButton from '@/components/store/WhatsAppButton'
+import PageLoader from '@/components/store/PageLoader'
 import { getTema, getFuente } from '@/lib/temas'
 
 const cormorant = Cormorant_Garamond({
@@ -208,6 +209,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
     return (
       <div className={`${cormorant.variable} flex flex-row min-h-screen`} style={themeStyle}>
         {fontLinks}
+        <PageLoader />
         <StoreSidebar />
         <div className="flex flex-col flex-1 min-w-0 bg-ivory">
           <main className="flex-1">{children}</main>
@@ -222,6 +224,7 @@ export default async function StoreLayout({ children }: { children: React.ReactN
   return (
     <div className={`${cormorant.variable} flex flex-col min-h-screen bg-ivory`} style={themeStyle}>
       {fontLinks}
+      <PageLoader />
       <StoreHeader variant={headerVariant} />
       <main className="flex-1">{children}</main>
       {footer}
