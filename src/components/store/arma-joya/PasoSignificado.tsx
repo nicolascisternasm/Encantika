@@ -13,6 +13,7 @@ type Props = {
   tarjetaTexto: string
   nombreReceptor: string
   esRegalo: boolean
+  guardando?: boolean
   onVolver: () => void
   onContinuar: () => void
 }
@@ -24,6 +25,7 @@ export default function PasoSignificado({
   tarjetaTexto,
   nombreReceptor,
   esRegalo,
+  guardando = false,
   onVolver,
   onContinuar,
 }: Props) {
@@ -178,10 +180,18 @@ export default function PasoSignificado({
           >
             <button
               onClick={onContinuar}
-              className="w-full py-4 text-[13px] uppercase tracking-[.16em] font-medium transition-all duration-300"
+              disabled={guardando}
+              className="w-full py-4 text-[13px] uppercase tracking-[.16em] font-medium transition-all duration-300 disabled:opacity-60 disabled:cursor-wait flex items-center justify-center gap-3"
               style={{ background: 'rgba(201,160,53,0.9)', color: '#0C0A08' }}
             >
-              Agregar al carrito →
+              {guardando ? (
+                <>
+                  <span className="inline-block w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  Guardando pedido…
+                </>
+              ) : (
+                'Confirmar pedido →'
+              )}
             </button>
             <p className="text-center text-[10px] mt-3" style={{ color: 'rgba(245,240,235,0.2)' }}>
               Tu diseño se guardará automáticamente

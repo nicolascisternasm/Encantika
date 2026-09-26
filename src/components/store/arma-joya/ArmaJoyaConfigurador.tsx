@@ -3,10 +3,12 @@
 import { useReducer, useState } from 'react'
 import type { TipoJoya, TipoComponente, Componente, ConfiguradorState } from '@/features/arma-joya/types'
 import { generarSignificadoIA } from '@/app/actions/arma-joya-ia'
+import { guardarConfiguracion } from '@/app/actions/arma-joya-guardar'
 import PasoTipoJoya from './PasoTipoJoya'
 import ConfiguradorPasos from './ConfiguradorPasos'
 import PasoPersonalizacion from './PasoPersonalizacion'
 import PasoSignificado from './PasoSignificado'
+import PasoConfirmacion from './PasoConfirmacion'
 
 // ── Estado global del configurador ────────────────────────────────────────────
 
@@ -75,6 +77,8 @@ type Props = {
 export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], componentes = [] }: Props) {
   const [estado, dispatch] = useReducer(reducer, estadoInicial)
   const [cargandoIA, setCargandoIA] = useState(false)
+  const [configuracionId, setConfiguracionId] = useState<string | null>(null)
+  const [guardando, setGuardando] = useState(false)
 
   function seleccionarTipo(tipo: TipoJoya) {
     dispatch({ type: 'SELECCIONAR_TIPO', payload: tipo })
@@ -166,6 +170,29 @@ export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], comp
   // ── Paso 3: significado generado por IA ───────────────────────────────────
 
   if (estado.paso === 3 && estado.tipoJoya) {
+    async function handleGuardar() {
+      if (!estado.tipoJoya || guardando) return
+      setGuardando(true)
+      try {
+        const { id } = await guardarConfiguracion({
+          tipoJoya: estado.tipoJoya,
+          selecciones: estado.selecciones,
+          nombreReceptor: estado.nombreReceptor,
+          esRegalo: estado.esRegalo,
+          intencionTexto: estado.intencionTexto,
+          significadoIA: estado.significadoIA,
+          tarjetaTexto: estado.tarjetaTexto,
+        })
+        setConfiguracionId(id)
+        dispatch({ type: 'IR_PASO', paso: 4 })
+      } catch {
+        // Avanzar igual si falla el guardado
+        dispatch({ type: 'IR_PASO', paso: 4 })
+      } finally {
+        setGuardando(false)
+      }
+    }
+
     return (
       <PasoSignificado
         tipoJoya={estado.tipoJoya}
@@ -174,28 +201,32 @@ export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], comp
         tarjetaTexto={estado.tarjetaTexto}
         nombreReceptor={estado.nombreReceptor}
         esRegalo={estado.esRegalo}
+        guardando={guardando}
         onVolver={() => dispatch({ type: 'IR_PASO', paso: 2 })}
-        onContinuar={() => dispatch({ type: 'IR_PASO', paso: 4 })}
+        onContinuar={handleGuardar}
       />
     )
   }
 
-  // ── Paso 4+: orden (Etapa 8) ──────────────────────────────────────────────
+  // ── Paso 4: confirmación ──────────────────────────────────────────────────
 
-  return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: '#0C0A08' }}>
-      <div className="text-center space-y-4 px-5">
-        <p className="text-[13px]" style={{ color: 'rgba(245,240,235,0.4)' }}>
-          Guardando tu diseño… (Etapa 8)
-        </p>
-        <button
-          onClick={() => dispatch({ type: 'IR_PASO', paso: 3 })}
-          className="text-[12px] transition-opacity opacity-40 hover:opacity-70"
-          style={{ color: '#F5F0EB' }}
-        >
-          ← Volver al resumen
-        </button>
-      </div>
-    </div>
-  )
+  if (estado.paso === 4 && estado.tipoJoya && configuracionId) {
+    return (
+      <PasoConfirmacion
+        tipoJoya={estado.tipoJoya}
+        selecciones={estado.selecciones}
+        configuracionId={configuracionId}
+        nombreReceptor={estado.nombreReceptor}
+        esRegalo={estado.esRegalo}
+        tarjetaTexto={estado.tarjetaTexto}
+        onNuevaJoya={() => {
+          setConfiguracionId(null)
+          dispatch({ type: 'REINICIAR' })
+        }}
+      />
+    )
+  }
+
+  // Fallback (no debería llegar acá)
+  return null
 }

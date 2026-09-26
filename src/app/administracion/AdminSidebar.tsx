@@ -76,6 +76,10 @@ export default function AdminSidebar({ userEmail, fullName, consultasNoLeidas = 
             </span>
           )}
         </a>
+        <a href="/administracion/arma-joya"
+          className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors">
+          Arma tu Joya
+        </a>
         <a href="/administracion/configuracion"
           className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors">
           Configuración
