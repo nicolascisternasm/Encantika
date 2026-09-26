@@ -120,44 +120,49 @@ function ModalOverlay({
   }, [])
 
   return (
+    /* Backdrop */
     <div
-      className="fixed inset-0 z-[100]"
-      style={{ background: '#0C0A08' }}
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6"
+      style={{ background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onCerrar() }}
     >
-      {/* Botón cerrar — siempre visible */}
-      <button
-        onClick={onCerrar}
-        className="absolute top-4 right-4 z-[110] flex items-center gap-2 text-[11px] uppercase tracking-[.12em] transition-opacity opacity-40 hover:opacity-80"
-        style={{ color: '#F5F0EB' }}
-        aria-label="Cerrar"
+      {/* Recuadro */}
+      <div
+        className="relative w-full max-w-5xl max-h-[90vh] overflow-y-auto rounded-sm"
+        style={{ background: '#0C0A08' }}
       >
-        <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-          <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        Cerrar
-      </button>
+        {/* Botón cerrar */}
+        <button
+          onClick={onCerrar}
+          className="absolute top-3 right-3 z-[110] w-8 h-8 flex items-center justify-center rounded-full transition-all opacity-40 hover:opacity-90"
+          style={{ background: 'rgba(245,240,235,0.08)' }}
+          aria-label="Cerrar"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="#F5F0EB" strokeWidth={1.5} viewBox="0 0 24 24">
+            <path d="M18 6L6 18M6 6l12 12" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
 
-      {/* Loading */}
-      {(loading || !Configurador) && (
-        <div className="flex flex-col items-center justify-center h-full gap-4">
-          <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(201,160,53,0.3)', borderTopColor: 'rgba(201,160,53,0.9)' }} />
-          <p className="text-[12px] uppercase tracking-[.2em]" style={{ color: 'rgba(245,240,235,0.3)' }}>
-            Cargando…
-          </p>
-        </div>
-      )}
+        {/* Loading */}
+        {(loading || !Configurador) && (
+          <div className="flex flex-col items-center justify-center py-32 gap-4">
+            <div className="w-6 h-6 border-2 rounded-full animate-spin" style={{ borderColor: 'rgba(201,160,53,0.3)', borderTopColor: 'rgba(201,160,53,0.9)' }} />
+            <p className="text-[12px] uppercase tracking-[.2em]" style={{ color: 'rgba(245,240,235,0.3)' }}>
+              Cargando…
+            </p>
+          </div>
+        )}
 
-      {/* Configurador */}
-      {!loading && data && Configurador && (
-        <div className="h-full overflow-y-auto">
+        {/* Configurador */}
+        {!loading && data && Configurador && (
           <Configurador
             tipos={data.tipos}
             tiposComponente={data.tiposComponente}
             componentes={data.componentes}
             onCerrar={onCerrar}
           />
-        </div>
-      )}
+        )}
+      </div>
     </div>
   )
 }
