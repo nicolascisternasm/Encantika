@@ -225,6 +225,116 @@ export default async function StorePage() {
     </section>
   ) : null
 
+  const coleccionesSection = colecciones.length > 0 ? (
+    <section className="py-20 px-6 sm:px-8" style={{ backgroundColor: 'var(--color-tarjeta, #F5F0EB)' }}>
+      <div className="max-w-7xl mx-auto">
+        <FadeIn className="text-center mb-12">
+          <p className="text-[10px] uppercase tracking-[.22em] mb-2 text-gold">Encantika</p>
+          <h2 className="font-display text-4xl font-normal tracking-wide text-onyx">
+            Nuestras colecciones
+          </h2>
+        </FadeIn>
+        <FadeInStagger
+          className={`grid gap-5 ${
+            colecciones.length === 1 ? 'grid-cols-1 max-w-lg mx-auto' :
+            colecciones.length === 2 ? 'grid-cols-1 sm:grid-cols-2' :
+            'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+          }`}
+          staggerDelay={0.1}
+        >
+          {colecciones.map((col) => (
+            <FadeInItem key={col.id}>
+              <Link href={`/colecciones/${col.slug}`} className="group block bg-white overflow-hidden hover:shadow-md transition-shadow duration-300">
+                <div className="relative aspect-[4/3] overflow-hidden bg-nude">
+                  {col.url_imagen ? (
+                    <img
+                      src={col.url_imagen}
+                      alt={col.nombre}
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <svg className="w-10 h-10 opacity-20" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="18" height="18" rx="2" />
+                        <circle cx="8.5" cy="8.5" r="1.5" />
+                        <path d="m21 15-5-5L5 21" />
+                      </svg>
+                    </div>
+                  )}
+                  {col._count > 0 && (
+                    <div className="absolute top-3 right-3 bg-white/90 px-2.5 py-1 text-[10px] tracking-[.1em] uppercase text-stone-600">
+                      {col._count} {col._count === 1 ? 'pieza' : 'piezas'}
+                    </div>
+                  )}
+                </div>
+                <div className="p-5">
+                  <h3 className="font-display text-[22px] font-normal text-onyx leading-tight mb-2">
+                    {col.nombre}
+                  </h3>
+                  {col.descripcion && (
+                    <p className="text-[13px] text-encantika-stone leading-relaxed line-clamp-2">
+                      {col.descripcion}
+                    </p>
+                  )}
+                  <p className="mt-4 text-[11px] uppercase tracking-[.12em] text-gold group-hover:tracking-[.18em] transition-all duration-300">
+                    Ver colección →
+                  </p>
+                </div>
+              </Link>
+            </FadeInItem>
+          ))}
+        </FadeInStagger>
+      </div>
+    </section>
+  ) : null
+
+  const productosSection = productos.length > 0 ? (
+    <section className="bg-white py-20 px-6 sm:px-8">
+      <div className="max-w-7xl mx-auto">
+        <FadeIn className="text-center">
+          <h2 className="font-display text-4xl font-normal text-onyx tracking-wide">
+            Piezas destacadas
+          </h2>
+        </FadeIn>
+        <FadeInStagger className={`mt-12 grid gap-4 sm:gap-6 ${productGridCols}`} staggerDelay={0.07}>
+          {productos.map((p) => {
+            const ruta = getMainImage(
+              (p.imagenes_producto as { ruta_almacenamiento: string; orden: number }[]) ?? []
+            )
+            const imgSrc = ruta ? `${storageUrl}/${ruta}` : null
+            const cat = (p.categorias as { nombre: string } | null)?.nombre
+            return (
+              <FadeInItem key={p.id}>
+                <Link href={`/catalogo/${p.slug}`} className="group block">
+                  <div className="relative aspect-square overflow-hidden bg-nude">
+                    {imgSrc ? (
+                      <Image src={imgSrc} alt={p.nombre} fill
+                        className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw" />
+                    ) : (
+                      <div className="absolute inset-0 bg-nude" />
+                    )}
+                  </div>
+                  <div className="mt-3 space-y-1">
+                    {cat && <p className="text-[10px] uppercase tracking-[.12em] text-encantika-stone">{cat}</p>}
+                    <h3 className="font-display text-xl text-onyx leading-tight">{p.nombre}</h3>
+                    <p className="text-sm text-encantika-stone">{formatCLP(p.precio_base)}</p>
+                  </div>
+                </Link>
+              </FadeInItem>
+            )
+          })}
+        </FadeInStagger>
+        <FadeIn className="mt-12 text-center" delay={0.1}>
+          <Link href="/catalogo"
+            className="inline-block border border-onyx text-onyx text-xs tracking-[.12em] uppercase px-8 py-3 hover:bg-onyx hover:text-white transition-all duration-300">
+            Ver todo el catálogo
+          </Link>
+        </FadeIn>
+      </div>
+    </section>
+  ) : null
+
   // ── Layout landing ────────────────────────────────────────────────────────────
 
   if (layout === 'landing') {
@@ -237,68 +347,8 @@ export default async function StorePage() {
           productos={landingProductos}
           storageUrl={storageUrl}
         />
-        {colecciones.length > 0 && (
-          <section className="py-20 px-6 sm:px-8" style={{ backgroundColor: 'var(--color-tarjeta, #F5F0EB)' }}>
-            <div className="max-w-7xl mx-auto">
-              <FadeIn className="text-center mb-12">
-                <p className="text-[10px] uppercase tracking-[.22em] mb-2 text-gold">Encantika</p>
-                <h2 className="font-display text-4xl font-normal tracking-wide text-onyx">
-                  Nuestras colecciones
-                </h2>
-              </FadeIn>
-              <FadeInStagger
-                className={`grid gap-5 ${
-                  colecciones.length === 1 ? 'grid-cols-1 max-w-lg mx-auto' :
-                  colecciones.length === 2 ? 'grid-cols-1 sm:grid-cols-2' :
-                  'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-                }`}
-                staggerDelay={0.1}
-              >
-                {colecciones.map((col) => (
-                  <FadeInItem key={col.id}>
-                    <Link href={`/colecciones/${col.slug}`} className="group block bg-white overflow-hidden hover:shadow-md transition-shadow duration-300">
-                      <div className="relative aspect-[4/3] overflow-hidden bg-nude">
-                        {col.url_imagen ? (
-                          <img
-                            src={col.url_imagen}
-                            alt={col.nombre}
-                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <svg className="w-10 h-10 opacity-20" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
-                              <rect x="3" y="3" width="18" height="18" rx="2" />
-                              <circle cx="8.5" cy="8.5" r="1.5" />
-                              <path d="m21 15-5-5L5 21" />
-                            </svg>
-                          </div>
-                        )}
-                        {col._count > 0 && (
-                          <div className="absolute top-3 right-3 bg-white/90 px-2.5 py-1 text-[10px] tracking-[.1em] uppercase text-stone-600">
-                            {col._count} {col._count === 1 ? 'pieza' : 'piezas'}
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-5">
-                        <h3 className="font-display text-[22px] font-normal text-onyx leading-tight mb-2">
-                          {col.nombre}
-                        </h3>
-                        {col.descripcion && (
-                          <p className="text-[13px] text-encantika-stone leading-relaxed line-clamp-2">
-                            {col.descripcion}
-                          </p>
-                        )}
-                        <p className="mt-4 text-[11px] uppercase tracking-[.12em] text-gold group-hover:tracking-[.18em] transition-all duration-300">
-                          Ver colección →
-                        </p>
-                      </div>
-                    </Link>
-                  </FadeInItem>
-                ))}
-              </FadeInStagger>
-            </div>
-          </section>
-        )}
+        {coleccionesSection}
+        {productosSection}
         {bannerSection}
         {historiaSection}
       </>
@@ -461,124 +511,15 @@ export default async function StorePage() {
       </section>
 
       {/* ── Sección 3: Colecciones ────────────────────────────────────────── */}
-      {colecciones.length > 0 && (
-        <section className="py-20 px-6 sm:px-8" style={{ backgroundColor: 'var(--color-tarjeta, #F5F0EB)' }}>
-          <div className="max-w-7xl mx-auto">
-            <FadeIn className="text-center mb-12">
-              <p className="text-[10px] uppercase tracking-[.22em] mb-2 text-gold">Encantika</p>
-              <h2 className="font-display text-4xl font-normal tracking-wide text-onyx">
-                Nuestras colecciones
-              </h2>
-            </FadeIn>
-            <FadeInStagger
-              className={`grid gap-5 ${
-                colecciones.length === 1 ? 'grid-cols-1 max-w-lg mx-auto' :
-                colecciones.length === 2 ? 'grid-cols-1 sm:grid-cols-2' :
-                'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
-              }`}
-              staggerDelay={0.1}
-            >
-              {colecciones.map((col) => (
-                <FadeInItem key={col.id}>
-                  <Link href={`/colecciones/${col.slug}`} className="group block bg-white overflow-hidden hover:shadow-md transition-shadow duration-300">
-                    {/* Imagen o placeholder */}
-                    <div className="relative aspect-[4/3] overflow-hidden bg-nude">
-                      {col.url_imagen ? (
-                        <img
-                          src={col.url_imagen}
-                          alt={col.nombre}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
-                        />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <svg className="w-10 h-10 opacity-20" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
-                            <rect x="3" y="3" width="18" height="18" rx="2" />
-                            <circle cx="8.5" cy="8.5" r="1.5" />
-                            <path d="m21 15-5-5L5 21" />
-                          </svg>
-                        </div>
-                      )}
-                      {/* Badge cantidad */}
-                      {col._count > 0 && (
-                        <div className="absolute top-3 right-3 bg-white/90 px-2.5 py-1 text-[10px] tracking-[.1em] uppercase text-stone-600">
-                          {col._count} {col._count === 1 ? 'pieza' : 'piezas'}
-                        </div>
-                      )}
-                    </div>
-                    {/* Info */}
-                    <div className="p-5">
-                      <h3 className="font-display text-[22px] font-normal text-onyx leading-tight mb-2">
-                        {col.nombre}
-                      </h3>
-                      {col.descripcion && (
-                        <p className="text-[13px] text-encantika-stone leading-relaxed line-clamp-2">
-                          {col.descripcion}
-                        </p>
-                      )}
-                      <p className="mt-4 text-[11px] uppercase tracking-[.12em] text-gold group-hover:tracking-[.18em] transition-all duration-300">
-                        Ver colección →
-                      </p>
-                    </div>
-                  </Link>
-                </FadeInItem>
-              ))}
-            </FadeInStagger>
-          </div>
-        </section>
-      )}
+      {coleccionesSection}
 
-      {/* ── Sección 4: Destacados (condicional) ───────────────────────────── */}
-      {productos.length > 0 && (
-        <section className="bg-white py-20 px-6 sm:px-8">
-          <div className="max-w-7xl mx-auto">
-            <FadeIn className="text-center">
-              <h2 className="font-display text-4xl font-normal text-onyx tracking-wide">
-                Piezas destacadas
-              </h2>
-            </FadeIn>
-            <FadeInStagger className={`mt-12 grid gap-4 sm:gap-6 ${productGridCols}`} staggerDelay={0.07}>
-              {productos.map((p) => {
-                const ruta = getMainImage(
-                  (p.imagenes_producto as { ruta_almacenamiento: string; orden: number }[]) ?? []
-                )
-                const imgSrc = ruta ? `${storageUrl}/${ruta}` : null
-                const cat = (p.categorias as { nombre: string } | null)?.nombre
-                return (
-                  <FadeInItem key={p.id}>
-                    <Link href={`/catalogo/${p.slug}`} className="group block">
-                      <div className="relative aspect-square overflow-hidden bg-nude">
-                        {imgSrc ? (
-                          <Image src={imgSrc} alt={p.nombre} fill
-                            className="object-cover transition-transform duration-500 group-hover:scale-[1.03]"
-                            sizes="(max-width: 640px) 50vw, (max-width: 1024px) 25vw, 25vw" />
-                        ) : (
-                          <div className="absolute inset-0 bg-nude" />
-                        )}
-                      </div>
-                      <div className="mt-3 space-y-1">
-                        {cat && <p className="text-[10px] uppercase tracking-[.12em] text-encantika-stone">{cat}</p>}
-                        <h3 className="font-display text-xl text-onyx leading-tight">{p.nombre}</h3>
-                        <p className="text-sm text-encantika-stone">{formatCLP(p.precio_base)}</p>
-                      </div>
-                    </Link>
-                  </FadeInItem>
-                )
-              })}
-            </FadeInStagger>
-            <FadeIn className="mt-12 text-center" delay={0.1}>
-              <Link href="/catalogo"
-                className="inline-block border border-onyx text-onyx text-xs tracking-[.12em] uppercase px-8 py-3 hover:bg-onyx hover:text-white transition-all duration-300">
-                Ver todo el catálogo
-              </Link>
-            </FadeIn>
-          </div>
-        </section>
-      )}
+      {/* ── Sección 4: Destacados ─────────────────────────────────────────── */}
+      {productosSection}
 
-      {/* ── Sección 4: Banner "Arma tu joya" ──────────────────────────────── */}
+      {/* ── Sección 5: Banner "Arma tu joya" ──────────────────────────────── */}
       {bannerSection}
 
-      {/* ── Sección 5: Historia (condicional) ─────────────────────────────── */}
+      {/* ── Sección 6: Historia (condicional) ─────────────────────────────── */}
       {historiaSection}
     </>
   )
