@@ -96,6 +96,12 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
                 <path d="M15.5 15.5 L20 20" strokeLinecap="round" />
               </svg>
             </button>
+            <Link href="/administracion" className="hidden sm:flex p-1.5 text-encantika-stone hover:text-onyx transition-colors opacity-40 hover:opacity-100" aria-label="Administración">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <rect x="3" y="11" width="18" height="11" rx="2" />
+                <path d="M7 11V7a5 5 0 0 1 10 0v4" strokeLinecap="round" />
+              </svg>
+            </Link>
             <Link href="/carrito" className="hidden sm:flex p-1.5 text-encantika-stone hover:text-onyx transition-colors relative" aria-label="Carrito">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                 <path d="M6 2 L3 6 v14 a2 2 0 0 0 2 2 h14 a2 2 0 0 0 2-2 V6 l-3-4 z" strokeLinejoin="round" />
@@ -161,8 +167,11 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
             </nav>
             <div className="mt-auto px-6 pb-8">
               <Link href="/administracion" onClick={() => setIsOpen(false)}
-                className="text-[11px] text-encantika-stone hover:text-onyx transition-colors">
-                Administración
+                className="inline-flex p-1 text-stone-300 hover:text-stone-600 transition-colors" aria-label="Administración">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <rect x="3" y="11" width="18" height="11" rx="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" strokeLinecap="round" />
+                </svg>
               </Link>
             </div>
           </div>
