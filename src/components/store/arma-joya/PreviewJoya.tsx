@@ -77,8 +77,10 @@ function PreviewCollar({ selecciones }: { selecciones: Partial<Record<string, Co
   const dije = selecciones['dije']
   const signo = selecciones['signo_zodiacal']
 
+  // El material (piedra) determina el color de la cadena en el preview
+  const materialColor = piedra?.color_primario ?? null
   const cadenaColor = cadena
-    ? (cadena.sku.includes('ORO') ? GOLD : PLATA)
+    ? (materialColor ?? (cadena.sku.includes('ORO') ? GOLD : PLATA))
     : GHOST_STROKE
   const cadenaStroke = cadena ? 1.8 : 1
   const cadenaDash = cadena ? 'none' : '5,4'
@@ -218,8 +220,9 @@ function PreviewPulsera({ selecciones }: { selecciones: Partial<Record<string, C
   const piedra = selecciones['piedra']
   const dije = selecciones['dije']
 
+  const materialColor = piedra?.color_primario ?? null
   const cadenaColor = cadena
-    ? (cadena.sku.includes('ORO') ? GOLD : PLATA)
+    ? (materialColor ?? (cadena.sku.includes('ORO') ? GOLD : PLATA))
     : GHOST_STROKE
 
   return (
