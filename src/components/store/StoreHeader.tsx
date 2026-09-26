@@ -62,12 +62,12 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
   return (
     <>
       <header className={headerCls}>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-8 h-24 sm:h-28 flex items-center">
+        <div className="relative max-w-7xl mx-auto px-4 sm:px-8 h-16 sm:h-20 flex items-center">
           <Link href="/" className="sm:hidden absolute left-1/2 -translate-x-1/2">
-            <Image src="/logo.png" alt="Encantika" width={300} height={300} className="h-20 w-auto" priority />
+            <Image src="/logo.png" alt="Encantika" width={398} height={110} className="h-10 w-auto" priority />
           </Link>
           <Link href="/" className="hidden sm:block shrink-0 mr-12">
-            <Image src="/logo.png" alt="Encantika" width={300} height={300} className="h-28 w-auto" priority />
+            <Image src="/logo.png" alt="Encantika" width={398} height={110} className="h-12 w-auto" priority />
           </Link>
           <nav className="hidden sm:flex flex-1 items-center justify-center gap-10">
             {NAV_LINKS.map(({ label, href }) => {
