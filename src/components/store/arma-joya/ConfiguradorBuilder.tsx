@@ -246,8 +246,10 @@ export default function ConfiguradorBuilder({
                                 if (seleccionado?.id === comp.id) {
                                   onDeseleccionar(tipo.slug)
                                 } else {
-                                  // Seleccionar cadena limpia la piedra
+                                  // Seleccionar cadena limpia piedra; dije y signo zodiacal se excluyen
                                   if (tipo.slug === 'cadena') onDeseleccionar('piedra')
+                                  if (tipo.slug === 'dije') onDeseleccionar('signo_zodiacal')
+                                  if (tipo.slug === 'signo_zodiacal') onDeseleccionar('dije')
                                   onSeleccionar(tipo.slug, comp)
                                 }
                               }}
