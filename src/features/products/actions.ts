@@ -23,9 +23,10 @@ const productoSchema = z.object({
 
 function parseFormData(formData: FormData, nombreOverride?: string) {
   const nombre = (nombreOverride ?? formData.get('nombre')) as string
+  const slugRaw = (formData.get('slug') as string) || nombre
   return productoSchema.safeParse({
     nombre,
-    slug: (formData.get('slug') as string) || generateSlug(nombre),
+    slug: generateSlug(slugRaw),
     precio_base: formData.get('precio_base'),
     estado: formData.get('estado'),
     tipo_producto: (formData.get('tipo_producto') as string) || 'terminado',
