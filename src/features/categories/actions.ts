@@ -39,3 +39,31 @@ export async function toggleCategoria(id: string, activo: boolean): Promise<Acti
   revalidatePath('/administracion/categorias')
   return { success: 'Categoría actualizada' }
 }
+
+export async function updateCategoria(id: string, nombre: string): Promise<ActionState> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  const trimmed = nombre.trim()
+  if (!trimmed) return { error: 'El nombre no puede estar vacío' }
+
+  const slug = generateSlug(trimmed)
+  const admin = createAdminClient()
+  const { error } = await admin.from('categorias').update({ nombre: trimmed, slug }).eq('id', id)
+  if (error) return { error: 'Error al actualizar la categoría' }
+  revalidatePath('/administracion/categorias')
+  return { success: 'Categoría actualizada' }
+}
+
+export async function deleteCategoria(id: string): Promise<ActionState> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'No autorizado' }
+
+  const admin = createAdminClient()
+  const { error } = await admin.from('categorias').delete().eq('id', id)
+  if (error) return { error: 'Error al eliminar la categoría' }
+  revalidatePath('/administracion/categorias')
+  return { success: 'Categoría eliminada' }
+}
