@@ -8,6 +8,7 @@ import { FadeIn, FadeInStagger, FadeInItem } from '@/components/store/FadeIn'
 import StatsCounter from '@/components/store/StatsCounter'
 import LandingHero from '@/components/store/LandingHero'
 import LandingCategoriasSection, { type ProductoLanding } from '@/components/store/LandingCategoriasSection'
+import { getColeccionesActivas } from '@/features/collections/queries'
 
 // ── Íconos de categoría ────────────────────────────────────────────────────────
 
@@ -62,7 +63,7 @@ export default async function StorePage() {
   const supabase = await createClient()
   const admin = createAdminClient()
 
-  const [{ data: productosRaw }, { data: configRaw }] = await Promise.all([
+  const [{ data: productosRaw }, { data: configRaw }, colecciones] = await Promise.all([
     supabase
       .from('productos')
       .select(`
@@ -78,6 +79,7 @@ export default async function StorePage() {
       .from('configuracion_tienda')
       .select('nombre_tienda, historia, mostrar_historia, hero_imagen_id, hero_posicion, banner_joya_imagen_id, banner_joya_posicion, historia_imagen_id, historia_posicion, layout')
       .single(),
+    getColeccionesActivas(),
   ])
 
   const config = configRaw as {
@@ -396,7 +398,74 @@ export default async function StorePage() {
         </div>
       </section>
 
-      {/* ── Sección 3: Destacados (condicional) ───────────────────────────── */}
+      {/* ── Sección 3: Colecciones ────────────────────────────────────────── */}
+      {colecciones.length > 0 && (
+        <section className="py-20 px-6 sm:px-8" style={{ backgroundColor: 'var(--color-tarjeta, #F5F0EB)' }}>
+          <div className="max-w-7xl mx-auto">
+            <FadeIn className="text-center mb-12">
+              <p className="text-[10px] uppercase tracking-[.22em] mb-2 text-gold">Encantika</p>
+              <h2 className="font-display text-4xl font-normal tracking-wide text-onyx">
+                Nuestras colecciones
+              </h2>
+            </FadeIn>
+            <FadeInStagger
+              className={`grid gap-5 ${
+                colecciones.length === 1 ? 'grid-cols-1 max-w-lg mx-auto' :
+                colecciones.length === 2 ? 'grid-cols-1 sm:grid-cols-2' :
+                'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+              }`}
+              staggerDelay={0.1}
+            >
+              {colecciones.map((col) => (
+                <FadeInItem key={col.id}>
+                  <Link href={`/colecciones/${col.slug}`} className="group block bg-white overflow-hidden hover:shadow-md transition-shadow duration-300">
+                    {/* Imagen o placeholder */}
+                    <div className="relative aspect-[4/3] overflow-hidden bg-nude">
+                      {col.url_imagen ? (
+                        <img
+                          src={col.url_imagen}
+                          alt={col.nombre}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <svg className="w-10 h-10 opacity-20" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <path d="m21 15-5-5L5 21" />
+                          </svg>
+                        </div>
+                      )}
+                      {/* Badge cantidad */}
+                      {col._count > 0 && (
+                        <div className="absolute top-3 right-3 bg-white/90 px-2.5 py-1 text-[10px] tracking-[.1em] uppercase text-stone-600">
+                          {col._count} {col._count === 1 ? 'pieza' : 'piezas'}
+                        </div>
+                      )}
+                    </div>
+                    {/* Info */}
+                    <div className="p-5">
+                      <h3 className="font-display text-[22px] font-normal text-onyx leading-tight mb-2">
+                        {col.nombre}
+                      </h3>
+                      {col.descripcion && (
+                        <p className="text-[13px] text-encantika-stone leading-relaxed line-clamp-2">
+                          {col.descripcion}
+                        </p>
+                      )}
+                      <p className="mt-4 text-[11px] uppercase tracking-[.12em] text-gold group-hover:tracking-[.18em] transition-all duration-300">
+                        Ver colección →
+                      </p>
+                    </div>
+                  </Link>
+                </FadeInItem>
+              ))}
+            </FadeInStagger>
+          </div>
+        </section>
+      )}
+
+      {/* ── Sección 4: Destacados (condicional) ───────────────────────────── */}
       {productos.length > 0 && (
         <section className="bg-white py-20 px-6 sm:px-8">
           <div className="max-w-7xl mx-auto">
