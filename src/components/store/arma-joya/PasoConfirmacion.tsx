@@ -30,12 +30,12 @@ export default function PasoConfirmacion({
 
   return (
     <div
-      className="relative min-h-screen flex flex-col items-center justify-center px-5 py-16"
+      className="relative min-h-full flex flex-col items-center justify-center px-5 py-16"
       style={{ background: '#0C0A08' }}
     >
       {/* Halo de fondo */}
       <div
-        className="fixed inset-0 pointer-events-none"
+        className="absolute inset-0 pointer-events-none"
         style={{
           background:
             'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(201,160,53,0.06) 0%, transparent 70%)',

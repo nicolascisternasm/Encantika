@@ -63,12 +63,12 @@ export default function ConfiguradorPasos({
   if (!tipoActual) return null
 
   return (
-    <div className="relative min-h-screen" style={{ background: '#0C0A08' }}>
+    <div className="relative min-h-full" style={{ background: '#0C0A08' }}>
       {/* Fondo dinámico */}
       <FondoDinamico selecciones={selecciones} />
 
       {/* Contenido — por encima del fondo */}
-      <div className="relative z-10 flex flex-col min-h-screen lg:flex-row">
+      <div className="relative z-10 flex flex-col min-h-full lg:flex-row">
 
         {/* ── Panel izquierdo: preview (sticky en desktop, fijo en mobile) ── */}
         <div className="lg:sticky lg:top-0 lg:h-screen lg:w-[42%] flex flex-col">

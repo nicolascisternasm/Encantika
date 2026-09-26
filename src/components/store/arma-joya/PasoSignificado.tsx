@@ -41,10 +41,10 @@ export default function PasoSignificado({
   }, [])
 
   return (
-    <div className="relative min-h-screen" style={{ background: '#0C0A08' }}>
+    <div className="relative min-h-full" style={{ background: '#0C0A08' }}>
       <FondoDinamico selecciones={selecciones} />
 
-      <div className="relative z-10 min-h-screen flex flex-col">
+      <div className="relative z-10 min-h-full flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-5 pt-5 pb-3 lg:px-10 lg:pt-8">
           <button

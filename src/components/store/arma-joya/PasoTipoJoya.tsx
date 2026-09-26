@@ -82,7 +82,7 @@ export default function PasoTipoJoya({ tipos, onSeleccionar }: Props) {
 
   return (
     <div
-      className="relative min-h-screen overflow-hidden flex flex-col"
+      className="relative min-h-full overflow-hidden flex flex-col"
       style={{ background: '#0C0A08' }}
     >
       {/* Fondo — halo dorado superior */}
