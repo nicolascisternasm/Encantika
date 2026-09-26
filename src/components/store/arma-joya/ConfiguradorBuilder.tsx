@@ -155,102 +155,165 @@ export default function ConfiguradorBuilder({
       {/* ── Panel derecho: categorías + opciones ────────────────────────── */}
       <div className="relative z-10 flex-1 flex flex-col overflow-y-auto">
         <div className="flex-1 px-5 py-6 lg:px-8 lg:py-8 space-y-8">
-          {tiposComponente.map((tipo) => {
-            const opciones = componentes.filter((c) => c.tipo_componente_id === tipo.id)
-            if (opciones.length === 0) return null
-            const seleccionado = selecciones[tipo.slug]
+          {tiposComponente
+            // piedra se renderiza dentro de la sección cadena, no por separado
+            .filter((tipo) => tipo.slug !== 'piedra')
+            .map((tipo) => {
+              const opciones = componentes.filter((c) => c.tipo_componente_id === tipo.id)
+              if (opciones.length === 0) return null
+              const seleccionado = selecciones[tipo.slug]
 
-            return (
-              <div key={tipo.id}>
-                {/* Título de categoría */}
-                <div className="flex items-center gap-3 mb-3">
-                  <p className="text-[11px] uppercase tracking-[.18em]" style={{ color: 'rgba(201,160,53,0.7)' }}>
-                    {tipo.nombre}
-                  </p>
-                  {!tipo.es_obligatorio && (
-                    <span className="text-[9px] uppercase tracking-[.1em] px-1.5 py-0.5 rounded"
-                      style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(245,240,235,0.25)' }}>
-                      Opcional
-                    </span>
+              // Para cadena, también incluimos las opciones de piedra abajo
+              const tipoPiedra = tipo.slug === 'cadena'
+                ? tiposComponente.find((t) => t.slug === 'piedra')
+                : null
+              const opcionesPiedra = tipoPiedra
+                ? componentes.filter((c) => c.tipo_componente_id === tipoPiedra.id)
+                : []
+              const seleccionadoPiedra = tipoPiedra ? selecciones[tipoPiedra.slug] : undefined
+
+              return (
+                <div key={tipo.id}>
+                  {/* Título de categoría */}
+                  <div className="flex items-center gap-3 mb-3">
+                    <p className="text-[11px] uppercase tracking-[.18em]" style={{ color: 'rgba(201,160,53,0.7)' }}>
+                      {tipo.nombre}
+                    </p>
+                    {!tipo.es_obligatorio && (
+                      <span className="text-[9px] uppercase tracking-[.1em] px-1.5 py-0.5 rounded"
+                        style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(245,240,235,0.25)' }}>
+                        Opcional
+                      </span>
+                    )}
+                    {seleccionado && (
+                      <button
+                        onClick={() => onDeseleccionar(tipo.slug)}
+                        className="ml-auto text-[9px] uppercase tracking-[.08em] opacity-40 hover:opacity-80 transition-opacity"
+                        style={{ color: '#F5F0EB' }}
+                      >
+                        Quitar
+                      </button>
+                    )}
+                  </div>
+
+                  {/* Opciones según tipo */}
+                  {tipo.slug === 'largo' ? (
+                    /* Largo: lista de píldoras compactas */
+                    <div className="flex flex-wrap gap-2">
+                      {opciones.map((comp) => {
+                        const activo = seleccionado?.id === comp.id
+                        return (
+                          <motion.button
+                            key={comp.id}
+                            layout
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            onClick={() => activo ? onDeseleccionar(tipo.slug) : onSeleccionar(tipo.slug, comp)}
+                            className="px-3 py-1.5 text-[12px] transition-all duration-200 whitespace-nowrap"
+                            style={{
+                              background: activo ? 'rgba(201,160,53,0.15)' : 'rgba(255,255,255,0.04)',
+                              border: `1px solid ${activo ? 'rgba(201,160,53,0.6)' : 'rgba(255,255,255,0.1)'}`,
+                              color: activo ? '#F5F0EB' : 'rgba(245,240,235,0.55)',
+                            }}
+                          >
+                            {comp.nombre}
+                            {config.mostrar_precio && comp.precio > 0 && (
+                              <span className="ml-1.5 text-[10px]" style={{ color: 'rgba(201,160,53,0.7)' }}>
+                                {formatCLP(comp.precio)}
+                              </span>
+                            )}
+                          </motion.button>
+                        )
+                      })}
+                    </div>
+                  ) : (
+                    <AnimatePresence mode="popLayout">
+                      <div className={`grid gap-2 ${
+                        tipo.slug === 'signo_zodiacal' ? 'grid-cols-4 sm:grid-cols-6' :
+                        'grid-cols-2 sm:grid-cols-3'
+                      }`}>
+                        {opciones.map((comp) => (
+                          <motion.div
+                            key={comp.id}
+                            layout
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ duration: 0.2 }}
+                          >
+                            <OpcionComponente
+                              comp={comp}
+                              seleccionado={seleccionado?.id === comp.id}
+                              config={config}
+                              ocultarHolistica={tipo.slug === 'signo_zodiacal'}
+                              onHover={tipo.slug === 'signo_zodiacal' ? setHoveredZodiacal : undefined}
+                              onSeleccionar={() => {
+                                if (seleccionado?.id === comp.id) {
+                                  onDeseleccionar(tipo.slug)
+                                } else {
+                                  onSeleccionar(tipo.slug, comp)
+                                }
+                              }}
+                            />
+                          </motion.div>
+                        ))}
+                      </div>
+                    </AnimatePresence>
                   )}
-                  {seleccionado && (
-                    <button
-                      onClick={() => onDeseleccionar(tipo.slug)}
-                      className="ml-auto text-[9px] uppercase tracking-[.08em] opacity-40 hover:opacity-80 transition-opacity"
-                      style={{ color: '#F5F0EB' }}
-                    >
-                      Quitar
-                    </button>
+
+                  {/* Piedras dentro de la sección cadena */}
+                  {tipoPiedra && opcionesPiedra.length > 0 && (
+                    <div className="mt-4">
+                      <div className="flex items-center gap-3 mb-3">
+                        <p className="text-[10px] uppercase tracking-[.15em]" style={{ color: 'rgba(201,160,53,0.5)' }}>
+                          {tipoPiedra.nombre}
+                        </p>
+                        {!tipoPiedra.es_obligatorio && (
+                          <span className="text-[9px] uppercase tracking-[.1em] px-1.5 py-0.5 rounded"
+                            style={{ background: 'rgba(255,255,255,0.05)', color: 'rgba(245,240,235,0.25)' }}>
+                            Opcional
+                          </span>
+                        )}
+                        {seleccionadoPiedra && (
+                          <button
+                            onClick={() => onDeseleccionar(tipoPiedra.slug)}
+                            className="ml-auto text-[9px] uppercase tracking-[.08em] opacity-40 hover:opacity-80 transition-opacity"
+                            style={{ color: '#F5F0EB' }}
+                          >
+                            Quitar
+                          </button>
+                        )}
+                      </div>
+                      <AnimatePresence mode="popLayout">
+                        <div className="grid gap-2 grid-cols-3 sm:grid-cols-5">
+                          {opcionesPiedra.map((comp) => (
+                            <motion.div
+                              key={comp.id}
+                              layout
+                              initial={{ opacity: 0, scale: 0.95 }}
+                              animate={{ opacity: 1, scale: 1 }}
+                              transition={{ duration: 0.2 }}
+                            >
+                              <OpcionComponente
+                                comp={comp}
+                                seleccionado={seleccionadoPiedra?.id === comp.id}
+                                config={config}
+                                onSeleccionar={() => {
+                                  if (seleccionadoPiedra?.id === comp.id) {
+                                    onDeseleccionar(tipoPiedra.slug)
+                                  } else {
+                                    onSeleccionar(tipoPiedra.slug, comp)
+                                  }
+                                }}
+                              />
+                            </motion.div>
+                          ))}
+                        </div>
+                      </AnimatePresence>
+                    </div>
                   )}
                 </div>
-
-                {/* Opciones según tipo */}
-                {tipo.slug === 'largo' ? (
-                  /* Largo: lista de píldoras compactas */
-                  <div className="flex flex-wrap gap-2">
-                    {opciones.map((comp) => {
-                      const activo = seleccionado?.id === comp.id
-                      return (
-                        <motion.button
-                          key={comp.id}
-                          layout
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          onClick={() => activo ? onDeseleccionar(tipo.slug) : onSeleccionar(tipo.slug, comp)}
-                          className="px-3 py-1.5 text-[12px] transition-all duration-200 whitespace-nowrap"
-                          style={{
-                            background: activo ? 'rgba(201,160,53,0.15)' : 'rgba(255,255,255,0.04)',
-                            border: `1px solid ${activo ? 'rgba(201,160,53,0.6)' : 'rgba(255,255,255,0.1)'}`,
-                            color: activo ? '#F5F0EB' : 'rgba(245,240,235,0.55)',
-                          }}
-                        >
-                          {comp.nombre}
-                          {config.mostrar_precio && comp.precio > 0 && (
-                            <span className="ml-1.5 text-[10px]" style={{ color: 'rgba(201,160,53,0.7)' }}>
-                              {formatCLP(comp.precio)}
-                            </span>
-                          )}
-                        </motion.button>
-                      )
-                    })}
-                  </div>
-                ) : (
-                  <AnimatePresence mode="popLayout">
-                    <div className={`grid gap-2 ${
-                      tipo.slug === 'signo_zodiacal' ? 'grid-cols-4 sm:grid-cols-6' :
-                      tipo.slug === 'piedra' ? 'grid-cols-3 sm:grid-cols-5' :
-                      'grid-cols-2 sm:grid-cols-3'
-                    }`}>
-                      {opciones.map((comp) => (
-                        <motion.div
-                          key={comp.id}
-                          layout
-                          initial={{ opacity: 0, scale: 0.95 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ duration: 0.2 }}
-                        >
-                          <OpcionComponente
-                            comp={comp}
-                            seleccionado={seleccionado?.id === comp.id}
-                            config={config}
-                            ocultarHolistica={tipo.slug === 'signo_zodiacal'}
-                            onHover={tipo.slug === 'signo_zodiacal' ? setHoveredZodiacal : undefined}
-                            onSeleccionar={() => {
-                              if (seleccionado?.id === comp.id) {
-                                onDeseleccionar(tipo.slug)
-                              } else {
-                                onSeleccionar(tipo.slug, comp)
-                              }
-                            }}
-                          />
-                        </motion.div>
-                      ))}
-                    </div>
-                  </AnimatePresence>
-                )}
-              </div>
-            )
-          })}
+              )
+            })}
         </div>
 
         {/* CTA sticky bottom */}
