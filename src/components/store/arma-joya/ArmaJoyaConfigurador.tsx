@@ -1,9 +1,12 @@
 'use client'
 
-import { useReducer } from 'react'
+import { useReducer, useState } from 'react'
 import type { TipoJoya, TipoComponente, Componente, ConfiguradorState } from '@/features/arma-joya/types'
+import { generarSignificadoIA } from '@/app/actions/arma-joya-ia'
 import PasoTipoJoya from './PasoTipoJoya'
 import ConfiguradorPasos from './ConfiguradorPasos'
+import PasoPersonalizacion from './PasoPersonalizacion'
+import PasoSignificado from './PasoSignificado'
 
 // ── Estado global del configurador ────────────────────────────────────────────
 
@@ -71,12 +74,45 @@ type Props = {
 
 export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], componentes = [] }: Props) {
   const [estado, dispatch] = useReducer(reducer, estadoInicial)
+  const [cargandoIA, setCargandoIA] = useState(false)
 
   function seleccionarTipo(tipo: TipoJoya) {
     dispatch({ type: 'SELECCIONAR_TIPO', payload: tipo })
   }
 
-  // Paso 0: selección de tipo de joya
+  async function handlePersonalizacion(datos: {
+    nombreReceptor: string
+    esRegalo: boolean
+    intencionTexto: string
+  }) {
+    if (!estado.tipoJoya) return
+    setCargandoIA(true)
+
+    dispatch({ type: 'SET_RECEPTOR', nombre: datos.nombreReceptor, esRegalo: datos.esRegalo })
+    dispatch({ type: 'SET_INTENCION', texto: datos.intencionTexto })
+
+    try {
+      const compsList = Object.values(estado.selecciones).filter(Boolean) as Componente[]
+      const resultado = await generarSignificadoIA({
+        tipoJoya: estado.tipoJoya.nombre,
+        componentes: compsList,
+        nombreReceptor: datos.nombreReceptor,
+        esRegalo: datos.esRegalo,
+        intencionTexto: datos.intencionTexto,
+      })
+      dispatch({ type: 'SET_SIGNIFICADO_IA', texto: resultado.significadoIA })
+      dispatch({ type: 'SET_TARJETA', texto: resultado.tarjetaTexto })
+      dispatch({ type: 'IR_PASO', paso: 3 })
+    } catch {
+      // Fallback: avanzar sin IA
+      dispatch({ type: 'IR_PASO', paso: 3 })
+    } finally {
+      setCargandoIA(false)
+    }
+  }
+
+  // ── Paso 0: selección de tipo de joya ─────────────────────────────────────
+
   if (estado.paso === 0) {
     return (
       <PasoTipoJoya
@@ -86,12 +122,13 @@ export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], comp
     )
   }
 
-  // Paso 1: configurador de componentes
+  // ── Paso 1: configurador de componentes ───────────────────────────────────
+
   if (estado.paso === 1 && estado.tipoJoya) {
-    const tiposParaEsteJoya = (tiposComponente ?? []).filter((t) =>
+    const tiposParaEsteJoya = tiposComponente.filter((t) =>
       t.tipos_joya_aplicables.includes(estado.tipoJoya!.slug)
     )
-    const componentesParaEsteJoya = (componentes ?? []).filter((c) =>
+    const componentesParaEsteJoya = componentes.filter((c) =>
       tiposParaEsteJoya.some((t) => t.id === c.tipo_componente_id)
     )
     return (
@@ -112,18 +149,51 @@ export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], comp
     )
   }
 
-  // Pasos 2+: personalización y resumen (Etapas 5+)
+  // ── Paso 2: personalización + llamada IA ──────────────────────────────────
+
+  if (estado.paso === 2 && estado.tipoJoya) {
+    return (
+      <PasoPersonalizacion
+        tipoJoya={estado.tipoJoya}
+        selecciones={estado.selecciones}
+        onVolver={() => dispatch({ type: 'IR_PASO', paso: 1 })}
+        onContinuar={handlePersonalizacion}
+        cargando={cargandoIA}
+      />
+    )
+  }
+
+  // ── Paso 3: significado generado por IA ───────────────────────────────────
+
+  if (estado.paso === 3 && estado.tipoJoya) {
+    return (
+      <PasoSignificado
+        tipoJoya={estado.tipoJoya}
+        selecciones={estado.selecciones}
+        significadoIA={estado.significadoIA}
+        tarjetaTexto={estado.tarjetaTexto}
+        nombreReceptor={estado.nombreReceptor}
+        esRegalo={estado.esRegalo}
+        onVolver={() => dispatch({ type: 'IR_PASO', paso: 2 })}
+        onContinuar={() => dispatch({ type: 'IR_PASO', paso: 4 })}
+      />
+    )
+  }
+
+  // ── Paso 4+: orden (Etapa 8) ──────────────────────────────────────────────
+
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ background: '#0C0A08' }}>
-      <div className="text-center space-y-4">
-        <p className="text-white/40 text-sm">
-          Personalización para <strong className="text-gold">{estado.tipoJoya?.nombre}</strong>
+      <div className="text-center space-y-4 px-5">
+        <p className="text-[13px]" style={{ color: 'rgba(245,240,235,0.4)' }}>
+          Guardando tu diseño… (Etapa 8)
         </p>
         <button
-          onClick={() => dispatch({ type: 'IR_PASO', paso: 1 })}
-          className="text-xs text-white/30 hover:text-white/60 transition-colors"
+          onClick={() => dispatch({ type: 'IR_PASO', paso: 3 })}
+          className="text-[12px] transition-opacity opacity-40 hover:opacity-70"
+          style={{ color: '#F5F0EB' }}
         >
-          ← Volver al configurador
+          ← Volver al resumen
         </button>
       </div>
     </div>
