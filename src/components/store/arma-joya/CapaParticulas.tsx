@@ -255,7 +255,7 @@ export default function CapaParticulas({ componente, index, visible }: Props) {
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 pointer-events-none"
+      className="absolute inset-0 pointer-events-none"
       style={{ zIndex: 2 + index }}
     />
   )

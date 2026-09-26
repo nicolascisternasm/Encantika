@@ -30,7 +30,7 @@ export default function FondoDinamico({ selecciones }: Props) {
   return (
     <>
       {/* Gradientes de atmósfera */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" style={{ background: '#0C0A08' }}>
+      <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ background: '#0C0A08' }}>
         {/* Halo dorado base (siempre presente) */}
         <div
           className="absolute inset-0"
