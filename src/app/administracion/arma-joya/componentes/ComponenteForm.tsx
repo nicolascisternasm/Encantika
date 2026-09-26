@@ -35,7 +35,7 @@ export default function ComponenteForm({ tiposComponente, inicial = {} }: Props)
     color: inicial.color ?? '',
     precio: inicial.precio ?? 0,
     stock: inicial.stock ?? 0,
-    url_imagen: (inicial as ComponenteFormData & { url_imagen?: string }).url_imagen ?? '',
+    url_imagen: inicial.url_imagen ?? '',
     color_primario: inicial.color_primario ?? '#C9A035',
     color_secundario: inicial.color_secundario ?? '',
     color_acento: inicial.color_acento ?? '',

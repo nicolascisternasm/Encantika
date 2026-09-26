@@ -37,6 +37,7 @@ export default async function EditarComponentePage({
         color: comp.color ?? '',
         precio: comp.precio,
         stock: comp.stock,
+        url_imagen: comp.url_imagen ?? '',
         color_primario: comp.color_primario ?? '',
         color_secundario: comp.color_secundario ?? '',
         color_acento: comp.color_acento ?? '',
