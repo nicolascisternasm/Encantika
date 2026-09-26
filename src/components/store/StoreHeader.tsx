@@ -102,7 +102,7 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
                 <path d="M7 11V7a5 5 0 0 1 10 0v4" strokeLinecap="round" />
               </svg>
             </Link>
-            <Link href="/carrito" className="hidden sm:flex p-1.5 text-encantika-stone hover:text-onyx transition-colors relative" aria-label="Carrito">
+            <Link href="/carrito" className="flex p-1.5 text-encantika-stone hover:text-onyx transition-colors relative" aria-label="Carrito">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                 <path d="M6 2 L3 6 v14 a2 2 0 0 0 2 2 h14 a2 2 0 0 0 2-2 V6 l-3-4 z" strokeLinejoin="round" />
                 <line x1="3" y1="6" x2="21" y2="6" />
@@ -155,15 +155,6 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
                   </Link>
                 )
               })}
-              <Link href="/carrito" onClick={() => setIsOpen(false)}
-                className="text-sm tracking-[.10em] uppercase text-stone-600 hover:text-onyx transition-colors flex items-center gap-2">
-                Carrito
-                {cartCount > 0 && (
-                  <span className="min-w-[18px] h-[18px] px-0.5 bg-onyx text-ivory text-[9px] font-medium flex items-center justify-center rounded-full leading-none">
-                    {cartCount > 9 ? '9+' : cartCount}
-                  </span>
-                )}
-              </Link>
             </nav>
             <div className="mt-auto px-6 pb-8">
               <Link href="/administracion" onClick={() => setIsOpen(false)}
