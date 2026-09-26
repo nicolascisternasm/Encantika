@@ -32,15 +32,14 @@ export default function ConfiguradorBuilder({
   onVolver,
   onAprobar,
 }: Props) {
-  const [hoveredZodiacal, setHoveredZodiacal] = useState<Componente | null>(null)
+  const [hoveredComp, setHoveredComp] = useState<Componente | null>(null)
 
   const seleccionados = Object.values(selecciones).filter(Boolean) as Componente[]
   const precioTotal = seleccionados.reduce((s, c) => s + c.precio, 0)
   const haySeleccion = seleccionados.length > 0
 
-  // Para el panel izquierdo: mostrar desc_holistica del signo que se está mirando o el seleccionado
-  const zodiacalActivo = hoveredZodiacal ?? (selecciones['signo_zodiacal'] ?? null)
-  const descZodiacal = zodiacalActivo?.desc_holistica ?? null
+  // Muestra desc_holistica del componente bajo el cursor en el panel izquierdo
+  const descActiva = hoveredComp?.desc_holistica ?? null
 
   return (
     <div className="relative min-h-full flex flex-col lg:flex-row" style={{ background: '#0C0A08' }}>
@@ -127,11 +126,11 @@ export default function ConfiguradorBuilder({
           )}
         </div>
 
-        {/* Descripción zodiacal (aparece al pasar el cursor sobre un signo) */}
+        {/* Descripción holística (aparece al pasar el cursor sobre cualquier componente) */}
         <AnimatePresence>
-          {descZodiacal && (
+          {descActiva && (
             <motion.div
-              key={zodiacalActivo?.id}
+              key={hoveredComp?.id}
               initial={{ opacity: 0, y: 6 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 6 }}
@@ -139,13 +138,11 @@ export default function ConfiguradorBuilder({
               className="shrink-0 mx-5 lg:mx-8 mb-4 mt-2 p-3"
               style={{ border: '1px solid rgba(201,160,53,0.15)', background: 'rgba(201,160,53,0.04)' }}
             >
-              {zodiacalActivo && (
-                <p className="text-[10px] uppercase tracking-[.12em] mb-1.5" style={{ color: 'rgba(201,160,53,0.6)' }}>
-                  {zodiacalActivo.nombre}
-                </p>
-              )}
+              <p className="text-[10px] uppercase tracking-[.12em] mb-1.5" style={{ color: 'rgba(201,160,53,0.6)' }}>
+                {hoveredComp?.nombre}
+              </p>
               <p className="text-[11px] leading-relaxed italic" style={{ color: 'rgba(245,240,235,0.45)' }}>
-                {descZodiacal}
+                {descActiva}
               </p>
             </motion.div>
           )}
@@ -208,6 +205,8 @@ export default function ConfiguradorBuilder({
                             layout
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
+                            onMouseEnter={() => setHoveredComp(comp)}
+                            onMouseLeave={() => setHoveredComp(null)}
                             onClick={() => activo ? onDeseleccionar(tipo.slug) : onSeleccionar(tipo.slug, comp)}
                             className="px-3 py-1.5 text-[12px] transition-all duration-200 whitespace-nowrap"
                             style={{
@@ -244,8 +243,8 @@ export default function ConfiguradorBuilder({
                               comp={comp}
                               seleccionado={seleccionado?.id === comp.id}
                               config={config}
-                              ocultarHolistica={tipo.slug === 'signo_zodiacal'}
-                              onHover={tipo.slug === 'signo_zodiacal' ? setHoveredZodiacal : undefined}
+                              ocultarHolistica
+                              onHover={setHoveredComp}
                               onSeleccionar={() => {
                                 if (seleccionado?.id === comp.id) {
                                   onDeseleccionar(tipo.slug)
@@ -297,6 +296,8 @@ export default function ConfiguradorBuilder({
                                 comp={comp}
                                 seleccionado={seleccionadoPiedra?.id === comp.id}
                                 config={config}
+                                ocultarHolistica
+                                onHover={setHoveredComp}
                                 onSeleccionar={() => {
                                   if (seleccionadoPiedra?.id === comp.id) {
                                     onDeseleccionar(tipoPiedra.slug)
