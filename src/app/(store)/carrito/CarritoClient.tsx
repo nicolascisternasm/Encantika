@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import ArmaJoyaLink from '@/components/store/ArmaJoyaLink'
 import { formatCLP } from '@/lib/utils'
 import {
   obtenerCarrito,
@@ -265,12 +266,11 @@ export default function CarritoClient({ whatsapp, candidatos }: Props) {
           >
             Ver colección
           </Link>
-          <Link
-            href="/arma-tu-joya"
+          <ArmaJoyaLink
             className="px-8 py-4 text-xs tracking-[.15em] uppercase font-medium border border-stone-300 text-stone-700 hover:border-onyx hover:text-onyx transition-colors duration-200"
           >
             Arma tu joya
-          </Link>
+          </ArmaJoyaLink>
         </div>
       </main>
     )

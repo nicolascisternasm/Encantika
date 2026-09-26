@@ -70,11 +70,12 @@ type Props = {
   tipos: TipoJoya[]
   tiposComponente?: TipoComponente[]
   componentes?: Componente[]
+  onCerrar?: () => void
 }
 
 // ── Configurador ──────────────────────────────────────────────────────────────
 
-export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], componentes = [] }: Props) {
+export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], componentes = [], onCerrar }: Props) {
   const [estado, dispatch] = useReducer(reducer, estadoInicial)
   const [cargandoIA, setCargandoIA] = useState(false)
   const [configuracionId, setConfiguracionId] = useState<string | null>(null)
@@ -223,6 +224,7 @@ export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], comp
           setConfiguracionId(null)
           dispatch({ type: 'REINICIAR' })
         }}
+        onCerrar={onCerrar}
       />
     )
   }

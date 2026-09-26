@@ -8,6 +8,8 @@ import StoreSidebar from '@/components/store/StoreSidebar'
 import WhatsAppButton from '@/components/store/WhatsAppButton'
 import PageLoader from '@/components/store/PageLoader'
 import { getTema, getFuente } from '@/lib/temas'
+import { ArmaJoyaModalProvider } from '@/context/ArmaJoyaModal'
+import ArmaJoyaLink from '@/components/store/ArmaJoyaLink'
 
 const cormorant = Cormorant_Garamond({
   variable: '--font-cormorant',
@@ -20,7 +22,6 @@ const FOOTER_NAV = [
   { label: 'Home', href: '/' },
   { label: 'Nosotros', href: '/nosotros' },
   { label: 'Joyas', href: '/catalogo' },
-  { label: 'Arma tu joya', href: '/arma-tu-joya' },
   { label: 'Contacto', href: '/contacto' },
 ]
 
@@ -194,6 +195,9 @@ export default async function StoreLayout({ children }: { children: React.ReactN
                 {label}
               </Link>
             ))}
+            <ArmaJoyaLink as="a" className="text-[11px] transition-colors hover:text-white" style={{ color: '#555' }}>
+              Arma tu joya
+            </ArmaJoyaLink>
           </div>
           <Link href="/administracion" className="text-[11px] transition-colors hover:text-white" style={{ color: '#444' }}>
             © 2026 Encantika
@@ -207,29 +211,33 @@ export default async function StoreLayout({ children }: { children: React.ReactN
 
   if (isLateral) {
     return (
-      <div className={`${cormorant.variable} flex flex-row min-h-screen`} style={themeStyle}>
-        {fontLinks}
-        <PageLoader />
-        <StoreSidebar />
-        <div className="flex flex-col flex-1 min-w-0 bg-ivory">
-          <main className="flex-1">{children}</main>
-          {footer}
+      <ArmaJoyaModalProvider>
+        <div className={`${cormorant.variable} flex flex-row min-h-screen`} style={themeStyle}>
+          {fontLinks}
+          <PageLoader />
+          <StoreSidebar />
+          <div className="flex flex-col flex-1 min-w-0 bg-ivory">
+            <main className="flex-1">{children}</main>
+            {footer}
+          </div>
+          {whatsapp}
+          <Toaster position="top-center" />
         </div>
-        {whatsapp}
-        <Toaster position="top-center" />
-      </div>
+      </ArmaJoyaModalProvider>
     )
   }
 
   return (
-    <div className={`${cormorant.variable} flex flex-col min-h-screen bg-ivory`} style={themeStyle}>
-      {fontLinks}
-      <PageLoader />
-      <StoreHeader variant={headerVariant} />
-      <main className="flex-1">{children}</main>
-      {footer}
-      {whatsapp}
-      <Toaster position="top-center" />
-    </div>
+    <ArmaJoyaModalProvider>
+      <div className={`${cormorant.variable} flex flex-col min-h-screen bg-ivory`} style={themeStyle}>
+        {fontLinks}
+        <PageLoader />
+        <StoreHeader variant={headerVariant} />
+        <main className="flex-1">{children}</main>
+        {footer}
+        {whatsapp}
+        <Toaster position="top-center" />
+      </div>
+    </ArmaJoyaModalProvider>
   )
 }

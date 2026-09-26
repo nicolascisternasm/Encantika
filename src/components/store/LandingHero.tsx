@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
+import ArmaJoyaLink from '@/components/store/ArmaJoyaLink'
 
 const ease = [0.22, 1, 0.36, 1] as const
 
@@ -82,8 +83,7 @@ export default function LandingHero({ heroUrl, heroPos }: Props) {
           >
             Ver colección
           </Link>
-          <Link
-            href="/arma-tu-joya"
+          <ArmaJoyaLink
             className="inline-block text-xs tracking-[.12em] uppercase px-8 py-3 transition-all duration-300 hover:opacity-70"
             style={{
               backgroundColor: 'var(--color-acento, #C9A035)',
@@ -91,7 +91,7 @@ export default function LandingHero({ heroUrl, heroPos }: Props) {
             }}
           >
             Arma tu joya
-          </Link>
+          </ArmaJoyaLink>
         </motion.div>
       </div>
     </section>

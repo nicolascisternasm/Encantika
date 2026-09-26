@@ -8,6 +8,7 @@ import { FadeIn, FadeInStagger, FadeInItem } from '@/components/store/FadeIn'
 import StatsCounter from '@/components/store/StatsCounter'
 import LandingHero from '@/components/store/LandingHero'
 import LandingCategoriasSection, { type ProductoLanding } from '@/components/store/LandingCategoriasSection'
+import ArmaJoyaLink from '@/components/store/ArmaJoyaLink'
 import { getColeccionesActivas } from '@/features/collections/queries'
 
 // ── Íconos de categoría ────────────────────────────────────────────────────────
@@ -193,10 +194,10 @@ export default async function StorePage() {
           Crea tu joya única
         </h2>
         <p className="mt-4 text-white/85 text-base">Elige cada detalle y diseña la pieza perfecta para ti</p>
-        <Link href="/arma-tu-joya"
+        <ArmaJoyaLink
           className="inline-block mt-8 border border-white text-white text-xs tracking-[.12em] uppercase px-8 py-3 hover:bg-white hover:text-onyx transition-all duration-300">
           Comenzar ahora
-        </Link>
+        </ArmaJoyaLink>
       </FadeIn>
     </section>
   )

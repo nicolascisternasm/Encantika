@@ -11,6 +11,7 @@ type Props = {
   esRegalo: boolean
   tarjetaTexto: string
   onNuevaJoya: () => void
+  onCerrar?: () => void
 }
 
 export default function PasoConfirmacion({
@@ -18,6 +19,7 @@ export default function PasoConfirmacion({
   selecciones,
   configuracionId,
   nombreReceptor,
+  onCerrar,
   esRegalo,
   tarjetaTexto,
   onNuevaJoya,
@@ -159,16 +161,23 @@ export default function PasoConfirmacion({
           >
             Crear otra joya
           </button>
-          <a
-            href="/"
-            className="w-full py-3 text-[12px] uppercase tracking-[.12em] text-center transition-all duration-200"
-            style={{
-              border: '1px solid rgba(255,255,255,0.08)',
-              color: 'rgba(245,240,235,0.4)',
-            }}
-          >
-            Volver al inicio
-          </a>
+          {onCerrar ? (
+            <button
+              onClick={onCerrar}
+              className="w-full py-3 text-[12px] uppercase tracking-[.12em] text-center transition-all duration-200"
+              style={{ border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(245,240,235,0.4)' }}
+            >
+              Volver al inicio
+            </button>
+          ) : (
+            <a
+              href="/"
+              className="w-full py-3 text-[12px] uppercase tracking-[.12em] text-center transition-all duration-200"
+              style={{ border: '1px solid rgba(255,255,255,0.08)', color: 'rgba(245,240,235,0.4)' }}
+            >
+              Volver al inicio
+            </a>
+          )}
         </motion.div>
       </div>
     </div>
