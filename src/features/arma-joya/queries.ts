@@ -2,6 +2,35 @@ import 'server-only'
 import { createClient } from '@/lib/supabase/server'
 import type { TipoJoya, TipoComponente, Componente } from './types'
 
+export async function getAllComponentesYTipos(): Promise<{
+  tiposComponente: TipoComponente[]
+  componentes: Componente[]
+}> {
+  const supabase = await createClient()
+  const [{ data: tipos }, { data: comps }] = await Promise.all([
+    supabase.from('tipo_componentes').select('*').order('orden_configurador'),
+    supabase
+      .from('componentes')
+      .select(`id, sku, nombre, descripcion, tipo_componente_id,
+               material, color, precio, stock,
+               url_imagen, url_imagen_capa,
+               color_primario, color_secundario, color_acento,
+               estilo_energia, intensidad, textura, estilo_particulas,
+               desc_holistica, tradicion, orden,
+               tipo_componentes!inner(slug)`)
+      .eq('activo', true)
+      .gt('stock', 0)
+      .order('orden'),
+  ])
+  return {
+    tiposComponente: (tipos ?? []) as TipoComponente[],
+    componentes: (comps ?? []).map((c) => {
+      const { tipo_componentes, ...rest } = c as typeof c & { tipo_componentes: { slug: string } }
+      return { ...rest, tipo_componente_slug: tipo_componentes.slug } as Componente
+    }),
+  }
+}
+
 export async function getTiposJoyaActivos(): Promise<TipoJoya[]> {
   const supabase = await createClient()
   const { data, error } = await supabase

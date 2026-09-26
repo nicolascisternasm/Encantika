@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { getTiposJoyaActivos } from '@/features/arma-joya/queries'
+import { getTiposJoyaActivos, getAllComponentesYTipos } from '@/features/arma-joya/queries'
 import ArmaJoyaConfigurador from '@/components/store/arma-joya/ArmaJoyaConfigurador'
 
 export const metadata: Metadata = {
@@ -8,6 +8,15 @@ export const metadata: Metadata = {
 }
 
 export default async function ArmaJoyaPage() {
-  const tipos = await getTiposJoyaActivos()
-  return <ArmaJoyaConfigurador tipos={tipos} />
+  const [tipos, { tiposComponente, componentes }] = await Promise.all([
+    getTiposJoyaActivos(),
+    getAllComponentesYTipos(),
+  ])
+  return (
+    <ArmaJoyaConfigurador
+      tipos={tipos}
+      tiposComponente={tiposComponente}
+      componentes={componentes}
+    />
+  )
 }
