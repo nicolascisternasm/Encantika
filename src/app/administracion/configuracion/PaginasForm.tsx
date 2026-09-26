@@ -192,87 +192,81 @@ export default function PaginasForm({ nosotros, seccion1: s1, seccion2: s2, secc
         ))}
       </div>
 
-      {/* Pestaña Nosotros */}
-      {activeTab === 'nosotros' && (
-        <div className="space-y-4 max-w-2xl">
-          <SectionTitle>Encabezado</SectionTitle>
-          <Field label="Título" name="nosotros_titulo" defaultValue={nosotros.titulo} placeholder="Nuestra historia" />
-          <Field label="Subtítulo" name="nosotros_subtitulo" defaultValue={nosotros.subtitulo} placeholder="Joyas hechas con amor…" />
+      {/* Pestaña Nosotros — siempre en DOM, se oculta con CSS */}
+      <div className={`space-y-4 max-w-2xl${activeTab !== 'nosotros' ? ' hidden' : ''}`}>
+        <SectionTitle>Encabezado</SectionTitle>
+        <Field label="Título" name="nosotros_titulo" defaultValue={nosotros.titulo} placeholder="Nuestra historia" />
+        <Field label="Subtítulo" name="nosotros_subtitulo" defaultValue={nosotros.subtitulo} placeholder="Joyas hechas con amor…" />
 
-          <SectionTitle>Historia y visión</SectionTitle>
-          <TextareaField label="Nuestra historia" name="nosotros_historia" defaultValue={nosotros.historia} rows={5} />
-          <TextareaField label="Nuestra visión" name="nosotros_vision" defaultValue={nosotros.vision} rows={3} />
+        <SectionTitle>Historia y visión</SectionTitle>
+        <TextareaField label="Nuestra historia" name="nosotros_historia" defaultValue={nosotros.historia} rows={5} />
+        <TextareaField label="Nuestra visión" name="nosotros_vision" defaultValue={nosotros.vision} rows={3} />
 
-          <SectionTitle>Sección 1</SectionTitle>
-          <Field label="Título" name="nosotros_seccion1_titulo" defaultValue={nosotros.seccion1_titulo} placeholder="Creadas con amor" />
-          <TextareaField label="Texto" name="nosotros_seccion1_texto" defaultValue={nosotros.seccion1_texto} />
-          <ImagenSelector
-            label="Imagen"
-            seccionKey="seccion1"
-            imagenUrl={img1.imagenUrl}
-            onSelect={img => setImg1({ imagenId: img.id, imagenUrl: img.url })}
-          />
+        <SectionTitle>Sección 1</SectionTitle>
+        <Field label="Título" name="nosotros_seccion1_titulo" defaultValue={nosotros.seccion1_titulo} placeholder="Creadas con amor" />
+        <TextareaField label="Texto" name="nosotros_seccion1_texto" defaultValue={nosotros.seccion1_texto} />
+        <ImagenSelector
+          label="Imagen"
+          seccionKey="seccion1"
+          imagenUrl={img1.imagenUrl}
+          onSelect={img => setImg1({ imagenId: img.id, imagenUrl: img.url })}
+        />
 
-          <SectionTitle>Sección 2</SectionTitle>
-          <Field label="Título" name="nosotros_seccion2_titulo" defaultValue={nosotros.seccion2_titulo} placeholder="Materiales de calidad" />
-          <TextareaField label="Texto" name="nosotros_seccion2_texto" defaultValue={nosotros.seccion2_texto} />
-          <ImagenSelector
-            label="Imagen"
-            seccionKey="seccion2"
-            imagenUrl={img2.imagenUrl}
-            onSelect={img => setImg2({ imagenId: img.id, imagenUrl: img.url })}
-          />
+        <SectionTitle>Sección 2</SectionTitle>
+        <Field label="Título" name="nosotros_seccion2_titulo" defaultValue={nosotros.seccion2_titulo} placeholder="Materiales de calidad" />
+        <TextareaField label="Texto" name="nosotros_seccion2_texto" defaultValue={nosotros.seccion2_texto} />
+        <ImagenSelector
+          label="Imagen"
+          seccionKey="seccion2"
+          imagenUrl={img2.imagenUrl}
+          onSelect={img => setImg2({ imagenId: img.id, imagenUrl: img.url })}
+        />
 
-          <SectionTitle>Sección 3</SectionTitle>
-          <Field label="Título" name="nosotros_seccion3_titulo" defaultValue={nosotros.seccion3_titulo} placeholder="Para momentos únicos" />
-          <TextareaField label="Texto" name="nosotros_seccion3_texto" defaultValue={nosotros.seccion3_texto} />
-          <ImagenSelector
-            label="Imagen"
-            seccionKey="seccion3"
-            imagenUrl={img3.imagenUrl}
-            onSelect={img => setImg3({ imagenId: img.id, imagenUrl: img.url })}
+        <SectionTitle>Sección 3</SectionTitle>
+        <Field label="Título" name="nosotros_seccion3_titulo" defaultValue={nosotros.seccion3_titulo} placeholder="Para momentos únicos" />
+        <TextareaField label="Texto" name="nosotros_seccion3_texto" defaultValue={nosotros.seccion3_texto} />
+        <ImagenSelector
+          label="Imagen"
+          seccionKey="seccion3"
+          imagenUrl={img3.imagenUrl}
+          onSelect={img => setImg3({ imagenId: img.id, imagenUrl: img.url })}
+        />
+      </div>
+
+      {/* Pestaña Footer — siempre en DOM */}
+      <div className={`space-y-4 max-w-2xl${activeTab !== 'footer' ? ' hidden' : ''}`}>
+        <SectionTitle>Información del footer</SectionTitle>
+        <TextareaField
+          label="Horario"
+          name="footer_horario"
+          defaultValue={footer.horario}
+          rows={2}
+          placeholder="Lunes a viernes: 9:00 - 18:00 hrs"
+        />
+        <Field label="Dirección" name="footer_direccion" defaultValue={footer.direccion} placeholder="Santiago, Chile · Solo venta online" />
+        <Field label="Teléfono" name="footer_telefono" defaultValue={footer.telefono} placeholder="+56 9 XXXX XXXX" />
+      </div>
+
+      {/* Pestaña Contacto — siempre en DOM */}
+      <div className={`space-y-4 max-w-2xl${activeTab !== 'contacto' ? ' hidden' : ''}`}>
+        <SectionTitle>Página de contacto</SectionTitle>
+        <Field label="Título" name="contacto_titulo" defaultValue={contacto.titulo} placeholder="¿Tienes alguna pregunta?" />
+        <TextareaField label="Subtítulo" name="contacto_subtitulo" defaultValue={contacto.subtitulo} rows={2} />
+        <Field label="Email de contacto" name="contacto_email" defaultValue={contacto.email} placeholder="contacto@encantika.cl" />
+        <div>
+          <label className="block text-xs tracking-widests uppercase text-stone-500 mb-1">URL embed Google Maps</label>
+          <p className="text-[11px] text-stone-400 mb-1.5">
+            En Google Maps → Compartir → Insertar mapa → copia solo el valor del atributo <code className="bg-stone-100 px-1">src="..."</code>
+          </p>
+          <textarea
+            name="contacto_maps_url"
+            rows={3}
+            defaultValue={contacto.maps_url ?? ''}
+            placeholder="https://www.google.com/maps/embed?pb=..."
+            className="w-full px-3 py-2 border border-sand text-sm text-stone-800 focus:outline-none focus:border-gold transition-colors resize-none font-mono text-[11px]"
           />
         </div>
-      )}
-
-      {/* Pestaña Footer */}
-      {activeTab === 'footer' && (
-        <div className="space-y-4 max-w-2xl">
-          <SectionTitle>Información del footer</SectionTitle>
-          <TextareaField
-            label="Horario"
-            name="footer_horario"
-            defaultValue={footer.horario}
-            rows={2}
-            placeholder="Lunes a viernes: 9:00 - 18:00 hrs"
-          />
-          <Field label="Dirección" name="footer_direccion" defaultValue={footer.direccion} placeholder="Santiago, Chile · Solo venta online" />
-          <Field label="Teléfono" name="footer_telefono" defaultValue={footer.telefono} placeholder="+56 9 XXXX XXXX" />
-        </div>
-      )}
-
-      {/* Pestaña Contacto */}
-      {activeTab === 'contacto' && (
-        <div className="space-y-4 max-w-2xl">
-          <SectionTitle>Página de contacto</SectionTitle>
-          <Field label="Título" name="contacto_titulo" defaultValue={contacto.titulo} placeholder="¿Tienes alguna pregunta?" />
-          <TextareaField label="Subtítulo" name="contacto_subtitulo" defaultValue={contacto.subtitulo} rows={2} />
-          <Field label="Email de contacto" name="contacto_email" defaultValue={contacto.email} placeholder="contacto@encantika.cl" />
-          <div>
-            <label className="block text-xs tracking-widests uppercase text-stone-500 mb-1">URL embed Google Maps</label>
-            <p className="text-[11px] text-stone-400 mb-1.5">
-              En Google Maps → Compartir → Insertar mapa → copia solo el valor del atributo <code className="bg-stone-100 px-1">src="..."</code>
-            </p>
-            <textarea
-              name="contacto_maps_url"
-              rows={3}
-              defaultValue={contacto.maps_url ?? ''}
-              placeholder="https://www.google.com/maps/embed?pb=..."
-              className="w-full px-3 py-2 border border-sand text-sm text-stone-800 focus:outline-none focus:border-gold transition-colors resize-none font-mono text-[11px]"
-            />
-          </div>
-        </div>
-      )}
+      </div>
 
       <div className="pt-6">
         <button

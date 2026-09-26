@@ -39,8 +39,8 @@ export default function ConfigTabs({ settingsForm, paginasForm }: ConfigTabsProp
         </button>
       </div>
 
-      {activeTab === 'general' && settingsForm}
-      {activeTab === 'paginas' && paginasForm}
+      <div className={activeTab !== 'general' ? 'hidden' : ''}>{settingsForm}</div>
+      <div className={activeTab !== 'paginas' ? 'hidden' : ''}>{paginasForm}</div>
     </div>
   )
 }
