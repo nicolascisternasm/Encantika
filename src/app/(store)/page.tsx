@@ -263,12 +263,12 @@ export default async function StorePage() {
             Ver colección
           </Link>
         </div>
-        <div className="hidden md:block md:w-[55%] relative">
+        <div className="hidden md:block md:w-[55%] relative overflow-hidden">
           <Image
             src={heroUrl ?? '/hero-1.jpg'}
             alt="Encantika — Brilla con magia"
             fill
-            className="object-cover"
+            className="object-cover animate-kenburns"
             style={{ objectPosition: heroPos }}
             sizes="55vw"
             priority
@@ -284,7 +284,7 @@ export default async function StorePage() {
           src={heroUrl ?? '/hero-1.jpg'}
           alt="Encantika — Brilla con magia"
           fill
-          className="object-cover"
+          className="object-cover animate-kenburns"
           style={{ objectPosition: heroPos }}
           sizes="100vw"
           priority
@@ -310,7 +310,7 @@ export default async function StorePage() {
           src={heroUrl ?? '/hero-1.jpg'}
           alt="Encantika — Brilla con magia"
           fill
-          className="object-cover"
+          className="object-cover animate-kenburns"
           style={{ objectPosition: heroPos }}
           sizes="100vw"
           priority
@@ -339,7 +339,7 @@ export default async function StorePage() {
           src={heroUrl ?? '/hero-1.jpg'}
           alt="Encantika — Brilla con magia"
           fill
-          className="object-cover"
+          className="object-cover animate-kenburns"
           style={{ objectPosition: heroPos }}
           sizes="100vw"
           priority

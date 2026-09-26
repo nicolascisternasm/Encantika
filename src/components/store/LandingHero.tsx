@@ -26,8 +26,8 @@ export default function LandingHero({ heroUrl, heroPos }: Props) {
           src={heroUrl ?? '/hero-1.jpg'}
           alt="Encantika — Brilla con magia"
           fill
-          className="object-cover"
-          style={{ objectPosition: heroPos }}
+          className="object-cover animate-kenburns"
+          style={{ objectPosition: heroPos, animationDelay: '1.3s' }}
           sizes="(max-width: 768px) 100vw, 55vw"
           priority
           unoptimized={!!heroUrl}
