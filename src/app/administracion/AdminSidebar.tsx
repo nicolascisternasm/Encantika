@@ -84,6 +84,10 @@ export default function AdminSidebar({ userEmail, fullName, consultasNoLeidas = 
           className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs">
           Componentes
         </a>
+        <a href="/administracion/arma-joya/configuracion"
+          className="block px-3 py-2 pl-6 text-stone-500 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors text-xs">
+          Configuración
+        </a>
         <a href="/administracion/configuracion"
           className="block px-3 py-2 text-stone-600 hover:text-stone-900 hover:bg-stone-50 rounded transition-colors">
           Configuración

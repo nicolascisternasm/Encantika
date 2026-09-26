@@ -28,6 +28,7 @@ export type ComponenteFormData = {
   color: string
   precio: number
   stock: number
+  url_imagen?: string
   color_primario: string
   color_secundario: string
   color_acento: string
@@ -53,6 +54,7 @@ export async function guardarComponente(data: ComponenteFormData): Promise<{ id:
     color: data.color.trim() || null,
     precio: data.precio,
     stock: data.stock,
+    url_imagen: data.url_imagen ?? null,
     color_primario: data.color_primario || null,
     color_secundario: data.color_secundario || null,
     color_acento: data.color_acento || null,

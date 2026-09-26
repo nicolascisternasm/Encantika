@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, useCallback, useRef, ty
 import { createPortal } from 'react-dom'
 import { fetchArmaJoyaData } from '@/app/actions/arma-joya-data'
 import type { TipoJoya, TipoComponente, Componente } from '@/features/arma-joya/types'
+import type { ConfigArmaJoya } from '@/app/actions/arma-joya-configuracion'
 
 // ── Tipos ─────────────────────────────────────────────────────────────────────
 
@@ -11,6 +12,7 @@ type ModalData = {
   tipos: TipoJoya[]
   tiposComponente: TipoComponente[]
   componentes: Componente[]
+  config: ConfigArmaJoya
 }
 
 type ModalCtx = {
@@ -110,6 +112,7 @@ function ModalOverlay({
     tipos: TipoJoya[]
     tiposComponente: TipoComponente[]
     componentes: Componente[]
+    config: ConfigArmaJoya
     onCerrar: () => void
   }> | null>(null)
 
@@ -159,6 +162,7 @@ function ModalOverlay({
             tipos={data.tipos}
             tiposComponente={data.tiposComponente}
             componentes={data.componentes}
+            config={data.config}
             onCerrar={onCerrar}
           />
         )}

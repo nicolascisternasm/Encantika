@@ -4,14 +4,16 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatCLP } from '@/lib/utils'
 import type { Componente } from '@/features/arma-joya/types'
+import type { ConfigArmaJoya } from '@/app/actions/arma-joya-configuracion'
 
 type Props = {
   comp: Componente
   seleccionado: boolean
+  config: ConfigArmaJoya
   onSeleccionar: () => void
 }
 
-export default function OpcionComponente({ comp, seleccionado, onSeleccionar }: Props) {
+export default function OpcionComponente({ comp, seleccionado, config, onSeleccionar }: Props) {
   const [expandido, setExpandido] = useState(false)
   const hasHolistica = Boolean(comp.desc_holistica)
 
@@ -73,7 +75,12 @@ export default function OpcionComponente({ comp, seleccionado, onSeleccionar }: 
           style={{ color: seleccionado ? '#F5F0EB' : 'rgba(245,240,235,0.75)' }}>
           {comp.nombre}
         </p>
-        {comp.precio > 0 && (
+        {config.mostrar_descripcion && comp.descripcion && (
+          <p className="text-[10px] mt-0.5 leading-snug" style={{ color: 'rgba(245,240,235,0.4)' }}>
+            {comp.descripcion}
+          </p>
+        )}
+        {config.mostrar_precio && comp.precio > 0 && (
           <p className="text-[11px] mt-0.5" style={{ color: 'rgba(201,160,53,0.8)' }}>
             {formatCLP(comp.precio)}
           </p>

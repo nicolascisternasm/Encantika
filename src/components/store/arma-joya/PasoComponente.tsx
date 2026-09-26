@@ -2,16 +2,18 @@
 
 import { motion } from 'framer-motion'
 import type { TipoComponente, Componente } from '@/features/arma-joya/types'
+import type { ConfigArmaJoya } from '@/app/actions/arma-joya-configuracion'
 import OpcionComponente from './OpcionComponente'
 
 type Props = {
   tipoComponente: TipoComponente
   opciones: Componente[]
   seleccionado: Componente | undefined
+  config: ConfigArmaJoya
   onSeleccionar: (comp: Componente) => void
 }
 
-export default function PasoComponente({ tipoComponente, opciones, seleccionado, onSeleccionar }: Props) {
+export default function PasoComponente({ tipoComponente, opciones, seleccionado, config, onSeleccionar }: Props) {
   if (opciones.length === 0) {
     return (
       <div className="flex items-center justify-center py-16">
@@ -49,6 +51,7 @@ export default function PasoComponente({ tipoComponente, opciones, seleccionado,
             <OpcionComponente
               comp={comp}
               seleccionado={seleccionado?.id === comp.id}
+              config={config}
               onSeleccionar={() => onSeleccionar(comp)}
             />
           </motion.div>

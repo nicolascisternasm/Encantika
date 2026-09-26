@@ -2,6 +2,7 @@
 
 import { useReducer, useState } from 'react'
 import type { TipoJoya, TipoComponente, Componente, ConfiguradorState } from '@/features/arma-joya/types'
+import type { ConfigArmaJoya } from '@/app/actions/arma-joya-configuracion'
 import { generarSignificadoIA } from '@/app/actions/arma-joya-ia'
 import { guardarConfiguracion } from '@/app/actions/arma-joya-guardar'
 import PasoTipoJoya from './PasoTipoJoya'
@@ -70,12 +71,15 @@ type Props = {
   tipos: TipoJoya[]
   tiposComponente?: TipoComponente[]
   componentes?: Componente[]
+  config?: ConfigArmaJoya
   onCerrar?: () => void
 }
 
+const CONFIG_DEFAULT: ConfigArmaJoya = { mostrar_precio: true, mostrar_descripcion: false }
+
 // ── Configurador ──────────────────────────────────────────────────────────────
 
-export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], componentes = [], onCerrar }: Props) {
+export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], componentes = [], config = CONFIG_DEFAULT, onCerrar }: Props) {
   const [estado, dispatch] = useReducer(reducer, estadoInicial)
   const [cargandoIA, setCargandoIA] = useState(false)
   const [configuracionId, setConfiguracionId] = useState<string | null>(null)
@@ -142,6 +146,7 @@ export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], comp
         tiposComponente={tiposParaEsteJoya}
         componentes={componentesParaEsteJoya}
         selecciones={estado.selecciones}
+        config={config}
         onSeleccionar={(tipoSlug, comp) =>
           dispatch({ type: 'SELECCIONAR_COMPONENTE', tipoSlug, componente: comp })
         }

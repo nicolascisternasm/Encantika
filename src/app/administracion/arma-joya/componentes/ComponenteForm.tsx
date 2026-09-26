@@ -2,6 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
+import { createClient } from '@/lib/supabase/client'
 import { guardarComponente, eliminarComponente, type ComponenteFormData } from '@/app/actions/arma-joya-componentes'
 
 type TipoComp = { id: string; nombre: string; slug: string }
@@ -21,6 +23,8 @@ export default function ComponenteForm({ tiposComponente, inicial = {} }: Props)
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState('')
 
+  const [uploadingImg, setUploadingImg] = useState(false)
+
   const [form, setForm] = useState<ComponenteFormData>({
     id: inicial.id,
     sku: inicial.sku ?? '',
@@ -31,6 +35,7 @@ export default function ComponenteForm({ tiposComponente, inicial = {} }: Props)
     color: inicial.color ?? '',
     precio: inicial.precio ?? 0,
     stock: inicial.stock ?? 0,
+    url_imagen: (inicial as ComponenteFormData & { url_imagen?: string }).url_imagen ?? '',
     color_primario: inicial.color_primario ?? '#C9A035',
     color_secundario: inicial.color_secundario ?? '',
     color_acento: inicial.color_acento ?? '',
@@ -77,6 +82,27 @@ export default function ComponenteForm({ tiposComponente, inicial = {} }: Props)
         setError(e instanceof Error ? e.message : 'Error al eliminar')
       }
     })
+  }
+
+  async function handleImagenUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingImg(true)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop()
+      const path = `componentes/${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`
+      const { data, error } = await supabase.storage
+        .from('imagenes-componentes')
+        .upload(path, file, { contentType: file.type, upsert: true })
+      if (error) throw error
+      const { data: urlData } = supabase.storage.from('imagenes-componentes').getPublicUrl(data.path)
+      set('url_imagen', urlData.publicUrl)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al subir imagen')
+    } finally {
+      setUploadingImg(false)
+    }
   }
 
   const isEditing = Boolean(form.id)
@@ -211,6 +237,51 @@ export default function ComponenteForm({ tiposComponente, inicial = {} }: Props)
               className="w-4 h-4 accent-stone-300"
             />
             <label htmlFor="activo" className="text-sm text-stone-400">Componente activo (visible en la tienda)</label>
+          </div>
+        </Section>
+
+        {/* ── Imagen del componente ── */}
+        <Section title="Imagen del componente">
+          <p className="text-xs text-stone-500 mb-3">
+            Sube una foto sin fondo (PNG transparente). Se mostrará en la tarjeta del configurador.
+          </p>
+          <div className="flex items-start gap-4">
+            {/* Preview */}
+            <div
+              className="w-24 h-24 rounded border border-stone-700 flex items-center justify-center shrink-0 overflow-hidden"
+              style={{ background: 'repeating-conic-gradient(#2a2520 0% 25%, #1a1512 0% 50%) 0 0 / 12px 12px' }}
+            >
+              {form.url_imagen ? (
+                <Image src={form.url_imagen} alt="preview" width={96} height={96} className="w-full h-full object-contain" unoptimized />
+              ) : (
+                <svg className="w-8 h-8 text-stone-600" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
+                  <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />
+                </svg>
+              )}
+            </div>
+            <div className="flex-1">
+              <label className="block cursor-pointer">
+                <span className="inline-block px-4 py-2 text-xs uppercase tracking-wider border border-stone-600 text-stone-300 hover:border-stone-400 hover:text-white transition-colors rounded">
+                  {uploadingImg ? 'Subiendo…' : 'Elegir imagen'}
+                </span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="sr-only"
+                  disabled={uploadingImg}
+                  onChange={handleImagenUpload}
+                />
+              </label>
+              {form.url_imagen && (
+                <button
+                  type="button"
+                  onClick={() => set('url_imagen', '')}
+                  className="mt-2 block text-xs text-red-500 hover:text-red-400 transition-colors"
+                >
+                  Quitar imagen
+                </button>
+              )}
+            </div>
           </div>
         </Section>
 

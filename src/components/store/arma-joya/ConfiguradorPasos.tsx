@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatCLP } from '@/lib/utils'
 import type { TipoJoya, TipoComponente, Componente, ConfiguradorSelecciones } from '@/features/arma-joya/types'
+import type { ConfigArmaJoya } from '@/app/actions/arma-joya-configuracion'
 import FondoDinamico from './FondoDinamico'
 import PreviewJoya from './PreviewJoya'
 import PasoComponente from './PasoComponente'
@@ -13,6 +14,7 @@ type Props = {
   tiposComponente: TipoComponente[]
   componentes: Componente[]
   selecciones: ConfiguradorSelecciones
+  config: ConfigArmaJoya
   onSeleccionar: (tipoSlug: string, comp: Componente) => void
   onDeseleccionar: (tipoSlug: string) => void
   onVolver: () => void
@@ -24,6 +26,7 @@ export default function ConfiguradorPasos({
   tiposComponente,
   componentes,
   selecciones,
+  config,
   onSeleccionar,
   onVolver,
   onFinalizar,
@@ -203,6 +206,7 @@ export default function ConfiguradorPasos({
                   tipoComponente={tipoActual}
                   opciones={opcionesActuales}
                   seleccionado={seleccionActual}
+                  config={config}
                   onSeleccionar={(comp) => onSeleccionar(tipoActual.slug, comp)}
                 />
               </motion.div>
