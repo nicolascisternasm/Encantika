@@ -1,11 +1,4 @@
-﻿node.exe : WARN: config section [inbucket] is deprecated. Please use [local_smtp] instead.
-En línea: 1 Carácter: 1
-+ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
-+ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    + CategoryInfo          : NotSpecified: (WARN: config se..._smtp] instead.:String) [], RemoteException
-    + FullyQualifiedErrorId : NativeCommandError
- 
-export type Json =
+﻿export type Json =
   | string
   | number
   | boolean
@@ -1707,6 +1700,3 @@ export const Constants = {
     Enums: {},
   },
 } as const
-A new version of Supabase CLI is available: v2.118.0 (currently installed v2.117.0)
-We recommend updating regularly for new features and bug fixes: 
-https://supabase.com/docs/guides/cli/getting-started#updating-the-supabase-cli
