@@ -25,8 +25,8 @@ export default function ContactoFormClient() {
 
   if (state.success) {
     return (
-      <div className="border border-stone-200 p-8 text-center space-y-3">
-        <div className="w-12 h-12 rounded-full bg-stone-100 flex items-center justify-center mx-auto">
+      <div className="py-10 text-center space-y-3">
+        <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto" style={{ backgroundColor: 'var(--color-fondo,#FFFDF9)' }}>
           <svg className="w-6 h-6 text-stone-600" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
             <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
