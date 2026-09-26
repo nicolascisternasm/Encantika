@@ -3,15 +3,13 @@
 import { useReducer, useState } from 'react'
 import type { TipoJoya, TipoComponente, Componente, ConfiguradorState } from '@/features/arma-joya/types'
 import type { ConfigArmaJoya } from '@/app/actions/arma-joya-configuracion'
-import { generarSignificadoIA } from '@/app/actions/arma-joya-ia'
+import { describirDisenoIA } from '@/app/actions/arma-joya-ia'
 import { guardarConfiguracion } from '@/app/actions/arma-joya-guardar'
 import PasoTipoJoya from './PasoTipoJoya'
-import ConfiguradorPasos from './ConfiguradorPasos'
-import PasoPersonalizacion from './PasoPersonalizacion'
-import PasoSignificado from './PasoSignificado'
-import PasoConfirmacion from './PasoConfirmacion'
+import ConfiguradorBuilder from './ConfiguradorBuilder'
+import PasoResultado from './PasoResultado'
 
-// ── Estado global del configurador ────────────────────────────────────────────
+// ── Estado ────────────────────────────────────────────────────────────────────
 
 const estadoInicial: ConfiguradorState = {
   paso: 0,
@@ -29,10 +27,7 @@ type Accion =
   | { type: 'SELECCIONAR_COMPONENTE'; tipoSlug: string; componente: Componente }
   | { type: 'DESELECCIONAR_COMPONENTE'; tipoSlug: string }
   | { type: 'IR_PASO'; paso: number }
-  | { type: 'SET_RECEPTOR'; nombre: string; esRegalo: boolean }
-  | { type: 'SET_INTENCION'; texto: string }
-  | { type: 'SET_SIGNIFICADO_IA'; texto: string }
-  | { type: 'SET_TARJETA'; texto: string }
+  | { type: 'SET_DESCRIPCION_IA'; texto: string }
   | { type: 'REINICIAR' }
 
 function reducer(state: ConfiguradorState, accion: Accion): ConfiguradorState {
@@ -40,24 +35,15 @@ function reducer(state: ConfiguradorState, accion: Accion): ConfiguradorState {
     case 'SELECCIONAR_TIPO':
       return { ...estadoInicial, paso: 1, tipoJoya: accion.payload }
     case 'SELECCIONAR_COMPONENTE':
-      return {
-        ...state,
-        selecciones: { ...state.selecciones, [accion.tipoSlug]: accion.componente },
-      }
+      return { ...state, selecciones: { ...state.selecciones, [accion.tipoSlug]: accion.componente } }
     case 'DESELECCIONAR_COMPONENTE': {
       const { [accion.tipoSlug]: _, ...resto } = state.selecciones
       return { ...state, selecciones: resto }
     }
     case 'IR_PASO':
       return { ...state, paso: accion.paso }
-    case 'SET_RECEPTOR':
-      return { ...state, nombreReceptor: accion.nombre, esRegalo: accion.esRegalo }
-    case 'SET_INTENCION':
-      return { ...state, intencionTexto: accion.texto }
-    case 'SET_SIGNIFICADO_IA':
+    case 'SET_DESCRIPCION_IA':
       return { ...state, significadoIA: accion.texto }
-    case 'SET_TARJETA':
-      return { ...state, tarjetaTexto: accion.texto }
     case 'REINICIAR':
       return estadoInicial
     default:
@@ -79,59 +65,29 @@ const CONFIG_DEFAULT: ConfigArmaJoya = { mostrar_precio: true, mostrar_descripci
 
 // ── Configurador ──────────────────────────────────────────────────────────────
 
-export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], componentes = [], config = CONFIG_DEFAULT, onCerrar }: Props) {
+export default function ArmaJoyaConfigurador({
+  tipos,
+  tiposComponente = [],
+  componentes = [],
+  config = CONFIG_DEFAULT,
+  onCerrar,
+}: Props) {
   const [estado, dispatch] = useReducer(reducer, estadoInicial)
   const [cargandoIA, setCargandoIA] = useState(false)
   const [configuracionId, setConfiguracionId] = useState<string | null>(null)
-  const [guardando, setGuardando] = useState(false)
 
-  function seleccionarTipo(tipo: TipoJoya) {
-    dispatch({ type: 'SELECCIONAR_TIPO', payload: tipo })
-  }
-
-  async function handlePersonalizacion(datos: {
-    nombreReceptor: string
-    esRegalo: boolean
-    intencionTexto: string
-  }) {
-    if (!estado.tipoJoya) return
-    setCargandoIA(true)
-
-    dispatch({ type: 'SET_RECEPTOR', nombre: datos.nombreReceptor, esRegalo: datos.esRegalo })
-    dispatch({ type: 'SET_INTENCION', texto: datos.intencionTexto })
-
-    try {
-      const compsList = Object.values(estado.selecciones).filter(Boolean) as Componente[]
-      const resultado = await generarSignificadoIA({
-        tipoJoya: estado.tipoJoya.nombre,
-        componentes: compsList,
-        nombreReceptor: datos.nombreReceptor,
-        esRegalo: datos.esRegalo,
-        intencionTexto: datos.intencionTexto,
-      })
-      dispatch({ type: 'SET_SIGNIFICADO_IA', texto: resultado.significadoIA })
-      dispatch({ type: 'SET_TARJETA', texto: resultado.tarjetaTexto })
-      dispatch({ type: 'IR_PASO', paso: 3 })
-    } catch {
-      // Fallback: avanzar sin IA
-      dispatch({ type: 'IR_PASO', paso: 3 })
-    } finally {
-      setCargandoIA(false)
-    }
-  }
-
-  // ── Paso 0: selección de tipo de joya ─────────────────────────────────────
+  // ── Paso 0: elegir tipo de joya ───────────────────────────────────────────
 
   if (estado.paso === 0) {
     return (
       <PasoTipoJoya
         tipos={tipos}
-        onSeleccionar={seleccionarTipo}
+        onSeleccionar={(tipo) => dispatch({ type: 'SELECCIONAR_TIPO', payload: tipo })}
       />
     )
   }
 
-  // ── Paso 1: configurador de componentes ───────────────────────────────────
+  // ── Paso 1: builder (selección libre de componentes) ──────────────────────
 
   if (estado.paso === 1 && estado.tipoJoya) {
     const tiposParaEsteJoya = tiposComponente.filter((t) =>
@@ -140,8 +96,39 @@ export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], comp
     const componentesParaEsteJoya = componentes.filter((c) =>
       tiposParaEsteJoya.some((t) => t.id === c.tipo_componente_id)
     )
+
+    async function handleAprobar() {
+      if (!estado.tipoJoya) return
+      setCargandoIA(true)
+      dispatch({ type: 'IR_PASO', paso: 2 })
+
+      try {
+        const compsList = Object.values(estado.selecciones).filter(Boolean) as Componente[]
+
+        // Guardar en BD y llamar IA en paralelo
+        const [{ id }, descripcion] = await Promise.all([
+          guardarConfiguracion({
+            tipoJoya: estado.tipoJoya!,
+            selecciones: estado.selecciones,
+            nombreReceptor: '',
+            esRegalo: false,
+            intencionTexto: '',
+            significadoIA: '',
+            tarjetaTexto: '',
+          }).catch(() => ({ id: crypto.randomUUID() })),
+          describirDisenoIA({ tipoJoya: estado.tipoJoya!.nombre, componentes: compsList })
+            .catch(() => ''),
+        ])
+
+        setConfiguracionId(id)
+        dispatch({ type: 'SET_DESCRIPCION_IA', texto: descripcion })
+      } finally {
+        setCargandoIA(false)
+      }
+    }
+
     return (
-      <ConfiguradorPasos
+      <ConfiguradorBuilder
         tipoJoya={estado.tipoJoya}
         tiposComponente={tiposParaEsteJoya}
         componentes={componentesParaEsteJoya}
@@ -154,77 +141,21 @@ export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], comp
           dispatch({ type: 'DESELECCIONAR_COMPONENTE', tipoSlug })
         }
         onVolver={() => dispatch({ type: 'REINICIAR' })}
-        onFinalizar={() => dispatch({ type: 'IR_PASO', paso: 2 })}
+        onAprobar={handleAprobar}
       />
     )
   }
 
-  // ── Paso 2: personalización + llamada IA ──────────────────────────────────
+  // ── Paso 2: resultado (IA + foto + precio + carrito) ──────────────────────
 
   if (estado.paso === 2 && estado.tipoJoya) {
     return (
-      <PasoPersonalizacion
+      <PasoResultado
         tipoJoya={estado.tipoJoya}
         selecciones={estado.selecciones}
-        onVolver={() => dispatch({ type: 'IR_PASO', paso: 1 })}
-        onContinuar={handlePersonalizacion}
-        cargando={cargandoIA}
-      />
-    )
-  }
-
-  // ── Paso 3: significado generado por IA ───────────────────────────────────
-
-  if (estado.paso === 3 && estado.tipoJoya) {
-    async function handleGuardar() {
-      if (!estado.tipoJoya || guardando) return
-      setGuardando(true)
-      try {
-        const { id } = await guardarConfiguracion({
-          tipoJoya: estado.tipoJoya,
-          selecciones: estado.selecciones,
-          nombreReceptor: estado.nombreReceptor,
-          esRegalo: estado.esRegalo,
-          intencionTexto: estado.intencionTexto,
-          significadoIA: estado.significadoIA,
-          tarjetaTexto: estado.tarjetaTexto,
-        })
-        setConfiguracionId(id)
-        dispatch({ type: 'IR_PASO', paso: 4 })
-      } catch {
-        // Avanzar igual si falla el guardado
-        dispatch({ type: 'IR_PASO', paso: 4 })
-      } finally {
-        setGuardando(false)
-      }
-    }
-
-    return (
-      <PasoSignificado
-        tipoJoya={estado.tipoJoya}
-        selecciones={estado.selecciones}
-        significadoIA={estado.significadoIA}
-        tarjetaTexto={estado.tarjetaTexto}
-        nombreReceptor={estado.nombreReceptor}
-        esRegalo={estado.esRegalo}
-        guardando={guardando}
-        onVolver={() => dispatch({ type: 'IR_PASO', paso: 2 })}
-        onContinuar={handleGuardar}
-      />
-    )
-  }
-
-  // ── Paso 4: confirmación ──────────────────────────────────────────────────
-
-  if (estado.paso === 4 && estado.tipoJoya && configuracionId) {
-    return (
-      <PasoConfirmacion
-        tipoJoya={estado.tipoJoya}
-        selecciones={estado.selecciones}
+        descripcionIA={estado.significadoIA}
+        cargandoIA={cargandoIA}
         configuracionId={configuracionId}
-        nombreReceptor={estado.nombreReceptor}
-        esRegalo={estado.esRegalo}
-        tarjetaTexto={estado.tarjetaTexto}
         onNuevaJoya={() => {
           setConfiguracionId(null)
           dispatch({ type: 'REINICIAR' })
@@ -234,6 +165,5 @@ export default function ArmaJoyaConfigurador({ tipos, tiposComponente = [], comp
     )
   }
 
-  // Fallback (no debería llegar acá)
   return null
 }

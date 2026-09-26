@@ -79,3 +79,39 @@ Solo devuelve el JSON, sin markdown, sin texto adicional.`
     }
   }
 }
+
+// ── Descripción del diseño (sin personalización) ───────────────────────────
+
+export async function describirDisenoIA(input: {
+  tipoJoya: string
+  componentes: Componente[]
+}): Promise<string> {
+  const { tipoJoya, componentes } = input
+
+  const lista = componentes
+    .map((c) => {
+      const partes = [c.nombre]
+      if (c.material) partes.push(c.material)
+      if (c.descripcion) partes.push(c.descripcion)
+      if (c.desc_holistica) partes.push(`significado: "${c.desc_holistica}"`)
+      return `- ${partes.join(' · ')}`
+    })
+    .join('\n')
+
+  const prompt = `Eres la voz poética de Encantika, una joyería chilena de joyas con significado simbólico. Tu estilo es cálido y lírico.
+
+Se ha diseñado un ${tipoJoya} con:
+${lista}
+
+Escribe una descripción de 3-5 oraciones del conjunto: qué materiales lo componen, qué emociones o cualidades evoca la combinación y por qué esta joya es especial. Usa lenguaje poético pero comprensible. Sin afirmaciones médicas.
+
+Devuelve solo el texto de la descripción, sin JSON, sin encabezados.`
+
+  const message = await client.messages.create({
+    model: 'claude-haiku-4-5-20251001',
+    max_tokens: 400,
+    messages: [{ role: 'user', content: prompt }],
+  })
+
+  return message.content[0].type === 'text' ? message.content[0].text.trim() : ''
+}
