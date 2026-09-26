@@ -331,15 +331,98 @@ const ZODIAC_GLYPH: Record<string, string> = {
   'ZOD-SAGITARIO': '♐', 'ZOD-CAPRICORNIO': '♑', 'ZOD-ACUARIO': '♒', 'ZOD-PISCIS': '♓',
 }
 
+// ── Posición del ornato (dije/signo) sobre la foto base, por tipo de joya ────
+// Ajustar estos valores según la composición real de las fotos.
+
+const ORNATO_POS: Record<string, { left: string; top: string; width: string }> = {
+  collar:  { left: '50%', top: '68%', width: '26%' },
+  pulsera: { left: '50%', top: '64%', width: '22%' },
+  aros:    { left: '50%', top: '52%', width: '38%' },
+}
+
+// ── Preview con fotos reales (composición de capas) ───────────────────────────
+
+function PreviewFotos({
+  tipoJoya,
+  baseImg,
+  ornatoImg,
+}: {
+  tipoJoya: TipoJoya
+  baseImg: string
+  ornatoImg: string | null
+}) {
+  const pos = ORNATO_POS[tipoJoya.slug] ?? ORNATO_POS.collar
+
+  return (
+    <div className="relative w-full h-full">
+      {/* Capa base: foto de la cadena/material */}
+      <AnimatePresence mode="wait">
+        <motion.img
+          key={baseImg}
+          src={baseImg}
+          alt={tipoJoya.nombre}
+          className="w-full h-full object-contain"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35 }}
+        />
+      </AnimatePresence>
+
+      {/* Capa ornato: dije o signo zodiacal encima */}
+      <AnimatePresence>
+        {ornatoImg && (
+          <motion.img
+            key={ornatoImg}
+            src={ornatoImg}
+            alt="ornato"
+            className="absolute object-contain pointer-events-none"
+            style={{
+              left: pos.left,
+              top: pos.top,
+              width: pos.width,
+              transform: 'translate(-50%, -50%)',
+            }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.8 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+          />
+        )}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 // ── Componente principal ──────────────────────────────────────────────────────
 
 export default function PreviewJoya({ tipoJoya, selecciones }: Props) {
+  // La cadena base puede ser la cadena de estilo o el material (piedra), mutuamente exclusivos
+  const cadenaBase = selecciones['cadena'] ?? selecciones['piedra'] ?? null
+  const baseImg = cadenaBase?.url_imagen ?? null
+
+  // El ornato puede ser un dije o un signo zodiacal, mutuamente exclusivos
+  const ornato = selecciones['dije'] ?? selecciones['signo_zodiacal'] ?? null
+  const ornatoImg = ornato?.url_imagen ?? null
+
+  const usarFotos = Boolean(baseImg)
+
   return (
     <div className="relative w-full h-full flex items-center justify-center">
       <div className="w-full max-w-[220px] sm:max-w-[260px] aspect-[3/4]">
-        {tipoJoya.slug === 'collar' && <PreviewCollar selecciones={selecciones} />}
-        {tipoJoya.slug === 'pulsera' && <PreviewPulsera selecciones={selecciones} />}
-        {tipoJoya.slug === 'aros' && <PreviewAros selecciones={selecciones} />}
+        {usarFotos ? (
+          <PreviewFotos
+            tipoJoya={tipoJoya}
+            baseImg={baseImg!}
+            ornatoImg={ornatoImg}
+          />
+        ) : (
+          <>
+            {tipoJoya.slug === 'collar'  && <PreviewCollar  selecciones={selecciones} />}
+            {tipoJoya.slug === 'pulsera' && <PreviewPulsera selecciones={selecciones} />}
+            {tipoJoya.slug === 'aros'    && <PreviewAros    selecciones={selecciones} />}
+          </>
+        )}
       </div>
     </div>
   )
