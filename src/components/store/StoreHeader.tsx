@@ -64,10 +64,10 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
       <header className={headerCls}>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-8 h-16 sm:h-20 flex items-center">
           <Link href="/" className="sm:hidden absolute left-1/2 -translate-x-1/2">
-            <Image src="/logo.png" alt="Encantika" width={200} height={50} className="h-8 w-auto" priority />
+            <Image src="/logo.png" alt="Encantika" width={200} height={50} className="h-11 w-auto" priority />
           </Link>
           <Link href="/" className="hidden sm:block shrink-0 mr-12">
-            <Image src="/logo.png" alt="Encantika" width={200} height={50} className="h-10 w-auto" priority />
+            <Image src="/logo.png" alt="Encantika" width={200} height={50} className="h-14 w-auto" priority />
           </Link>
           <nav className="hidden sm:flex flex-1 items-center justify-center gap-10">
             {NAV_LINKS.map(({ label, href }) => {
@@ -130,7 +130,7 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
           <div className="absolute inset-0 bg-black/40" onClick={() => setIsOpen(false)} />
           <div className="absolute right-0 top-0 bottom-0 w-72 bg-white flex flex-col">
             <div className="flex items-center justify-between px-6 h-16 border-b border-sand">
-              <Image src="/logo.png" alt="Encantika" width={120} height={30} className="h-7 w-auto" />
+              <Image src="/logo.png" alt="Encantika" width={120} height={30} className="h-9 w-auto" />
               <button onClick={() => setIsOpen(false)} className="p-1.5 text-encantika-stone" aria-label="Cerrar menú">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                   <line x1="18" y1="6" x2="6" y2="18" strokeLinecap="round" />
