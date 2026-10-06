@@ -8,6 +8,7 @@ import { FadeIn, FadeInStagger, FadeInItem } from '@/components/store/FadeIn'
 import StatsCounter from '@/components/store/StatsCounter'
 import LandingHero from '@/components/store/LandingHero'
 import LandingCategoriasSection, { type ProductoLanding } from '@/components/store/LandingCategoriasSection'
+import { toTitleCase } from '@/lib/titleCase'
 import ArmaJoyaLink from '@/components/store/ArmaJoyaLink'
 import { getColeccionesActivas } from '@/features/collections/queries'
 
@@ -270,7 +271,7 @@ export default async function StorePage() {
                 </div>
                 <div className="p-5">
                   <h3 className="font-display text-[22px] font-normal text-onyx leading-tight mb-2">
-                    {col.nombre}
+                    {toTitleCase(col.nombre)}
                   </h3>
                   {col.descripcion && (
                     <p className="text-[13px] text-encantika-stone leading-relaxed line-clamp-2">
@@ -318,7 +319,7 @@ export default async function StorePage() {
                   </div>
                   <div className="mt-3 space-y-1">
                     {cat && <p className="text-[10px] uppercase tracking-[.12em] text-encantika-stone">{cat}</p>}
-                    <h3 className="font-display text-xl text-onyx leading-tight">{p.nombre}</h3>
+                    <h3 className="font-display text-xl text-onyx leading-tight">{toTitleCase(p.nombre)}</h3>
                     <p className="text-sm text-encantika-stone">{formatCLP(p.precio_base)}</p>
                   </div>
                 </Link>

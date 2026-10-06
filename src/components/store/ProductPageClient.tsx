@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { formatCLP } from '@/lib/utils'
 import ProductGallery, { type ImagenPDP } from './ProductGallery'
 import AddToCartButton from './AddToCartButton'
+import { toTitleCase } from '@/lib/titleCase'
 
 export type { ImagenPDP }
 
@@ -111,7 +112,7 @@ export default function ProductPageClient({
 
         {/* Nombre */}
         <h1 className="font-display text-[28px] sm:text-[36px] font-normal leading-[1.1] text-stone-800">
-          {producto.nombre}
+          {toTitleCase(producto.nombre)}
         </h1>
 
         {/* Precio */}

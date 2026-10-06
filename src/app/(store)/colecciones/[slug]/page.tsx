@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { getColeccionBySlug } from '@/features/collections/queries'
 import { createClient } from '@/lib/supabase/server'
 import { formatCLP } from '@/lib/utils'
+import { toTitleCase } from '@/lib/titleCase'
 
 export default async function ColeccionSlugPage({
   params,
@@ -62,7 +63,7 @@ export default async function ColeccionSlugPage({
                 {coleccion.nombre}
               </p>
               <h1 className="font-display text-5xl font-light tracking-[0.15em]">
-                {coleccion.nombre}
+                {toTitleCase(coleccion.nombre)}
               </h1>
               {coleccion.descripcion && (
                 <p className="mt-2 text-sm opacity-80 max-w-md">{coleccion.descripcion}</p>
@@ -77,7 +78,7 @@ export default async function ColeccionSlugPage({
               {coleccion.nombre}
             </p>
             <h1 className="font-display text-5xl font-light tracking-[0.15em] text-stone-800">
-              {coleccion.nombre}
+              {toTitleCase(coleccion.nombre)}
             </h1>
             {coleccion.descripcion && (
               <p className="mt-3 text-sm text-stone-500 max-w-md mx-auto">{coleccion.descripcion}</p>

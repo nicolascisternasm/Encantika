@@ -5,6 +5,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { formatCLP } from '@/lib/utils'
+import { toTitleCase } from '@/lib/titleCase'
 
 export interface ProductoLanding {
   id: string
@@ -111,7 +112,7 @@ export default function LandingCategoriasSection({ categorias, productos, storag
                     className="font-display text-lg leading-tight"
                     style={{ color: 'var(--color-texto)' }}
                   >
-                    {p.nombre}
+                    {toTitleCase(p.nombre)}
                   </h3>
                   <p
                     className="text-sm"

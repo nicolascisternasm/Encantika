@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { formatCLP } from '@/lib/utils'
 import { FadeIn, FadeInStagger, FadeInItem } from '@/components/store/FadeIn'
+import { toTitleCase } from '@/lib/titleCase'
 
 interface CatalogoPageProps {
   searchParams: Promise<{ categoria?: string }>
@@ -63,7 +64,7 @@ export default async function CatalogoPage({ searchParams }: CatalogoPageProps) 
       <section className="px-6 pt-8 pb-7 text-center" style={{ borderBottom: '1px solid var(--color-borde, #E8E2DB)' }}>
         <p className="text-[10px] uppercase tracking-[.22em] text-stone-400 mb-1.5">Encantika</p>
         <h1 className="font-display text-[42px] sm:text-5xl font-light tracking-[0.12em] text-stone-800 leading-tight">
-          {categoriaActual ? categoriaActual.nombre : 'Catálogo'}
+          {categoriaActual ? toTitleCase(categoriaActual.nombre) : 'Catálogo'}
         </h1>
         {!categoriaActual && (
           <p className="mt-1 text-[12px] tracking-[.14em] text-stone-400">
