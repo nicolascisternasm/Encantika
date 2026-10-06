@@ -37,13 +37,13 @@ export default async function AdminLayout({
   ])
 
   return (
-    <div className="flex min-h-screen bg-stone-50">
+    <div className="flex min-h-screen" style={{ background: '#0f1117' }}>
       <AdminSidebar
         userEmail={user.email ?? ''}
         fullName={perfilResult.data?.nombre_completo ?? ''}
         consultasNoLeidas={consultasResult}
       />
-      <main className="flex-1 p-8">{children}</main>
+      <main className="flex-1 overflow-auto p-8">{children}</main>
       <Toaster richColors position="top-right" />
     </div>
   )

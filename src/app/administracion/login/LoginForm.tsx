@@ -22,13 +22,10 @@ export default function LoginForm() {
     setError(null)
 
     const supabase = createClient()
-    const { error: authError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    })
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password })
 
     if (authError) {
-      setError('Credenciales invalidas. Verifica tu correo y contrasena.')
+      setError('Credenciales inválidas. Verifica tu correo y contraseña.')
       setLoading(false)
       return
     }
@@ -53,14 +50,18 @@ export default function LoginForm() {
     router.refresh()
   }
 
+  const inputStyle = {
+    background: '#1f2937',
+    border: '1px solid #374151',
+    color: '#f9fafb',
+    borderRadius: '8px',
+  }
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
       <div>
-        <label
-          htmlFor="email"
-          className="block text-xs tracking-widest uppercase text-stone-500 mb-2"
-        >
-          Correo electronico
+        <label htmlFor="email" className="block text-xs font-medium mb-2" style={{ color: '#9ca3af' }}>
+          Correo electrónico
         </label>
         <input
           id="email"
@@ -69,17 +70,17 @@ export default function LoginForm() {
           autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-3 bg-white border border-stone-200 text-stone-800 text-sm focus:outline-none focus:border-stone-400 transition-colors placeholder:text-stone-300"
+          className="w-full px-4 py-3 text-sm focus:outline-none transition-colors placeholder:text-opacity-30"
+          style={{ ...inputStyle, '--tw-placeholder-opacity': '0.3' } as React.CSSProperties}
           placeholder="hola@encantika.cl"
+          onFocus={e => (e.target.style.borderColor = '#6366f1')}
+          onBlur={e => (e.target.style.borderColor = '#374151')}
         />
       </div>
 
       <div>
-        <label
-          htmlFor="password"
-          className="block text-xs tracking-widest uppercase text-stone-500 mb-2"
-        >
-          Contrasena
+        <label htmlFor="password" className="block text-xs font-medium mb-2" style={{ color: '#9ca3af' }}>
+          Contraseña
         </label>
         <input
           id="password"
@@ -88,18 +89,27 @@ export default function LoginForm() {
           autoComplete="current-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          className="w-full px-4 py-3 bg-white border border-stone-200 text-stone-800 text-sm focus:outline-none focus:border-stone-400 transition-colors"
+          className="w-full px-4 py-3 text-sm focus:outline-none transition-colors"
+          style={inputStyle}
+          onFocus={e => (e.target.style.borderColor = '#6366f1')}
+          onBlur={e => (e.target.style.borderColor = '#374151')}
         />
       </div>
 
       {error && (
-        <p className="text-xs text-red-600 text-center">{error}</p>
+        <div
+          className="px-4 py-3 rounded-lg text-sm"
+          style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}
+        >
+          {error}
+        </div>
       )}
 
       <button
         type="submit"
         disabled={loading}
-        className="w-full py-3 bg-stone-800 text-white text-xs tracking-widest uppercase hover:bg-stone-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        className="w-full py-3 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{ background: '#6366f1', color: 'white' }}
       >
         {loading ? 'Ingresando…' : 'Ingresar'}
       </button>

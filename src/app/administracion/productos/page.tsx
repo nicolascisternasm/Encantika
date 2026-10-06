@@ -14,7 +14,8 @@ export default async function ProductosPage() {
         action={
           <Link
             href="/administracion/productos/nuevo"
-            className="px-4 py-2 text-sm bg-stone-800 text-white hover:bg-stone-700 transition-colors"
+            className="px-4 py-2 text-sm rounded-lg font-medium transition-colors"
+            style={{ background: '#6366f1', color: 'white' }}
           >
             + Nuevo producto
           </Link>

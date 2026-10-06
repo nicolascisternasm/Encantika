@@ -22,16 +22,36 @@ interface InventarioTableProps {
 }
 
 function StockBadge({ stock }: { stock: number }) {
-  if (stock > 3) return <span className="text-xs px-2 py-0.5 bg-green-50 text-green-700">En stock ({stock})</span>
-  if (stock > 0) return <span className="text-xs px-2 py-0.5 bg-yellow-50 text-yellow-700">Stock bajo ({stock})</span>
-  return <span className="text-xs px-2 py-0.5 bg-red-50 text-red-600">Sin stock</span>
+  if (stock > 3) return (
+    <span className="text-xs px-2 py-0.5 rounded-md font-medium" style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981', border: '1px solid rgba(16,185,129,0.25)' }}>
+      En stock ({stock})
+    </span>
+  )
+  if (stock > 0) return (
+    <span className="text-xs px-2 py-0.5 rounded-md font-medium" style={{ background: 'rgba(245,158,11,0.12)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.25)' }}>
+      Stock bajo ({stock})
+    </span>
+  )
+  return (
+    <span className="text-xs px-2 py-0.5 rounded-md font-medium" style={{ background: 'rgba(239,68,68,0.1)', color: '#ef4444', border: '1px solid rgba(239,68,68,0.2)' }}>
+      Sin stock
+    </span>
+  )
 }
 
 function TipoBadge({ tipo }: { tipo: string }) {
   if (tipo === 'fabricado') {
-    return <span className="text-xs px-2 py-0.5 bg-stone-100 text-stone-600">Fabricado</span>
+    return (
+      <span className="text-xs px-2 py-0.5 rounded-md font-medium" style={{ background: 'rgba(99,102,241,0.12)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.2)' }}>
+        Fabricado
+      </span>
+    )
   }
-  return <span className="text-xs px-2 py-0.5 bg-white border border-stone-200 text-stone-500">Terminado</span>
+  return (
+    <span className="text-xs px-2 py-0.5 rounded-md font-medium" style={{ background: '#374151', color: '#9ca3af', border: '1px solid #4b5563' }}>
+      Terminado
+    </span>
+  )
 }
 
 type FiltroTipo = 'todos' | 'terminado' | 'fabricado'
@@ -49,9 +69,13 @@ export default function InventarioTable({ productos, storageUrl }: InventarioTab
       p.stock === 0
     )
 
-  const btnBase = 'px-3 py-1 text-xs transition-colors'
-  const btnActive = 'bg-stone-800 text-white'
-  const btnInactive = 'border border-stone-200 text-stone-600 hover:bg-stone-50'
+  function btnStyle(active: boolean) {
+    return {
+      background: active ? '#6366f1' : 'transparent',
+      color: active ? 'white' : '#6b7280',
+      border: active ? '1px solid #6366f1' : '1px solid #374151',
+    }
+  }
 
   return (
     <div className="space-y-4">
@@ -63,7 +87,8 @@ export default function InventarioTable({ productos, storageUrl }: InventarioTab
               key={v}
               type="button"
               onClick={() => setFiltroTipo(v)}
-              className={`${btnBase} ${filtroTipo === v ? btnActive : btnInactive}`}
+              className="px-3 py-1 text-xs rounded-md transition-colors"
+              style={btnStyle(filtroTipo === v)}
             >
               {v === 'todos' ? 'Todos' : v === 'terminado' ? 'Terminado' : 'Fabricado'}
             </button>
@@ -75,57 +100,66 @@ export default function InventarioTable({ productos, storageUrl }: InventarioTab
               key={v}
               type="button"
               onClick={() => setFiltroStock(v)}
-              className={`${btnBase} ${filtroStock === v ? btnActive : btnInactive}`}
+              className="px-3 py-1 text-xs rounded-md transition-colors"
+              style={btnStyle(filtroStock === v)}
             >
               {v === 'todos' ? 'Todo el stock' : v === 'en_stock' ? 'Con stock' : 'Sin stock'}
             </button>
           ))}
         </div>
-        <span className="text-xs text-stone-400 ml-auto">
+        <span className="text-xs ml-auto" style={{ color: '#4b5563' }}>
           {filtered.length} de {productos.length} productos
         </span>
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-stone-100">
+      <div className="rounded-xl overflow-hidden" style={{ background: '#1f2937', border: '1px solid #374151' }}>
         {filtered.length === 0 ? (
-          <p className="py-12 text-center text-sm text-stone-400">
+          <p className="py-12 text-center text-sm" style={{ color: '#6b7280' }}>
             No hay productos que coincidan con los filtros
           </p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-stone-100">
+              <tr style={{ borderBottom: '1px solid #374151' }}>
                 <th className="w-14 px-3 py-3"></th>
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Nombre</th>
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Tipo</th>
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Stock</th>
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Precio</th>
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Categoría</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: '#6b7280' }}>Nombre</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: '#6b7280' }}>Tipo</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: '#6b7280' }}>Stock</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: '#6b7280' }}>Precio</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold uppercase tracking-wider" style={{ color: '#6b7280' }}>Categoría</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map(p => (
-                <tr key={p.id} className="border-b border-stone-50 hover:bg-stone-50 transition-colors">
+                <tr
+                  key={p.id}
+                  className="transition-colors"
+                  style={{ borderBottom: '1px solid #374151' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#111827')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
                   <td className="px-3 py-3 w-14">
                     {p.imagen ? (
                       <img
                         src={`${storageUrl}/${p.imagen}`}
                         alt=""
-                        className="w-12 h-12 object-cover border border-stone-100"
+                        className="w-12 h-12 object-cover rounded-md"
+                        style={{ border: '1px solid #374151' }}
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-stone-50 border border-stone-100" />
+                      <div className="w-12 h-12 rounded-md" style={{ background: '#111827', border: '1px solid #374151' }} />
                     )}
                   </td>
                   <td className="px-4 py-3">
                     <Link
                       href={`/administracion/productos/${p.id}`}
-                      className="font-medium text-stone-800 hover:underline"
+                      className="font-medium hover:underline"
+                      style={{ color: '#f9fafb' }}
                     >
                       {p.nombre}
                     </Link>
-                    <p className="text-xs text-stone-400 mt-0.5 font-mono">{p.slug}</p>
+                    <p className="text-xs mt-0.5 font-mono" style={{ color: '#4b5563' }}>{p.slug}</p>
                   </td>
                   <td className="px-4 py-3">
                     <TipoBadge tipo={p.tipo_producto} />
@@ -133,8 +167,8 @@ export default function InventarioTable({ productos, storageUrl }: InventarioTab
                   <td className="px-4 py-3">
                     <StockBadge stock={p.stock} />
                   </td>
-                  <td className="px-4 py-3 text-stone-700 text-sm tabular-nums">{formatCLP(p.precio_base)}</td>
-                  <td className="px-4 py-3 text-stone-500 text-sm">{p.categoria ?? '—'}</td>
+                  <td className="px-4 py-3 text-sm tabular-nums" style={{ color: '#d1d5db' }}>{formatCLP(p.precio_base)}</td>
+                  <td className="px-4 py-3 text-sm" style={{ color: '#9ca3af' }}>{p.categoria ?? '—'}</td>
                 </tr>
               ))}
             </tbody>
