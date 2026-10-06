@@ -252,7 +252,7 @@ export default function ComponenteForm({ tiposComponente, inicial = {} }: Props)
               style={{ background: 'repeating-conic-gradient(#2a2520 0% 25%, #1a1512 0% 50%) 0 0 / 12px 12px' }}
             >
               {form.url_imagen ? (
-                <Image src={form.url_imagen} alt="preview" width={96} height={96} className="w-full h-full object-contain" unoptimized />
+                <Image src={form.url_imagen} alt="preview" width={96} height={96} className="w-full h-full object-contain" />
               ) : (
                 <svg className="w-8 h-8 text-stone-600" fill="none" stroke="currentColor" strokeWidth={1} viewBox="0 0 24 24">
                   <rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" />

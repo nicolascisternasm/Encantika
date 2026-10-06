@@ -96,7 +96,6 @@ export default function SelectorImagenModal({ seccionKey, onSelect, onClose }: P
                       fill
                       className="object-cover group-hover:opacity-90 transition-opacity"
                       sizes="(max-width: 768px) 33vw, 22vw"
-                      unoptimized
                     />
                   </div>
                   <p className="text-[10px] text-stone-500 px-2 py-1.5 truncate bg-white">{img.nombre}</p>

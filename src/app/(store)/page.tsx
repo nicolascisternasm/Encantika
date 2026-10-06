@@ -187,7 +187,7 @@ export default async function StorePage() {
       style={{ height: 'clamp(280px, 40vw, 400px)' }}>
       <Image src={bannerUrl ?? '/hero-2.jpg'} alt="Crea tu joya única" fill
         className="object-cover" style={{ objectPosition: bannerPos }}
-        sizes="100vw" unoptimized={!!bannerUrl} />
+        sizes="100vw" />
       <div className="absolute inset-0" style={{ backgroundColor: 'rgba(201,160,53,0.72)' }} />
       <FadeIn className="relative z-10 px-6 max-w-xl">
         <h2 className="font-display text-white font-normal tracking-[.06em] text-[40px] sm:text-[52px] leading-[1.1]">
@@ -209,7 +209,7 @@ export default async function StorePage() {
           <Image src={historiaUrl ?? '/hero-3.jpg'} alt="Nuestra historia" fill
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.04]"
             style={{ objectPosition: historiaPos }}
-            sizes="(max-width: 768px) 100vw, 50vw" unoptimized={!!historiaUrl} />
+            sizes="(max-width: 768px) 100vw, 50vw" />
         </FadeIn>
         <FadeIn delay={0.15}>
           <p className="text-[11px] uppercase tracking-[.15em] text-gold">Nuestra historia</p>
@@ -387,7 +387,7 @@ export default async function StorePage() {
             style={{ objectPosition: heroPos }}
             sizes="55vw"
             priority
-            unoptimized={!!heroUrl}
+
           />
         </div>
       </section>
@@ -403,7 +403,7 @@ export default async function StorePage() {
           style={{ objectPosition: heroPos }}
           sizes="100vw"
           priority
-          unoptimized={!!heroUrl}
+
         />
         <div className="absolute inset-0 bg-black/30" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
@@ -429,7 +429,7 @@ export default async function StorePage() {
           style={{ objectPosition: heroPos }}
           sizes="100vw"
           priority
-          unoptimized={!!heroUrl}
+
         />
         <div className="absolute inset-0 bg-black/25" />
         <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-6">
@@ -458,7 +458,7 @@ export default async function StorePage() {
           style={{ objectPosition: heroPos }}
           sizes="100vw"
           priority
-          unoptimized={!!heroUrl}
+
         />
         <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/35" />
         <div className="absolute inset-0 flex items-center">

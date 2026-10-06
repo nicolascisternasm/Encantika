@@ -119,7 +119,7 @@ function ImagenSelector({
       <div className="flex items-start gap-4">
         <div className="relative overflow-hidden bg-stone-100 rounded" style={{ width: 120, height: 80 }}>
           {imagenUrl ? (
-            <Image src={imagenUrl} alt="Imagen" fill className="object-cover" unoptimized />
+            <Image src={imagenUrl} alt="Imagen" fill className="object-cover" />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
               <span className="text-stone-300 text-[10px] text-center px-1">Sin imagen</span>

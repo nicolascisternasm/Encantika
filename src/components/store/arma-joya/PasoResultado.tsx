@@ -86,7 +86,6 @@ export default function PasoResultado({
                   width={400}
                   height={400}
                   className="w-full h-full object-contain"
-                  unoptimized
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">

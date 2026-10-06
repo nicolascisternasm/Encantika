@@ -31,7 +31,6 @@ export default function LandingHero({ heroUrl, heroPos }: Props) {
           style={{ objectPosition: heroPos, animationDelay: '1.3s' }}
           sizes="(max-width: 768px) 100vw, 55vw"
           priority
-          unoptimized={!!heroUrl}
         />
       </motion.div>
 

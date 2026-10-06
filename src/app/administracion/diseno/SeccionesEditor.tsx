@@ -151,7 +151,6 @@ function SeccionCard({
                 fill
                 className="object-cover"
                 style={{ objectPosition: seccion.posicion }}
-                unoptimized
               />
             ) : (
               <div className="absolute inset-0 flex items-center justify-center">
