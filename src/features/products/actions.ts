@@ -55,6 +55,8 @@ export async function createProducto(prevState: ActionState, formData: FormData)
     return { error: 'Error al crear el producto' }
   }
   revalidatePath('/administracion/productos')
+  revalidatePath('/')
+  revalidatePath('/catalogo')
   return { success: 'Producto creado exitosamente', id: (data as any).id }
 }
 
@@ -67,13 +69,21 @@ export async function updateProducto(id: string, prevState: ActionState, formDat
   if (!parsed.success) return { error: parsed.error.issues[0].message }
 
   const admin = createAdminClient()
-  const { error } = await admin.from('productos').update(parsed.data as any).eq('id', id)
+  const { data: updated, error } = await admin
+    .from('productos')
+    .update(parsed.data as any)
+    .eq('id', id)
+    .select('slug')
+    .single()
   if (error) {
     if (error.code === '23505') return { error: 'Ya existe un producto con ese slug' }
     return { error: 'Error al actualizar el producto' }
   }
   revalidatePath('/administracion/productos')
   revalidatePath(`/administracion/productos/${id}`)
+  revalidatePath('/')
+  revalidatePath('/catalogo')
+  if (updated?.slug) revalidatePath(`/catalogo/${updated.slug}`)
   return { success: 'Producto actualizado exitosamente' }
 }
 
@@ -109,6 +119,8 @@ export async function deleteProducto(id: string): Promise<ActionState> {
   const { error } = await admin.from('productos').delete().eq('id', id)
   if (error) return { error: `Error al eliminar el producto: ${error.message}` }
   revalidatePath('/administracion/productos')
+  revalidatePath('/')
+  revalidatePath('/catalogo')
   return { success: 'Producto eliminado' }
 }
 
