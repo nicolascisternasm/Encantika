@@ -61,7 +61,7 @@ export default function InsumoProductoEditor({
 
   return (
     <div className="space-y-4">
-      <p className="text-xs text-stone-400 italic">
+      <p className="text-xs italic" style={{ color: '#6b7280' }}>
         Esta información es referencial para fabricación. No afecta el stock de insumos automáticamente.
       </p>
 
@@ -69,28 +69,29 @@ export default function InsumoProductoEditor({
       {insumos.length > 0 ? (
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-stone-100">
-              <th className="text-left pb-2 pr-4 text-xs font-normal text-stone-400">Insumo</th>
-              <th className="text-left pb-2 pr-4 text-xs font-normal text-stone-400">Cantidad por unidad</th>
-              <th className="text-left pb-2 pr-4 text-xs font-normal text-stone-400">Nota</th>
+            <tr style={{ borderBottom: '1px solid #374151' }}>
+              <th className="text-left pb-2 pr-4 text-xs font-normal" style={{ color: '#6b7280' }}>Insumo</th>
+              <th className="text-left pb-2 pr-4 text-xs font-normal" style={{ color: '#6b7280' }}>Cantidad por unidad</th>
+              <th className="text-left pb-2 pr-4 text-xs font-normal" style={{ color: '#6b7280' }}>Nota</th>
               <th className="pb-2"></th>
             </tr>
           </thead>
           <tbody>
             {insumos.map(i => (
-              <tr key={i.insumo_id} className="border-b border-stone-50">
-                <td className="py-2 pr-4 text-stone-700 text-xs">
+              <tr key={i.insumo_id} style={{ borderBottom: '1px solid #374151' }}>
+                <td className="py-2 pr-4 text-xs" style={{ color: '#d1d5db' }}>
                   {i.nombre}
-                  <span className="ml-1 text-stone-400">({i.unidad})</span>
+                  <span className="ml-1" style={{ color: '#6b7280' }}>({i.unidad})</span>
                 </td>
-                <td className="py-2 pr-4 text-xs tabular-nums text-stone-600">{i.cantidad_por_unidad}</td>
-                <td className="py-2 pr-4 text-xs text-stone-400">{i.nota ?? '—'}</td>
+                <td className="py-2 pr-4 text-xs tabular-nums" style={{ color: '#9ca3af' }}>{i.cantidad_por_unidad}</td>
+                <td className="py-2 pr-4 text-xs" style={{ color: '#6b7280' }}>{i.nota ?? '—'}</td>
                 <td className="py-2 text-right">
                   <button
                     type="button"
                     onClick={() => handleRemove(i.insumo_id)}
                     disabled={removing}
-                    className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-40"
+                    className="text-xs transition-colors disabled:opacity-40"
+                    style={{ color: '#ef4444' }}
                   >
                     Quitar
                   </button>
@@ -100,18 +101,24 @@ export default function InsumoProductoEditor({
           </tbody>
         </table>
       ) : (
-        <p className="text-xs text-stone-400">No hay insumos asociados a este producto.</p>
+        <p className="text-xs" style={{ color: '#6b7280' }}>No hay insumos asociados a este producto.</p>
       )}
 
       {/* Add insumo form */}
       {disponibles.length > 0 && (
         <div className="flex items-end gap-3 pt-1">
           <div className="flex-1">
-            <label className="block text-xs text-stone-400 mb-1">Insumo</label>
+            <label className="block text-xs mb-1" style={{ color: '#9ca3af' }}>Insumo</label>
             <select
               value={selectedId}
               onChange={e => setSelectedId(e.target.value)}
-              className="w-full border border-stone-200 px-2 py-1.5 text-xs focus:outline-none focus:border-stone-400 bg-white"
+              className="w-full px-2 py-1.5 text-xs focus:outline-none"
+              style={{
+                background: '#1f2937',
+                border: '1px solid #374151',
+                color: '#f9fafb',
+                borderRadius: '8px',
+              }}
             >
               {disponibles.map(i => (
                 <option key={i.id} value={i.id}>{i.nombre} ({i.unidad})</option>
@@ -119,31 +126,44 @@ export default function InsumoProductoEditor({
             </select>
           </div>
           <div>
-            <label className="block text-xs text-stone-400 mb-1">Cant. x unidad</label>
+            <label className="block text-xs mb-1" style={{ color: '#9ca3af' }}>Cant. x unidad</label>
             <input
               type="number"
               value={cantidad}
               min={0.001}
               step={0.001}
               onChange={e => setCantidad(Number(e.target.value))}
-              className="w-24 border border-stone-200 px-2 py-1.5 text-xs focus:outline-none focus:border-stone-400"
+              className="w-24 px-2 py-1.5 text-xs focus:outline-none"
+              style={{
+                background: '#1f2937',
+                border: '1px solid #374151',
+                color: '#f9fafb',
+                borderRadius: '8px',
+              }}
             />
           </div>
           <div className="flex-1">
-            <label className="block text-xs text-stone-400 mb-1">Nota (opcional)</label>
+            <label className="block text-xs mb-1" style={{ color: '#9ca3af' }}>Nota (opcional)</label>
             <input
               type="text"
               value={nota}
               onChange={e => setNota(e.target.value)}
               placeholder="ej: color plata"
-              className="w-full border border-stone-200 px-2 py-1.5 text-xs focus:outline-none focus:border-stone-400"
+              className="w-full px-2 py-1.5 text-xs focus:outline-none"
+              style={{
+                background: '#1f2937',
+                border: '1px solid #374151',
+                color: '#f9fafb',
+                borderRadius: '8px',
+              }}
             />
           </div>
           <button
             type="button"
             onClick={handleAdd}
             disabled={adding || !selectedId || cantidad <= 0}
-            className="px-3 py-1.5 text-xs bg-stone-700 text-white hover:bg-stone-600 transition-colors disabled:opacity-50 whitespace-nowrap"
+            className="px-3 py-1.5 text-xs transition-colors disabled:opacity-50 whitespace-nowrap"
+            style={{ background: '#6366f1', color: 'white', borderRadius: '8px' }}
           >
             {adding ? '...' : 'Agregar'}
           </button>

@@ -36,11 +36,11 @@ export default async function DisenoPaginaPage() {
   }
 
   return (
-    <div className="p-8 max-w-5xl">
-      <h1 className="text-2xl font-light text-stone-800 tracking-wide mb-1">
+    <div style={{ padding: 32, maxWidth: 960 }}>
+      <h1 style={{ fontSize: 24, fontWeight: 300, color: '#f9fafb', letterSpacing: '0.02em', marginBottom: 4 }}>
         Diseño de la tienda
       </h1>
-      <p className="text-sm text-stone-500 mb-10">
+      <p style={{ fontSize: 14, color: '#9ca3af', marginBottom: 40 }}>
         Elige la paleta de colores, la fuente y las imágenes de cada sección.
       </p>
 

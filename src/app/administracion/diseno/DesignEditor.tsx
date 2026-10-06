@@ -54,13 +54,27 @@ export default function DesignEditor({ currentTema, currentFuente, currentLayout
   ]
 
   const saveButton = (
-    <div className="flex items-center gap-4 pb-12">
-      <button onClick={handleSave} disabled={isPending}
-        className="bg-stone-900 text-white text-sm tracking-wide px-8 py-3 hover:bg-stone-700 transition-colors disabled:opacity-50">
+    <div style={{ display: 'flex', alignItems: 'center', gap: 16, paddingBottom: 48 }}>
+      <button
+        onClick={handleSave}
+        disabled={isPending}
+        style={{
+          background: '#6366f1',
+          color: '#fff',
+          fontSize: 14,
+          letterSpacing: '0.04em',
+          padding: '12px 32px',
+          borderRadius: 8,
+          border: 'none',
+          cursor: isPending ? 'not-allowed' : 'pointer',
+          opacity: isPending ? 0.5 : 1,
+          transition: 'opacity 0.15s',
+        }}
+      >
         {isPending ? 'Guardando…' : 'Guardar diseño'}
       </button>
       {mensaje && (
-        <p className={`text-sm ${mensaje.tipo === 'ok' ? 'text-stone-500' : 'text-red-600'}`}>
+        <p style={{ fontSize: 14, color: mensaje.tipo === 'ok' ? '#10b981' : '#ef4444' }}>
           {mensaje.texto}
         </p>
       )}
@@ -72,14 +86,26 @@ export default function DesignEditor({ currentTema, currentFuente, currentLayout
       <style dangerouslySetInnerHTML={{ __html: FONT_IMPORTS }} />
 
       {/* Pestañas */}
-      <div className="flex border-b border-stone-200 mb-8">
+      <div style={{ display: 'flex', borderBottom: '1px solid #374151', marginBottom: 32 }}>
         {tabs.map((t) => (
-          <button key={t.key} onClick={() => setActiveTab(t.key)}
-            className={`px-5 py-3 text-sm transition-colors -mb-px border-b-2 ${
-              activeTab === t.key
-                ? 'border-stone-900 text-stone-900'
-                : 'border-transparent text-stone-500 hover:text-stone-700'
-            }`}>
+          <button
+            key={t.key}
+            onClick={() => setActiveTab(t.key)}
+            style={{
+              padding: '12px 20px',
+              fontSize: 14,
+              transition: 'color 0.15s',
+              marginBottom: -1,
+              borderBottom: activeTab === t.key ? '2px solid #6366f1' : '2px solid transparent',
+              color: activeTab === t.key ? '#f9fafb' : '#6b7280',
+              background: 'transparent',
+              border: 'none',
+              borderBottomWidth: 2,
+              borderBottomStyle: 'solid',
+              borderBottomColor: activeTab === t.key ? '#6366f1' : 'transparent',
+              cursor: 'pointer',
+            }}
+          >
             {t.label}
           </button>
         ))}
@@ -88,14 +114,14 @@ export default function DesignEditor({ currentTema, currentFuente, currentLayout
       {/* ── Pestaña: Tema y fuente ───────────────────────────────────────────── */}
       {activeTab === 'tema-fuente' && (
         <>
-          <section className="mb-12">
-            <h2 className="text-xs uppercase tracking-[.15em] text-stone-400 mb-6">Paleta de colores</h2>
+          <section style={{ marginBottom: 48 }}>
+            <h2 style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#6b7280', marginBottom: 24 }}>Paleta de colores</h2>
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
               {(Object.keys(TEMAS) as TemaKey[]).map((key) => {
                 const t = TEMAS[key]
                 const selected = tema === key
                 return (
-                  <button key={key} onClick={() => setTema(key)} className="text-left focus:outline-none group">
+                  <button key={key} onClick={() => setTema(key)} style={{ textAlign: 'left', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
                     <div style={{
                       border: selected ? `2px solid ${t.vars['--color-acento']}` : '2px solid transparent',
                       outline: selected ? `3px solid ${t.vars['--color-acento']}40` : '3px solid transparent',
@@ -103,7 +129,7 @@ export default function DesignEditor({ currentTema, currentFuente, currentLayout
                     }}>
                       <MiniTemaPreview temaKey={key} />
                     </div>
-                    <p className={`mt-2 text-xs text-center transition-colors ${selected ? 'text-stone-900 font-medium' : 'text-stone-500 group-hover:text-stone-700'}`}>
+                    <p style={{ marginTop: 8, fontSize: 12, textAlign: 'center', transition: 'color 0.15s', color: selected ? '#f9fafb' : '#9ca3af', fontWeight: selected ? 500 : 400 }}>
                       {t.nombre}
                     </p>
                   </button>
@@ -112,21 +138,30 @@ export default function DesignEditor({ currentTema, currentFuente, currentLayout
             </div>
           </section>
 
-          <section className="mb-12">
-            <h2 className="text-xs uppercase tracking-[.15em] text-stone-400 mb-6">Fuente de títulos</h2>
+          <section style={{ marginBottom: 48 }}>
+            <h2 style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#6b7280', marginBottom: 24 }}>Fuente de títulos</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {(Object.keys(FUENTES) as FuenteKey[]).map((key) => {
                 const f = FUENTES[key]
                 const selected = fuente === key
                 return (
-                  <button key={key} onClick={() => setFuente(key)}
-                    className={`text-left px-4 py-5 rounded border-2 transition-all duration-150 focus:outline-none ${
-                      selected ? 'border-stone-800 bg-stone-50' : 'border-stone-200 bg-white hover:border-stone-300'
-                    }`}>
-                    <p style={{ fontFamily: f.css, fontSize: 28, lineHeight: 1.3 }} className="text-stone-800">
+                  <button
+                    key={key}
+                    onClick={() => setFuente(key)}
+                    style={{
+                      textAlign: 'left',
+                      padding: '16px',
+                      borderRadius: 8,
+                      border: selected ? '2px solid #6366f1' : '2px solid #374151',
+                      background: selected ? 'rgba(99,102,241,0.08)' : '#1f2937',
+                      cursor: 'pointer',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <p style={{ fontFamily: f.css, fontSize: 28, lineHeight: 1.3, color: '#f9fafb' }}>
                       Brilla con magia
                     </p>
-                    <p className="mt-2 text-xs text-stone-400">{f.nombre}</p>
+                    <p style={{ marginTop: 8, fontSize: 12, color: '#6b7280' }}>{f.nombre}</p>
                   </button>
                 )
               })}
@@ -140,13 +175,13 @@ export default function DesignEditor({ currentTema, currentFuente, currentLayout
       {/* ── Pestaña: Layout ──────────────────────────────────────────────────── */}
       {activeTab === 'layout' && (
         <>
-          <section className="mb-12">
-            <h2 className="text-xs uppercase tracking-[.15em] text-stone-400 mb-2">Estructura de la tienda</h2>
-            <p className="text-sm text-stone-500 mb-6">
+          <section style={{ marginBottom: 48 }}>
+            <h2 style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.15em', color: '#6b7280', marginBottom: 8 }}>Estructura de la tienda</h2>
+            <p style={{ fontSize: 14, color: '#6b7280', marginBottom: 24 }}>
               Elige cómo se organiza el menú, el hero y la grilla de productos.
             </p>
 
-            <div className="grid grid-cols-3 gap-4 max-w-3xl">
+            <div className="grid grid-cols-3 gap-4" style={{ maxWidth: 768 }}>
               {(Object.keys(LAYOUTS) as LayoutKey[]).map((key) => (
                 <LayoutCard
                   key={key}
@@ -170,7 +205,7 @@ export default function DesignEditor({ currentTema, currentFuente, currentLayout
 
       {/* ── Pestaña: Vista previa ────────────────────────────────────────────── */}
       {activeTab === 'preview' && (
-        <section className="mb-10">
+        <section style={{ marginBottom: 40 }}>
           <LivePreview temaKey={tema} fuenteKey={fuente} layoutKey={layout} />
         </section>
       )}
@@ -197,7 +232,7 @@ function LayoutCard({
   return (
     <button
       onClick={onSelect}
-      className="text-left w-full focus:outline-none group"
+      style={{ textAlign: 'left', width: '100%', background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}
     >
       <div style={{
         border: selected ? `2px solid ${acento}` : '2px solid transparent',
@@ -209,17 +244,16 @@ function LayoutCard({
       }}>
         <LayoutSVGPreview layoutKey={layoutKey} vars={temaVars} />
       </div>
-      <div className="mt-2 px-0.5">
-        <div className="flex items-center gap-2">
-          <p className={`text-sm transition-colors ${selected ? 'text-stone-900 font-medium' : 'text-stone-700 group-hover:text-stone-900'}`}
-            style={{ fontFamily: "'Cormorant Garamond', Georgia, serif", fontSize: 15 }}>
+      <div style={{ marginTop: 8, padding: '0 2px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <p style={{ fontSize: 15, transition: 'color 0.15s', color: selected ? '#f9fafb' : '#d1d5db', fontWeight: selected ? 500 : 400, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
             {l.nombre}
           </p>
-          <span className="text-[10px] px-1.5 py-0.5 rounded" style={{ background: acento + '20', color: acento, fontWeight: 500 }}>
+          <span style={{ fontSize: 10, padding: '2px 6px', borderRadius: 4, background: acento + '20', color: acento, fontWeight: 500 }}>
             {l.badge}
           </span>
         </div>
-        <p className="text-[11px] text-stone-400 mt-0.5 leading-snug">{l.descripcion}</p>
+        <p style={{ fontSize: 11, color: '#6b7280', marginTop: 2, lineHeight: 1.4 }}>{l.descripcion}</p>
       </div>
     </button>
   )

@@ -61,16 +61,26 @@ function ValorRow({ valor }: { valor: ValorAtributo }) {
     })
   }
 
+  const inputStyle = {
+    background: '#111827',
+    border: '1px solid #374151',
+    color: '#f9fafb',
+    borderRadius: '6px',
+  }
+
   if (editMode) {
     return (
-      <tr className="border-b border-stone-50 bg-stone-50">
+      <tr style={{ borderBottom: '1px solid #374151', background: '#111827' }}>
         <td className="py-2 pr-3">
           <input
             ref={inputRef}
             value={editValor}
             onChange={e => setEditValor(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setEditMode(false) }}
-            className="w-full border border-stone-300 px-2 py-1 text-xs focus:outline-none focus:border-stone-500"
+            className="w-full px-2 py-1 text-xs focus:outline-none transition-colors"
+            style={inputStyle}
+            onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+            onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
           />
         </td>
         <td className="py-2 pr-3">
@@ -78,7 +88,8 @@ function ValorRow({ valor }: { valor: ValorAtributo }) {
             type="color"
             value={editColor}
             onChange={e => setEditColor(e.target.value)}
-            className="h-7 w-12 border border-stone-200 cursor-pointer"
+            className="h-7 w-12 cursor-pointer"
+            style={{ border: '1px solid #374151', borderRadius: '4px', background: '#111827' }}
           />
         </td>
         <td colSpan={3} className="py-2">
@@ -87,14 +98,18 @@ function ValorRow({ valor }: { valor: ValorAtributo }) {
               type="button"
               onClick={handleSave}
               disabled={saving}
-              className="text-xs px-3 py-1 bg-stone-800 text-white hover:bg-stone-700 disabled:opacity-50"
+              className="text-xs px-3 py-1 transition-colors disabled:opacity-50"
+              style={{ background: '#6366f1', color: 'white', borderRadius: '6px' }}
             >
               {saving ? '…' : 'Guardar'}
             </button>
             <button
               type="button"
               onClick={() => setEditMode(false)}
-              className="text-xs text-stone-500 hover:text-stone-700"
+              className="text-xs transition-colors"
+              style={{ color: '#9ca3af' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#d1d5db')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#9ca3af')}
             >
               Cancelar
             </button>
@@ -105,13 +120,21 @@ function ValorRow({ valor }: { valor: ValorAtributo }) {
   }
 
   return (
-    <tr className="border-b border-stone-50 group hover:bg-stone-50 transition-colors">
+    <tr
+      className="group transition-colors"
+      style={{ borderBottom: '1px solid #374151' }}
+      onMouseEnter={e => (e.currentTarget.style.background = '#111827')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+    >
       <td className="py-2 pr-3">
-        <span className={`flex items-center gap-1.5 text-sm ${!valor.activo ? 'text-stone-400 line-through' : 'text-stone-700'}`}>
+        <span
+          className={`flex items-center gap-1.5 text-sm ${!valor.activo ? 'line-through' : ''}`}
+          style={{ color: valor.activo ? '#d1d5db' : '#6b7280' }}
+        >
           {valor.color_hex && (
             <span
-              className="inline-block w-3 h-3 rounded-full border border-stone-200 flex-shrink-0"
-              style={{ backgroundColor: valor.color_hex }}
+              className="inline-block w-3 h-3 rounded-full flex-shrink-0"
+              style={{ backgroundColor: valor.color_hex, border: '1px solid #374151' }}
             />
           )}
           {valor.valor}
@@ -120,12 +143,12 @@ function ValorRow({ valor }: { valor: ValorAtributo }) {
       <td className="py-2 pr-3">
         {valor.color_hex ? (
           <span
-            className="inline-block w-5 h-5 rounded border border-stone-200"
-            style={{ backgroundColor: valor.color_hex }}
+            className="inline-block w-5 h-5 rounded"
+            style={{ backgroundColor: valor.color_hex, border: '1px solid #374151' }}
             title={valor.color_hex}
           />
         ) : (
-          <span className="text-xs text-stone-300">—</span>
+          <span className="text-xs" style={{ color: '#4b5563' }}>—</span>
         )}
       </td>
       <td className="py-2 pr-3">
@@ -133,11 +156,12 @@ function ValorRow({ valor }: { valor: ValorAtributo }) {
           type="button"
           onClick={handleToggle}
           disabled={toggling}
-          className={`text-[11px] px-2 py-0.5 rounded transition-colors ${
+          className="text-[11px] px-2 py-0.5 rounded transition-colors disabled:opacity-50"
+          style={
             valor.activo
-              ? 'bg-green-50 text-green-700 hover:bg-green-100'
-              : 'bg-stone-100 text-stone-400 hover:bg-stone-200'
-          } disabled:opacity-50`}
+              ? { background: 'rgba(16,185,129,0.12)', color: '#10b981', borderRadius: '6px' }
+              : { background: '#374151', color: '#9ca3af', borderRadius: '6px' }
+          }
         >
           {toggling ? '…' : valor.activo ? 'Activo' : 'Inactivo'}
         </button>
@@ -146,7 +170,10 @@ function ValorRow({ valor }: { valor: ValorAtributo }) {
         <button
           type="button"
           onClick={handleEdit}
-          className="text-xs text-stone-400 hover:text-stone-700"
+          className="text-xs transition-colors"
+          style={{ color: '#6b7280' }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#d1d5db')}
+          onMouseLeave={e => (e.currentTarget.style.color = '#6b7280')}
         >
           Editar
         </button>
@@ -156,7 +183,10 @@ function ValorRow({ valor }: { valor: ValorAtributo }) {
           type="button"
           onClick={handleDelete}
           disabled={deleting}
-          className="text-xs text-red-400 hover:text-red-600 disabled:opacity-50"
+          className="text-xs disabled:opacity-50 transition-colors"
+          style={{ color: '#ef4444' }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#fca5a5')}
+          onMouseLeave={e => (e.currentTarget.style.color = '#ef4444')}
         >
           {deleting ? '…' : 'Eliminar'}
         </button>
@@ -190,6 +220,13 @@ function AtributoNombreEditor({ attr }: { attr: Atributo }) {
     })
   }
 
+  const inputStyle = {
+    background: '#111827',
+    border: '1px solid #374151',
+    color: '#f9fafb',
+    borderRadius: '6px',
+  }
+
   if (editMode) {
     return (
       <div className="flex items-center gap-2 flex-wrap">
@@ -199,24 +236,38 @@ function AtributoNombreEditor({ attr }: { attr: Atributo }) {
           onChange={e => setNombre(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setEditMode(false) }}
           placeholder="Nombre"
-          className="border border-stone-300 px-2 py-1 text-sm focus:outline-none focus:border-stone-500 w-40"
+          className="px-2 py-1 text-sm focus:outline-none w-40 transition-colors"
+          style={inputStyle}
+          onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+          onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
         />
         <input
           value={codigo}
           onChange={e => setCodigo(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') handleSave(); if (e.key === 'Escape') setEditMode(false) }}
           placeholder="código"
-          className="border border-stone-300 px-2 py-1 text-sm font-mono focus:outline-none focus:border-stone-500 w-28"
+          className="px-2 py-1 text-sm font-mono focus:outline-none w-28 transition-colors"
+          style={inputStyle}
+          onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+          onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
         />
         <button
           type="button"
           onClick={handleSave}
           disabled={saving}
-          className="text-xs px-3 py-1 bg-stone-800 text-white hover:bg-stone-700 disabled:opacity-50"
+          className="text-xs px-3 py-1 transition-colors disabled:opacity-50"
+          style={{ background: '#6366f1', color: 'white', borderRadius: '6px' }}
         >
           {saving ? '…' : 'Guardar'}
         </button>
-        <button type="button" onClick={() => setEditMode(false)} className="text-xs text-stone-400 hover:text-stone-600">
+        <button
+          type="button"
+          onClick={() => setEditMode(false)}
+          className="text-xs transition-colors"
+          style={{ color: '#9ca3af' }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#d1d5db')}
+          onMouseLeave={e => (e.currentTarget.style.color = '#9ca3af')}
+        >
           Cancelar
         </button>
       </div>
@@ -225,12 +276,15 @@ function AtributoNombreEditor({ attr }: { attr: Atributo }) {
 
   return (
     <div className="flex items-center gap-2 group">
-      <span className="text-sm font-medium text-stone-800">{attr.nombre}</span>
-      <span className="text-xs text-stone-400 font-mono">{attr.codigo}</span>
+      <span className="text-sm font-medium" style={{ color: '#f9fafb' }}>{attr.nombre}</span>
+      <span className="text-xs font-mono" style={{ color: '#6b7280' }}>{attr.codigo}</span>
       <button
         type="button"
         onClick={handleEdit}
-        className="text-xs text-stone-300 hover:text-stone-500 opacity-0 group-hover:opacity-100 transition-opacity"
+        className="text-xs opacity-0 group-hover:opacity-100 transition-opacity transition-colors"
+        style={{ color: '#6b7280' }}
+        onMouseEnter={e => (e.currentTarget.style.color = '#d1d5db')}
+        onMouseLeave={e => (e.currentTarget.style.color = '#6b7280')}
       >
         Editar
       </button>
@@ -254,12 +308,22 @@ function AddValorForm({ atributoId }: { atributoId: string }) {
     }
   }, [state])
 
+  const inputStyle = {
+    background: '#111827',
+    border: '1px solid #374151',
+    color: '#f9fafb',
+    borderRadius: '6px',
+  }
+
   if (!show) {
     return (
       <button
         type="button"
         onClick={() => setShow(true)}
-        className="text-xs text-stone-400 hover:text-stone-700 transition-colors"
+        className="text-xs transition-colors"
+        style={{ color: '#6b7280' }}
+        onMouseEnter={e => (e.currentTarget.style.color = '#6366f1')}
+        onMouseLeave={e => (e.currentTarget.style.color = '#6b7280')}
       >
         + Agregar valor
       </button>
@@ -275,25 +339,37 @@ function AddValorForm({ atributoId }: { atributoId: string }) {
         placeholder="Nuevo valor"
         required
         autoFocus
-        className="border border-stone-200 px-2 py-1 text-xs focus:outline-none focus:border-stone-400 w-36"
+        className="px-2 py-1 text-xs focus:outline-none w-36 transition-colors"
+        style={inputStyle}
+        onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+        onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
       />
       <div className="flex items-center gap-1.5">
-        <span className="text-[11px] text-stone-400">Color</span>
+        <span className="text-[11px]" style={{ color: '#6b7280' }}>Color</span>
         <input
           name="color_hex"
           type="color"
           defaultValue="#000000"
-          className="h-6 w-10 border border-stone-200 cursor-pointer"
+          className="h-6 w-10 cursor-pointer"
+          style={{ border: '1px solid #374151', borderRadius: '4px', background: '#111827' }}
         />
       </div>
       <button
         type="submit"
         disabled={pending}
-        className="text-xs px-3 py-1 bg-stone-700 text-white hover:bg-stone-600 disabled:opacity-50"
+        className="text-xs px-3 py-1 transition-colors disabled:opacity-50"
+        style={{ background: '#6366f1', color: 'white', borderRadius: '6px' }}
       >
         {pending ? '…' : 'Agregar'}
       </button>
-      <button type="button" onClick={() => setShow(false)} className="text-xs text-stone-400 hover:text-stone-600">
+      <button
+        type="button"
+        onClick={() => setShow(false)}
+        className="text-xs transition-colors"
+        style={{ color: '#9ca3af' }}
+        onMouseEnter={e => (e.currentTarget.style.color = '#d1d5db')}
+        onMouseLeave={e => (e.currentTarget.style.color = '#9ca3af')}
+      >
         Cancelar
       </button>
     </form>
@@ -311,22 +387,37 @@ export default function AttributeManager({ atributos }: { atributos: Atributo[] 
     if (attrState.success) toast.success(attrState.success)
   }, [attrState])
 
+  const inputStyle = {
+    background: '#111827',
+    border: '1px solid #374151',
+    color: '#f9fafb',
+    borderRadius: '8px',
+  }
+
   return (
     <div className="space-y-6">
       {/* Attribute list */}
-      <div className="bg-white border border-stone-100 divide-y divide-stone-50">
+      <div
+        className="rounded-sm"
+        style={{ background: '#1f2937', border: '1px solid #374151' }}
+      >
         {atributos.length === 0 ? (
-          <div className="p-10 text-center text-stone-400 text-sm">No hay atributos todavía</div>
+          <div className="p-10 text-center text-sm" style={{ color: '#9ca3af' }}>
+            No hay atributos todavía
+          </div>
         ) : (
           atributos.map(attr => (
-            <div key={attr.id} className="p-4">
+            <div key={attr.id} className="p-4" style={{ borderBottom: '1px solid #374151' }}>
               {/* Header */}
               <div className="flex items-center justify-between gap-4">
                 <AtributoNombreEditor attr={attr} />
                 <button
                   type="button"
                   onClick={() => setExpandedId(expandedId === attr.id ? '' : attr.id)}
-                  className="text-xs text-stone-400 hover:text-stone-700 flex-shrink-0"
+                  className="text-xs flex-shrink-0 transition-colors"
+                  style={{ color: '#6b7280' }}
+                  onMouseEnter={e => (e.currentTarget.style.color = '#d1d5db')}
+                  onMouseLeave={e => (e.currentTarget.style.color = '#6b7280')}
                 >
                   {expandedId === attr.id ? '▲ cerrar' : `▼ ${attr.valores_atributo.length} valor${attr.valores_atributo.length !== 1 ? 'es' : ''}`}
                 </button>
@@ -339,10 +430,10 @@ export default function AttributeManager({ atributos }: { atributos: Atributo[] 
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
                         <thead>
-                          <tr className="border-b border-stone-100">
-                            <th className="text-left pb-1.5 pr-3 text-[11px] font-normal text-stone-400 uppercase tracking-wider">Valor</th>
-                            <th className="text-left pb-1.5 pr-3 text-[11px] font-normal text-stone-400 uppercase tracking-wider">Color</th>
-                            <th className="text-left pb-1.5 pr-3 text-[11px] font-normal text-stone-400 uppercase tracking-wider">Estado</th>
+                          <tr style={{ borderBottom: '1px solid #374151' }}>
+                            <th className="text-left pb-1.5 pr-3 text-[11px] font-normal uppercase tracking-wider" style={{ color: '#6b7280' }}>Valor</th>
+                            <th className="text-left pb-1.5 pr-3 text-[11px] font-normal uppercase tracking-wider" style={{ color: '#6b7280' }}>Color</th>
+                            <th className="text-left pb-1.5 pr-3 text-[11px] font-normal uppercase tracking-wider" style={{ color: '#6b7280' }}>Estado</th>
                             <th colSpan={2} />
                           </tr>
                         </thead>
@@ -354,7 +445,7 @@ export default function AttributeManager({ atributos }: { atributos: Atributo[] 
                       </table>
                     </div>
                   ) : (
-                    <p className="text-xs text-stone-400">Sin valores todavía.</p>
+                    <p className="text-xs" style={{ color: '#6b7280' }}>Sin valores todavía.</p>
                   )}
                   <AddValorForm atributoId={attr.id} />
                 </div>
@@ -365,33 +456,45 @@ export default function AttributeManager({ atributos }: { atributos: Atributo[] 
       </div>
 
       {/* New attribute form */}
-      <div className="bg-white border border-stone-100 p-6">
-        <h3 className="text-xs text-stone-500 uppercase tracking-wider mb-4">Nuevo atributo</h3>
+      <div
+        className="p-6 rounded-sm"
+        style={{ background: '#1f2937', border: '1px solid #374151' }}
+      >
+        <h3 className="text-xs uppercase tracking-wider mb-4" style={{ color: '#9ca3af' }}>
+          Nuevo atributo
+        </h3>
         <form action={attrAction} className="flex items-end gap-3 flex-wrap">
           <div>
-            <label className="block text-xs text-stone-400 mb-1">Nombre</label>
+            <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Nombre</label>
             <input
               name="nombre"
               type="text"
               placeholder="ej: Color"
               required
-              className="border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:border-stone-400 w-44"
+              className="px-3 py-2 text-sm focus:outline-none w-44 transition-colors"
+              style={inputStyle}
+              onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+              onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
             />
           </div>
           <div>
-            <label className="block text-xs text-stone-400 mb-1">Código</label>
+            <label className="block text-xs mb-1" style={{ color: '#6b7280' }}>Código</label>
             <input
               name="codigo"
               type="text"
               placeholder="ej: color"
               required
-              className="border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:border-stone-400 font-mono w-32"
+              className="px-3 py-2 text-sm focus:outline-none font-mono w-32 transition-colors"
+              style={inputStyle}
+              onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+              onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
             />
           </div>
           <button
             type="submit"
             disabled={attrPending}
-            className="py-2 px-4 text-sm bg-stone-800 text-white hover:bg-stone-700 transition-colors disabled:opacity-50"
+            className="py-2 px-4 text-sm transition-colors disabled:opacity-50"
+            style={{ background: '#6366f1', color: 'white', borderRadius: '8px' }}
           >
             {attrPending ? '…' : 'Crear atributo'}
           </button>

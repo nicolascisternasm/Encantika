@@ -14,26 +14,42 @@ export default function ConfigTabs({ settingsForm, paginasForm }: ConfigTabsProp
 
   return (
     <div>
-      <div className="flex border-b border-sand mb-8">
+      <div style={{ display: 'flex', gap: 8, marginBottom: 32 }}>
         <button
           type="button"
           onClick={() => setActiveTab('general')}
-          className={`px-5 py-3 text-xs uppercase tracking-widest transition-colors -mb-px border-b-2 ${
-            activeTab === 'general'
-              ? 'border-stone-900 text-stone-900'
-              : 'border-transparent text-stone-400 hover:text-stone-700'
-          }`}
+          style={{
+            padding: '8px 20px',
+            fontSize: 12,
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            borderRadius: 8,
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'background 0.15s, color 0.15s',
+            background: activeTab === 'general' ? '#6366f1' : '#374151',
+            color: activeTab === 'general' ? '#ffffff' : '#9ca3af',
+            fontWeight: 500,
+          }}
         >
           General
         </button>
         <button
           type="button"
           onClick={() => setActiveTab('paginas')}
-          className={`px-5 py-3 text-xs uppercase tracking-widest transition-colors -mb-px border-b-2 ${
-            activeTab === 'paginas'
-              ? 'border-stone-900 text-stone-900'
-              : 'border-transparent text-stone-400 hover:text-stone-700'
-          }`}
+          style={{
+            padding: '8px 20px',
+            fontSize: 12,
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            borderRadius: 8,
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'background 0.15s, color 0.15s',
+            background: activeTab === 'paginas' ? '#6366f1' : '#374151',
+            color: activeTab === 'paginas' ? '#ffffff' : '#9ca3af',
+            fontWeight: 500,
+          }}
         >
           Páginas
         </button>

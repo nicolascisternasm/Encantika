@@ -34,12 +34,12 @@ export default async function ComponentesPage() {
     <div className="p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-semibold text-stone-100">Componentes</h1>
-          <p className="text-stone-400 text-sm mt-1">Catálogo de piezas para Arma tu Joya</p>
+          <h1 style={{ fontSize: 24, fontWeight: 600, color: '#f9fafb', margin: 0 }}>Componentes</h1>
+          <p style={{ color: '#9ca3af', fontSize: 14, marginTop: 4 }}>Catálogo de piezas para Arma tu Joya</p>
         </div>
         <Link
           href="/administracion/arma-joya/componentes/nuevo"
-          className="px-4 py-2 text-sm bg-stone-100 text-stone-900 hover:bg-white transition-colors"
+          style={{ padding: '8px 16px', fontSize: 14, background: '#6366f1', color: '#fff', borderRadius: 8, textDecoration: 'none', transition: 'opacity 0.15s' }}
         >
           + Nuevo componente
         </Link>
@@ -49,40 +49,39 @@ export default async function ComponentesPage() {
         const comps = porTipo.get(tipo.id) ?? []
         if (comps.length === 0) return null
         return (
-          <div key={tipo.id} className="mb-8">
-            <h2 className="text-xs uppercase tracking-widest text-stone-500 mb-3 flex items-center gap-2">
+          <div key={tipo.id} style={{ marginBottom: 32 }}>
+            <h2 style={{ fontSize: 11, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#6b7280', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
               {tipo.nombre}
-              <span className="text-stone-700">({comps.length})</span>
+              <span style={{ color: '#4b5563' }}>({comps.length})</span>
             </h2>
             <div className="flex flex-col gap-1">
               {comps.map((c) => (
                 <div
                   key={c.id}
-                  className="flex items-center gap-4 bg-stone-900 border border-stone-800 px-4 py-3 hover:border-stone-700 transition-colors"
+                  style={{ display: 'flex', alignItems: 'center', gap: 16, background: '#1f2937', border: '1px solid #374151', padding: '12px 16px', transition: 'border-color 0.15s' }}
                 >
                   {/* Swatch de color */}
                   <div
-                    className="w-5 h-5 rounded-full shrink-0 border border-stone-700"
-                    style={{ background: c.color_primario ?? '#3a3530' }}
+                    style={{ width: 20, height: 20, borderRadius: '50%', flexShrink: 0, border: '1px solid #374151', background: c.color_primario ?? '#3a3530' }}
                   />
 
-                  <div className="flex-1 min-w-0">
-                    <p className="text-stone-200 text-sm font-medium truncate">{c.nombre}</p>
-                    <p className="text-stone-600 text-xs">{c.sku}</p>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <p style={{ color: '#d1d5db', fontSize: 14, fontWeight: 500 }} className="truncate">{c.nombre}</p>
+                    <p style={{ color: '#6b7280', fontSize: 12 }}>{c.sku}</p>
                   </div>
 
-                  <div className="text-right shrink-0">
-                    <p className="text-stone-300 text-sm">
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <p style={{ color: '#9ca3af', fontSize: 14 }}>
                       {c.precio > 0 ? `$${c.precio.toLocaleString('es-CL')}` : 'Sin costo'}
                     </p>
-                    <p className="text-stone-600 text-xs">Stock: {c.stock}</p>
+                    <p style={{ color: '#6b7280', fontSize: 12 }}>Stock: {c.stock}</p>
                   </div>
 
                   <ToggleActivo id={c.id} activo={c.activo} />
 
                   <Link
                     href={`/administracion/arma-joya/componentes/${c.id}`}
-                    className="text-xs text-stone-500 hover:text-stone-300 transition-colors shrink-0"
+                    style={{ fontSize: 12, color: '#6b7280', textDecoration: 'none', flexShrink: 0, transition: 'color 0.15s' }}
                   >
                     Editar →
                   </Link>

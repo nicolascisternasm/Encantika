@@ -38,31 +38,34 @@ function ConsultaRow({ consulta: c }: { consulta: Consulta }) {
   }
 
   return (
-    <div className={`border-b border-stone-100 transition-colors ${leido ? '' : 'bg-stone-50'}`}>
+    <div style={{ borderBottom: '1px solid #374151', transition: 'background 0.15s', background: leido ? 'transparent' : 'rgba(99,102,241,0.05)' }}>
       {/* Fila resumen */}
       <button
-        className="w-full text-left px-4 py-3 hover:bg-stone-100 transition-colors flex items-start gap-3"
+        className="w-full text-left flex items-start gap-3"
+        style={{ padding: '12px 16px', transition: 'background 0.15s' }}
         onClick={() => setAbierta(v => !v)}
+        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.03)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
       >
-        <div className="mt-0.5 shrink-0">
+        <div style={{ marginTop: 4, flexShrink: 0 }}>
           {leido ? (
-            <div className="w-2 h-2 rounded-full bg-stone-200" />
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#374151' }} />
           ) : (
-            <div className="w-2 h-2 rounded-full bg-stone-700" />
+            <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#6366f1' }} />
           )}
         </div>
-        <div className="flex-1 min-w-0 grid grid-cols-4 gap-3 text-sm">
-          <span className={`truncate ${leido ? 'text-stone-500' : 'text-stone-800 font-medium'}`}>
+        <div style={{ flex: 1, minWidth: 0, display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, fontSize: 13 }}>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: leido ? '#9ca3af' : '#f9fafb', fontWeight: leido ? 400 : 500 }}>
             {c.nombre}
           </span>
-          <span className="truncate text-stone-500 text-xs mt-0.5">{c.email}</span>
-          <span className="truncate text-stone-500 text-xs mt-0.5">
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#9ca3af', fontSize: 12, marginTop: 2 }}>{c.email}</span>
+          <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: '#9ca3af', fontSize: 12, marginTop: 2 }}>
             {c.asunto ?? '—'}
           </span>
-          <span className="text-stone-400 text-xs mt-0.5 text-right">{formatFecha(c.creado_en)}</span>
+          <span style={{ color: '#6b7280', fontSize: 12, marginTop: 2, textAlign: 'right' }}>{formatFecha(c.creado_en)}</span>
         </div>
         <svg
-          className={`w-4 h-4 shrink-0 text-stone-400 mt-0.5 transition-transform ${abierta ? 'rotate-180' : ''}`}
+          style={{ width: 16, height: 16, flexShrink: 0, color: '#6b7280', marginTop: 2, transition: 'transform 0.2s', transform: abierta ? 'rotate(180deg)' : 'rotate(0deg)' }}
           fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24"
         >
           <path d="m6 9 6 6 6-6" strokeLinecap="round" />
@@ -71,26 +74,30 @@ function ConsultaRow({ consulta: c }: { consulta: Consulta }) {
 
       {/* Detalle expandido */}
       {abierta && (
-        <div className="px-9 pb-5 space-y-3">
+        <div style={{ padding: '0 16px 20px 36px', display: 'flex', flexDirection: 'column', gap: 12 }}>
           {c.telefono && (
-            <p className="text-xs text-stone-500">
-              <span className="uppercase tracking-wider mr-2">Teléfono:</span>{c.telefono}
+            <p style={{ fontSize: 12, color: '#9ca3af' }}>
+              <span style={{ textTransform: 'uppercase', letterSpacing: '0.08em', marginRight: 8 }}>Teléfono:</span>{c.telefono}
             </p>
           )}
-          <div className="bg-white border border-stone-100 rounded p-4">
-            <p className="text-sm text-stone-700 leading-relaxed whitespace-pre-wrap">{c.mensaje}</p>
+          <div style={{ background: '#111827', border: '1px solid #374151', borderRadius: 8, padding: 16 }}>
+            <p style={{ fontSize: 14, color: '#d1d5db', lineHeight: 1.6, whiteSpace: 'pre-wrap' }}>{c.mensaje}</p>
           </div>
-          <div className="flex items-center gap-4">
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
             <a
               href={`mailto:${c.email}?subject=Re: ${c.asunto ?? 'Tu consulta'}`}
-              className="text-xs text-stone-600 border border-stone-200 px-3 py-1.5 hover:border-stone-400 transition-colors"
+              style={{ fontSize: 12, color: '#d1d5db', border: '1px solid #374151', padding: '6px 12px', borderRadius: 6, textDecoration: 'none', transition: 'border-color 0.15s' }}
+              onMouseEnter={e => (e.currentTarget.style.borderColor = '#6366f1')}
+              onMouseLeave={e => (e.currentTarget.style.borderColor = '#374151')}
             >
               Responder por email
             </a>
             <button
               onClick={toggleLeido}
               disabled={isPending}
-              className="text-xs text-stone-500 hover:text-stone-800 transition-colors disabled:opacity-50"
+              style={{ fontSize: 12, color: '#9ca3af', background: 'none', border: 'none', cursor: 'pointer', opacity: isPending ? 0.5 : 1, transition: 'color 0.15s' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#f9fafb')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#9ca3af')}
             >
               {leido ? 'Marcar como no leído' : 'Marcar como leído'}
             </button>
@@ -104,21 +111,21 @@ function ConsultaRow({ consulta: c }: { consulta: Consulta }) {
 export default function ConsultasList({ consultas }: Props) {
   if (consultas.length === 0) {
     return (
-      <div className="text-center py-16 text-stone-400">
-        <p className="text-4xl mb-4">✉️</p>
-        <p className="text-sm">Aún no hay consultas de contacto.</p>
+      <div style={{ textAlign: 'center', padding: '64px 0', color: '#6b7280' }}>
+        <p style={{ fontSize: 36, marginBottom: 16 }}>✉️</p>
+        <p style={{ fontSize: 14 }}>Aún no hay consultas de contacto.</p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white border border-stone-100 rounded-lg overflow-hidden">
+    <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 10, overflow: 'hidden' }}>
       {/* Header */}
-      <div className="px-4 py-2 border-b border-stone-100 grid grid-cols-4 gap-3 text-[10px] uppercase tracking-widest text-stone-400">
-        <span className="pl-5">Nombre</span>
+      <div style={{ padding: '8px 16px', borderBottom: '1px solid #374151', display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, fontSize: 10, textTransform: 'uppercase', letterSpacing: '0.12em', color: '#6b7280' }}>
+        <span style={{ paddingLeft: 20 }}>Nombre</span>
         <span>Email</span>
         <span>Asunto</span>
-        <span className="text-right">Fecha</span>
+        <span style={{ textAlign: 'right' }}>Fecha</span>
       </div>
       {consultas.map(c => (
         <ConsultaRow key={c.id} consulta={c} />

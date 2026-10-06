@@ -21,10 +21,10 @@ export type ImagenSitio = {
 
 type Filtro = 'todas' | 'horizontal' | 'vertical' | 'cuadrada'
 
-const BADGE: Record<string, { label: string; cls: string }> = {
-  horizontal: { label: 'Horizontal', cls: 'bg-blue-100 text-blue-700' },
-  vertical:   { label: 'Vertical',   cls: 'bg-green-100 text-green-700' },
-  cuadrada:   { label: 'Cuadrada',   cls: 'bg-amber-100 text-amber-700' },
+const BADGE: Record<string, { label: string; color: string; bg: string }> = {
+  horizontal: { label: 'Horizontal', color: '#60a5fa', bg: 'rgba(96,165,250,0.12)' },
+  vertical:   { label: 'Vertical',   color: '#34d399', bg: 'rgba(52,211,153,0.12)' },
+  cuadrada:   { label: 'Cuadrada',   color: '#fbbf24', bg: 'rgba(251,191,36,0.12)' },
 }
 
 const USO_LABEL: Record<string, string> = {
@@ -115,59 +115,72 @@ export default function ImagenesManager({ imagenes }: { imagenes: ImagenSitio[] 
         onDragLeave={() => setIsDragging(false)}
         onDrop={(e) => { e.preventDefault(); setIsDragging(false); if (e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0]) }}
         onClick={() => inputRef.current?.click()}
-        className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-colors mb-8 ${
-          isDragging ? 'border-stone-500 bg-stone-50' : 'border-stone-200 hover:border-stone-300'
-        }`}
+        style={{
+          border: `2px dashed ${isDragging ? '#6366f1' : '#374151'}`,
+          borderRadius: 12,
+          padding: 48,
+          textAlign: 'center',
+          cursor: 'pointer',
+          transition: 'border-color 0.15s, background 0.15s',
+          marginBottom: 32,
+          background: isDragging ? 'rgba(99,102,241,0.05)' : 'transparent',
+        }}
       >
         <input
           ref={inputRef}
           type="file"
           accept="image/jpeg,image/png,image/webp"
-          className="hidden"
+          style={{ display: 'none' }}
           onChange={(e) => { if (e.target.files?.[0]) processFile(e.target.files[0]); e.target.value = '' }}
         />
         {uploading ? (
-          <p className="text-stone-500 text-sm">Subiendo imagen…</p>
+          <p style={{ color: '#9ca3af', fontSize: 14 }}>Subiendo imagen…</p>
         ) : (
           <>
-            <p className="text-stone-600 text-sm">Arrastra una imagen aquí o haz clic para seleccionar</p>
-            <p className="text-stone-400 text-xs mt-1">JPG, PNG, WebP — máx. 10 MB</p>
+            <p style={{ color: '#d1d5db', fontSize: 14 }}>Arrastra una imagen aquí o haz clic para seleccionar</p>
+            <p style={{ color: '#6b7280', fontSize: 12, marginTop: 4 }}>JPG, PNG, WebP — máx. 10 MB</p>
           </>
         )}
       </div>
 
       {error && (
-        <p className="text-red-600 text-sm mb-6 bg-red-50 px-4 py-2 rounded">{error}</p>
+        <p style={{ color: '#ef4444', fontSize: 14, marginBottom: 24, background: 'rgba(239,68,68,0.1)', padding: '8px 16px', borderRadius: 6 }}>{error}</p>
       )}
 
       {/* Filtros por orientación */}
-      <div className="flex gap-2 mb-6">
+      <div style={{ display: 'flex', gap: 8, marginBottom: 24, alignItems: 'center' }}>
         {(['todas', 'horizontal', 'vertical', 'cuadrada'] as Filtro[]).map((f) => (
           <button
             key={f}
             onClick={() => setFiltro(f)}
-            className={`px-3 py-1.5 text-xs rounded border transition-colors ${
-              filtro === f
-                ? 'bg-stone-900 text-white border-stone-900'
-                : 'bg-white text-stone-600 border-stone-200 hover:border-stone-400'
-            }`}
+            style={{
+              padding: '6px 12px',
+              fontSize: 12,
+              borderRadius: 6,
+              border: '1px solid',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+              background: filtro === f ? '#6366f1' : 'transparent',
+              color: filtro === f ? '#fff' : '#9ca3af',
+              borderColor: filtro === f ? '#6366f1' : '#374151',
+            }}
           >
             {f.charAt(0).toUpperCase() + f.slice(1)}
             {f !== 'todas' && (
-              <span className="ml-1 opacity-60">
+              <span style={{ marginLeft: 4, opacity: 0.6 }}>
                 ({imagenes.filter((i) => i.orientacion === f).length})
               </span>
             )}
           </button>
         ))}
-        <span className="ml-auto text-xs text-stone-400 self-center">
+        <span style={{ marginLeft: 'auto', fontSize: 12, color: '#6b7280' }}>
           {imagenes.length} {imagenes.length === 1 ? 'imagen' : 'imágenes'}
         </span>
       </div>
 
       {/* Galería */}
       {filtradas.length === 0 ? (
-        <p className="text-stone-400 text-sm text-center py-16">
+        <p style={{ color: '#6b7280', fontSize: 14, textAlign: 'center', padding: '64px 0' }}>
           {imagenes.length === 0
             ? 'No hay imágenes. Sube una para comenzar.'
             : 'No hay imágenes con ese filtro.'}
@@ -179,10 +192,11 @@ export default function ImagenesManager({ imagenes }: { imagenes: ImagenSitio[] 
             return (
               <div
                 key={img.id}
-                className="bg-white border border-stone-100 rounded-lg overflow-hidden group shadow-sm"
+                style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 8, overflow: 'hidden' }}
+                className="group"
               >
                 {/* Miniatura */}
-                <div className="relative bg-stone-50 overflow-hidden" style={{ height: 140 }}>
+                <div style={{ position: 'relative', background: '#374151', overflow: 'hidden', height: 140 }}>
                   <Image
                     src={img.url}
                     alt={img.nombre}
@@ -193,7 +207,26 @@ export default function ImagenesManager({ imagenes }: { imagenes: ImagenSitio[] 
                   <button
                     onClick={() => handleDelete(img.id, img.storage_path)}
                     disabled={deletingId === img.id}
-                    className="absolute top-2 right-2 bg-white/90 hover:bg-red-50 text-stone-500 hover:text-red-600 w-7 h-7 rounded flex items-center justify-center text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                    style={{
+                      position: 'absolute',
+                      top: 8,
+                      right: 8,
+                      background: 'rgba(31,41,55,0.9)',
+                      color: '#9ca3af',
+                      width: 28,
+                      height: 28,
+                      borderRadius: 6,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: 14,
+                      fontWeight: 500,
+                      border: 'none',
+                      cursor: 'pointer',
+                      opacity: 0,
+                      transition: 'opacity 0.15s',
+                    }}
+                    className="group-hover:opacity-100"
                     title="Eliminar imagen"
                   >
                     ×
@@ -201,21 +234,21 @@ export default function ImagenesManager({ imagenes }: { imagenes: ImagenSitio[] 
                 </div>
 
                 {/* Metadata */}
-                <div className="p-3 space-y-1.5">
-                  <span className={`inline-block text-[10px] px-2 py-0.5 rounded-full font-medium ${badge.cls}`}>
+                <div style={{ padding: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <span style={{ display: 'inline-block', fontSize: 10, padding: '2px 8px', borderRadius: 999, fontWeight: 500, color: badge.color, background: badge.bg }}>
                     {badge.label}
                   </span>
-                  <p className="text-[11px] text-stone-400">
+                  <p style={{ fontSize: 11, color: '#6b7280' }}>
                     {img.ancho} × {img.alto}
                   </p>
-                  <div className="flex flex-wrap gap-1">
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
                     {img.usos_sugeridos?.map((uso) => (
-                      <span key={uso} className="text-[10px] bg-stone-100 text-stone-500 px-1.5 py-0.5 rounded">
+                      <span key={uso} style={{ fontSize: 10, background: '#374151', color: '#9ca3af', padding: '2px 6px', borderRadius: 4 }}>
                         {USO_LABEL[uso] ?? uso}
                       </span>
                     ))}
                   </div>
-                  <p className="text-[11px] text-stone-500 truncate" title={img.nombre}>
+                  <p style={{ fontSize: 11, color: '#9ca3af' }} className="truncate" title={img.nombre}>
                     {img.nombre}
                   </p>
                 </div>

@@ -69,87 +69,109 @@ export default function CollectionList({ colecciones }: { colecciones: Coleccion
       <div className="flex justify-end">
         <button
           onClick={openCreate}
-          className="px-4 py-2 text-sm bg-stone-800 text-white hover:bg-stone-700 transition-colors"
+          className="px-4 py-2 text-sm transition-colors"
+          style={{ background: '#6366f1', color: 'white', borderRadius: '8px' }}
         >
           + Nueva colección
         </button>
       </div>
 
-      <div className="bg-white border border-stone-100 rounded-sm overflow-hidden">
+      <div
+        className="rounded-sm overflow-hidden"
+        style={{ background: '#1f2937', border: '1px solid #374151' }}
+      >
         {colecciones.length === 0 ? (
-          <div className="p-16 text-center text-stone-400 text-sm">
+          <div className="p-16 text-center text-sm" style={{ color: '#9ca3af' }}>
             No hay colecciones todavía
           </div>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-stone-100">
+              <tr style={{ borderBottom: '1px solid #374151' }}>
                 <th className="w-16 px-3 py-3" />
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Nombre</th>
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider hidden sm:table-cell">Slug</th>
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Productos</th>
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Estado</th>
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider hidden md:table-cell">Orden</th>
-                <th className="text-right px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Acciones</th>
+                <th className="text-left px-4 py-3 text-xs font-normal uppercase tracking-wider" style={{ color: '#6b7280' }}>Nombre</th>
+                <th className="text-left px-4 py-3 text-xs font-normal uppercase tracking-wider hidden sm:table-cell" style={{ color: '#6b7280' }}>Slug</th>
+                <th className="text-left px-4 py-3 text-xs font-normal uppercase tracking-wider" style={{ color: '#6b7280' }}>Productos</th>
+                <th className="text-left px-4 py-3 text-xs font-normal uppercase tracking-wider" style={{ color: '#6b7280' }}>Estado</th>
+                <th className="text-left px-4 py-3 text-xs font-normal uppercase tracking-wider hidden md:table-cell" style={{ color: '#6b7280' }}>Orden</th>
+                <th className="text-right px-4 py-3 text-xs font-normal uppercase tracking-wider" style={{ color: '#6b7280' }}>Acciones</th>
               </tr>
             </thead>
             <tbody>
               {colecciones.map(col => (
-                <tr key={col.id} className="border-b border-stone-50 hover:bg-stone-50 transition-colors">
+                <tr
+                  key={col.id}
+                  className="transition-colors"
+                  style={{ borderBottom: '1px solid #374151' }}
+                  onMouseEnter={e => (e.currentTarget.style.background = '#111827')}
+                  onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+                >
                   <td className="px-3 py-3 w-16">
                     {col.url_imagen ? (
                       <img
                         src={col.url_imagen}
                         alt=""
-                        className="w-12 h-12 object-cover border border-stone-100"
+                        className="w-12 h-12 object-cover"
+                        style={{ border: '1px solid #374151' }}
                       />
                     ) : (
-                      <div className="w-12 h-12 bg-stone-50 border border-stone-100" />
+                      <div className="w-12 h-12" style={{ background: '#111827', border: '1px solid #374151' }} />
                     )}
                   </td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => openEdit(col)}
-                      className="font-medium text-stone-800 hover:underline text-left"
+                      className="font-medium hover:underline text-left"
+                      style={{ color: '#f9fafb' }}
                     >
                       {col.nombre}
                     </button>
                     {col.descripcion && (
-                      <p className="text-xs text-stone-400 mt-0.5 line-clamp-1">{col.descripcion}</p>
+                      <p className="text-xs mt-0.5 line-clamp-1" style={{ color: '#6b7280' }}>{col.descripcion}</p>
                     )}
                   </td>
                   <td className="px-4 py-3 hidden sm:table-cell">
-                    <span className="text-xs text-stone-400 font-mono">{col.slug}</span>
+                    <span className="text-xs font-mono" style={{ color: '#6b7280' }}>{col.slug}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-xs px-2 py-0.5 bg-stone-100 text-stone-600 rounded">
+                    <span
+                      className="text-xs px-2 py-0.5 rounded"
+                      style={{ background: '#374151', color: '#d1d5db' }}
+                    >
                       {col._count}
                     </span>
                   </td>
                   <td className="px-4 py-3">
                     <button
                       onClick={() => handleToggle(col)}
-                      className={`text-xs px-2 py-0.5 rounded transition-colors ${
+                      className="text-xs px-2 py-0.5 rounded transition-colors"
+                      style={
                         col.activo
-                          ? 'bg-green-50 text-green-700 hover:bg-green-100'
-                          : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
-                      }`}
+                          ? { background: 'rgba(16,185,129,0.12)', color: '#10b981', borderRadius: '6px' }
+                          : { background: '#374151', color: '#9ca3af', borderRadius: '6px' }
+                      }
                     >
                       {col.activo ? 'Activa' : 'Inactiva'}
                     </button>
                   </td>
-                  <td className="px-4 py-3 text-stone-500 text-sm hidden md:table-cell">{col.orden}</td>
+                  <td className="px-4 py-3 text-sm hidden md:table-cell" style={{ color: '#9ca3af' }}>{col.orden}</td>
                   <td className="px-4 py-3 text-right space-x-3">
                     <button
                       onClick={() => openEdit(col)}
-                      className="text-stone-500 hover:text-stone-800 text-xs"
+                      className="text-xs transition-colors"
+                      style={{ color: '#9ca3af' }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#f9fafb')}
+                      onMouseLeave={e => (e.currentTarget.style.color = '#9ca3af')}
                     >
                       Editar
                     </button>
                     <button
                       onClick={() => handleDelete(col)}
                       disabled={deleting === col.id}
-                      className="text-red-500 hover:text-red-700 text-xs disabled:opacity-50"
+                      className="text-xs disabled:opacity-50 transition-colors"
+                      style={{ color: '#ef4444' }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#fca5a5')}
+                      onMouseLeave={e => (e.currentTarget.style.color = '#ef4444')}
                     >
                       {deleting === col.id ? '...' : 'Eliminar'}
                     </button>
@@ -275,29 +297,57 @@ function ColeccionModal({ mode, coleccion, onClose }: ModalProps) {
 
   const currentImg = pendingPreview ?? imgUrl
 
+  const inputStyle = {
+    background: '#111827',
+    border: '1px solid #374151',
+    color: '#f9fafb',
+    borderRadius: '8px',
+  }
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      style={{ background: 'rgba(0,0,0,0.6)' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-white w-full max-w-lg mx-4 shadow-xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-stone-100">
-          <h2 className="text-sm font-medium text-stone-800 uppercase tracking-widest">
+      <div
+        className="w-full max-w-lg mx-4 shadow-xl max-h-[90vh] overflow-y-auto rounded-sm"
+        style={{ background: '#1f2937', border: '1px solid #374151' }}
+      >
+        <div
+          className="flex items-center justify-between px-6 py-4"
+          style={{ borderBottom: '1px solid #374151' }}
+        >
+          <h2 className="text-sm font-medium uppercase tracking-widest" style={{ color: '#f9fafb' }}>
             {mode === 'crear' ? 'Nueva colección' : 'Editar colección'}
           </h2>
-          <button onClick={onClose} className="text-stone-400 hover:text-stone-700 text-xl leading-none">×</button>
+          <button
+            onClick={onClose}
+            className="text-xl leading-none transition-colors"
+            style={{ color: '#6b7280' }}
+            onMouseEnter={e => (e.currentTarget.style.color = '#f9fafb')}
+            onMouseLeave={e => (e.currentTarget.style.color = '#6b7280')}
+          >
+            ×
+          </button>
         </div>
 
         <div className="px-6 py-5 space-y-4">
           {/* Imagen */}
           <div>
-            <p className="text-xs text-stone-500 uppercase tracking-widest mb-2">Imagen</p>
+            <p className="text-xs uppercase tracking-widest mb-2" style={{ color: '#9ca3af' }}>Imagen</p>
             <div className="flex items-start gap-4">
               <div
-                className={`group relative w-[120px] h-[120px] border-2 border-dashed transition-colors flex-shrink-0 ${
-                  uploadingImg ? 'border-stone-200 opacity-60' : 'border-stone-200 hover:border-stone-400 cursor-pointer'
+                className={`group relative w-[120px] h-[120px] flex-shrink-0 transition-colors ${
+                  uploadingImg ? 'opacity-60' : 'cursor-pointer'
                 }`}
+                style={{
+                  border: `2px dashed ${uploadingImg ? '#374151' : '#4b5563'}`,
+                  borderRadius: '8px',
+                }}
                 onClick={() => !uploadingImg && fileRef.current?.click()}
+                onMouseEnter={e => { if (!uploadingImg) (e.currentTarget as HTMLDivElement).style.borderColor = '#6366f1' }}
+                onMouseLeave={e => { if (!uploadingImg) (e.currentTarget as HTMLDivElement).style.borderColor = '#4b5563' }}
                 onDragOver={e => { e.preventDefault(); e.stopPropagation() }}
                 onDrop={e => { e.preventDefault(); e.stopPropagation(); const f = e.dataTransfer.files[0]; if (f) handleFileSelect(f) }}
               >
@@ -310,18 +360,26 @@ function ColeccionModal({ mode, coleccion, onClose }: ModalProps) {
                 />
                 {currentImg ? (
                   <>
-                    <img src={currentImg} alt="" className="w-full h-full object-cover" />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors pointer-events-none" />
+                    <img src={currentImg} alt="" className="w-full h-full object-cover rounded-sm" />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none rounded-sm" />
                     <button
                       type="button"
                       onClick={e => { e.stopPropagation(); handleRemoveImage() }}
-                      className="absolute top-1 right-1 z-10 w-5 h-5 bg-white/90 border border-stone-200 text-stone-500 hover:text-red-500 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1 right-1 z-10 w-5 h-5 text-xs flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      style={{
+                        background: 'rgba(31,41,55,0.9)',
+                        border: '1px solid #374151',
+                        color: '#9ca3af',
+                        borderRadius: '4px',
+                      }}
+                      onMouseEnter={e => (e.currentTarget.style.color = '#ef4444')}
+                      onMouseLeave={e => (e.currentTarget.style.color = '#9ca3af')}
                     >
                       ×
                     </button>
                   </>
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center gap-1 text-stone-400">
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-1" style={{ color: '#6b7280' }}>
                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
                         d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
@@ -331,58 +389,70 @@ function ColeccionModal({ mode, coleccion, onClose }: ModalProps) {
                   </div>
                 )}
               </div>
-              <p className="text-xs text-stone-400 mt-1">JPG, PNG o WebP · Máx. 5 MB</p>
+              <p className="text-xs mt-1" style={{ color: '#6b7280' }}>JPG, PNG o WebP · Máx. 5 MB</p>
             </div>
           </div>
 
           {/* Nombre */}
           <div>
-            <label className="block text-xs text-stone-500 mb-1">Nombre *</label>
+            <label className="block text-xs mb-1" style={{ color: '#9ca3af' }}>Nombre *</label>
             <input
               value={nombre}
               onChange={e => handleNombreChange(e.target.value)}
-              className="w-full border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:border-stone-400"
+              className="w-full px-3 py-2 text-sm focus:outline-none transition-colors"
+              style={inputStyle}
               placeholder="Ej: Verano 2026"
+              onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+              onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
             />
           </div>
 
           {/* Slug */}
           <div>
-            <label className="block text-xs text-stone-500 mb-1">Slug *</label>
+            <label className="block text-xs mb-1" style={{ color: '#9ca3af' }}>Slug *</label>
             <input
               value={slug}
               onChange={e => { setSlug(e.target.value); setSlugManual(true) }}
-              className="w-full border border-stone-200 px-3 py-2 text-sm font-mono focus:outline-none focus:border-stone-400"
+              className="w-full px-3 py-2 text-sm font-mono focus:outline-none transition-colors"
+              style={inputStyle}
               placeholder="verano-2026"
+              onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+              onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
             />
           </div>
 
           {/* Descripción */}
           <div>
-            <label className="block text-xs text-stone-500 mb-1">Descripción</label>
+            <label className="block text-xs mb-1" style={{ color: '#9ca3af' }}>Descripción</label>
             <textarea
               value={descripcion}
               onChange={e => setDescripcion(e.target.value)}
               rows={2}
-              className="w-full border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:border-stone-400 resize-none"
+              className="w-full px-3 py-2 text-sm focus:outline-none resize-none transition-colors"
+              style={inputStyle}
               placeholder="Descripción opcional"
+              onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+              onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
             />
           </div>
 
           {/* Orden + Activa */}
           <div className="flex gap-4">
             <div className="flex-1">
-              <label className="block text-xs text-stone-500 mb-1">Orden</label>
+              <label className="block text-xs mb-1" style={{ color: '#9ca3af' }}>Orden</label>
               <input
                 type="number"
                 min={0}
                 value={orden}
                 onChange={e => setOrden(parseInt(e.target.value) || 0)}
-                className="w-full border border-stone-200 px-3 py-2 text-sm focus:outline-none focus:border-stone-400"
+                className="w-full px-3 py-2 text-sm focus:outline-none transition-colors"
+                style={inputStyle}
+                onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+                onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
               />
             </div>
             <div className="flex items-end pb-2">
-              <label className="flex items-center gap-2 cursor-pointer text-sm text-stone-700">
+              <label className="flex items-center gap-2 cursor-pointer text-sm" style={{ color: '#d1d5db' }}>
                 <input
                   type="checkbox"
                   checked={activo}
@@ -399,7 +469,8 @@ function ColeccionModal({ mode, coleccion, onClose }: ModalProps) {
           <button
             onClick={handleSubmit}
             disabled={isPending || uploadingImg || !nombre.trim() || !slug.trim()}
-            className="flex-1 py-2 text-sm bg-stone-800 text-white hover:bg-stone-700 transition-colors disabled:opacity-50"
+            className="flex-1 py-2 text-sm transition-colors disabled:opacity-50"
+            style={{ background: '#6366f1', color: 'white', borderRadius: '8px' }}
           >
             {isPending || uploadingImg
               ? 'Guardando…'
@@ -407,7 +478,10 @@ function ColeccionModal({ mode, coleccion, onClose }: ModalProps) {
           </button>
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm border border-stone-200 text-stone-700 hover:bg-stone-50 transition-colors"
+            className="px-4 py-2 text-sm transition-colors"
+            style={{ background: '#374151', color: '#d1d5db', borderRadius: '8px' }}
+            onMouseEnter={e => (e.currentTarget.style.background = '#4b5563')}
+            onMouseLeave={e => (e.currentTarget.style.background = '#374151')}
           >
             Cancelar
           </button>

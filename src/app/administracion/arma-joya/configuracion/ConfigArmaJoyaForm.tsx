@@ -21,64 +21,113 @@ export default function ConfigArmaJoyaForm({ inicial }: { inicial: ConfigArmaJoy
   }
 
   return (
-    <div className="max-w-lg space-y-6">
-      <div className="bg-white border border-stone-100 rounded-lg p-6 space-y-5">
-        <h3 className="text-sm font-medium text-stone-700 uppercase tracking-wider">Tarjetas de componente</h3>
+    <div style={{ maxWidth: 512 }}>
+      <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 8, padding: 24, marginBottom: 24 }}>
+        <h3 style={{ fontSize: 12, fontWeight: 500, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 20 }}>Tarjetas de componente</h3>
 
-        <label className="flex items-center justify-between gap-4 cursor-pointer">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, cursor: 'pointer' }}>
           <div>
-            <p className="text-sm text-stone-700">Mostrar precio</p>
-            <p className="text-xs text-stone-400 mt-0.5">Muestra el valor de cada componente en la tarjeta</p>
+            <p style={{ fontSize: 14, color: '#d1d5db' }}>Mostrar precio</p>
+            <p style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>Muestra el valor de cada componente en la tarjeta</p>
           </div>
           <button
             type="button"
             role="switch"
             aria-checked={form.mostrar_precio}
             onClick={() => toggle('mostrar_precio')}
-            className="relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors duration-200"
-            style={{ background: form.mostrar_precio ? '#C9A035' : '#d1d5db' }}
+            style={{
+              position: 'relative',
+              display: 'inline-flex',
+              height: 24,
+              width: 44,
+              flexShrink: 0,
+              borderRadius: 999,
+              transition: 'background 0.2s',
+              background: form.mostrar_precio ? '#6366f1' : '#374151',
+              border: 'none',
+              cursor: 'pointer',
+            }}
           >
             <span
-              className="inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 mt-0.5"
-              style={{ transform: form.mostrar_precio ? 'translateX(22px)' : 'translateX(2px)' }}
+              style={{
+                display: 'inline-block',
+                height: 20,
+                width: 20,
+                borderRadius: '50%',
+                background: '#fff',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                transition: 'transform 0.2s',
+                marginTop: 2,
+                transform: form.mostrar_precio ? 'translateX(22px)' : 'translateX(2px)',
+              }}
             />
           </button>
-        </label>
+        </div>
 
-        <div className="h-px bg-stone-100" />
+        <div style={{ height: 1, background: '#374151', margin: '20px 0' }} />
 
-        <label className="flex items-center justify-between gap-4 cursor-pointer">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, cursor: 'pointer' }}>
           <div>
-            <p className="text-sm text-stone-700">Mostrar descripción</p>
-            <p className="text-xs text-stone-400 mt-0.5">Muestra la descripción corta del componente bajo el nombre</p>
+            <p style={{ fontSize: 14, color: '#d1d5db' }}>Mostrar descripción</p>
+            <p style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>Muestra la descripción corta del componente bajo el nombre</p>
           </div>
           <button
             type="button"
             role="switch"
             aria-checked={form.mostrar_descripcion}
             onClick={() => toggle('mostrar_descripcion')}
-            className="relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors duration-200"
-            style={{ background: form.mostrar_descripcion ? '#C9A035' : '#d1d5db' }}
+            style={{
+              position: 'relative',
+              display: 'inline-flex',
+              height: 24,
+              width: 44,
+              flexShrink: 0,
+              borderRadius: 999,
+              transition: 'background 0.2s',
+              background: form.mostrar_descripcion ? '#6366f1' : '#374151',
+              border: 'none',
+              cursor: 'pointer',
+            }}
           >
             <span
-              className="inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 mt-0.5"
-              style={{ transform: form.mostrar_descripcion ? 'translateX(22px)' : 'translateX(2px)' }}
+              style={{
+                display: 'inline-block',
+                height: 20,
+                width: 20,
+                borderRadius: '50%',
+                background: '#fff',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+                transition: 'transform 0.2s',
+                marginTop: 2,
+                transform: form.mostrar_descripcion ? 'translateX(22px)' : 'translateX(2px)',
+              }}
             />
           </button>
-        </label>
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         <button
           onClick={handleGuardar}
           disabled={pending}
-          className="px-5 py-2 text-xs uppercase tracking-wider text-white rounded transition-opacity disabled:opacity-50"
-          style={{ background: '#C9A035' }}
+          style={{
+            padding: '8px 20px',
+            fontSize: 12,
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            color: '#fff',
+            background: '#6366f1',
+            borderRadius: 8,
+            border: 'none',
+            cursor: pending ? 'not-allowed' : 'pointer',
+            opacity: pending ? 0.5 : 1,
+            transition: 'opacity 0.15s',
+          }}
         >
           {pending ? 'Guardando…' : 'Guardar cambios'}
         </button>
         {guardado && (
-          <p className="text-xs text-green-600">✓ Guardado</p>
+          <p style={{ fontSize: 12, color: '#10b981' }}>✓ Guardado</p>
         )}
       </div>
     </div>

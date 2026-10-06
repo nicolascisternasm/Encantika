@@ -46,14 +46,14 @@ export default function VariantMatrix({ productoId, atributos, variantes }: Vari
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <div>
-          <p className="text-sm text-stone-600">
+          <p style={{ fontSize: 14, color: '#d1d5db' }}>
             {variantes.length} variante{variantes.length !== 1 ? 's' : ''}
           </p>
           {atributos.length > 0 && (
-            <p className="text-xs text-stone-400 mt-0.5">
+            <p style={{ fontSize: 12, color: '#6b7280', marginTop: 2 }}>
               Atributos: {atributos.map((a) => a.nombre).join(', ')}
             </p>
           )}
@@ -61,26 +61,26 @@ export default function VariantMatrix({ productoId, atributos, variantes }: Vari
         <button
           onClick={handleGenerate}
           disabled={generating}
-          className="px-4 py-2 text-xs bg-stone-800 text-white hover:bg-stone-700 transition-colors disabled:opacity-50"
+          style={{ padding: '8px 16px', fontSize: 12, background: '#6366f1', color: 'white', border: 'none', borderRadius: 8, cursor: generating ? 'not-allowed' : 'pointer', opacity: generating ? 0.5 : 1, transition: 'opacity 0.2s' }}
         >
           {generating ? 'Generando...' : 'Generar variantes'}
         </button>
       </div>
 
       {variantes.length === 0 ? (
-        <div className="bg-white border border-stone-100 rounded-sm p-10 text-center text-stone-400 text-sm">
+        <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 8, padding: '40px 20px', textAlign: 'center', color: '#6b7280', fontSize: 14 }}>
           No hay variantes. Asigna atributos y genera las combinaciones.
         </div>
       ) : (
-        <div className="bg-white border border-stone-100 rounded-sm overflow-hidden">
-          <table className="w-full text-sm">
+        <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 8, overflow: 'hidden' }}>
+          <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
             <thead>
-              <tr className="border-b border-stone-100">
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Variante</th>
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">SKU</th>
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Precio</th>
-                <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Estado</th>
-                <th className="text-right px-4 py-3"></th>
+              <tr style={{ borderBottom: '1px solid #374151' }}>
+                <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 11, fontWeight: 400, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Variante</th>
+                <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 11, fontWeight: 400, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>SKU</th>
+                <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 11, fontWeight: 400, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Precio</th>
+                <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 11, fontWeight: 400, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Estado</th>
+                <th style={{ padding: '12px 16px' }}></th>
               </tr>
             </thead>
             <tbody>
@@ -135,16 +135,26 @@ function VarianteRow({
     })
   }
 
+  const inputStyle: React.CSSProperties = {
+    background: '#111827',
+    border: '1px solid #374151',
+    borderRadius: 6,
+    padding: '4px 8px',
+    fontSize: 12,
+    color: '#f9fafb',
+    outline: 'none',
+  }
+
   if (editing) {
     return (
-      <tr className="border-b border-stone-50 bg-stone-50">
-        <td className="px-4 py-3 text-stone-700 text-sm">{label}</td>
-        <td colSpan={3} className="px-4 py-2">
-          <form onSubmit={handleSubmit} className="flex gap-2 items-center">
+      <tr style={{ borderBottom: '1px solid #374151', background: '#111827' }}>
+        <td style={{ padding: '12px 16px', color: '#d1d5db', fontSize: 14 }}>{label}</td>
+        <td colSpan={3} style={{ padding: '8px 16px' }}>
+          <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <input
               name="sku"
               defaultValue={variante.sku}
-              className="border border-stone-200 px-2 py-1 text-xs font-mono w-36 focus:outline-none focus:border-stone-400"
+              style={{ ...inputStyle, fontFamily: 'monospace', width: 144 }}
               placeholder="SKU"
             />
             <input
@@ -152,20 +162,20 @@ function VarianteRow({
               type="number"
               min={0}
               defaultValue={variante.precio}
-              className="border border-stone-200 px-2 py-1 text-xs w-28 focus:outline-none focus:border-stone-400"
+              style={{ ...inputStyle, width: 112 }}
               placeholder="Precio"
             />
             <button
               type="submit"
               disabled={isPending}
-              className="text-xs bg-stone-800 text-white px-3 py-1 hover:bg-stone-700 disabled:opacity-50"
+              style={{ fontSize: 12, background: '#6366f1', color: 'white', border: 'none', borderRadius: 6, padding: '4px 12px', cursor: isPending ? 'not-allowed' : 'pointer', opacity: isPending ? 0.5 : 1 }}
             >
               {isPending ? '...' : 'Guardar'}
             </button>
             <button
               type="button"
               onClick={onCancel}
-              className="text-xs text-stone-500 hover:text-stone-700"
+              style={{ fontSize: 12, background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px 8px' }}
             >
               Cancelar
             </button>
@@ -177,21 +187,29 @@ function VarianteRow({
   }
 
   return (
-    <tr className="border-b border-stone-50 hover:bg-stone-50 transition-colors">
-      <td className="px-4 py-3 text-stone-700 text-sm">{label}</td>
-      <td className="px-4 py-3 text-stone-500 font-mono text-xs">{variante.sku}</td>
-      <td className="px-4 py-3 text-stone-700 text-sm">{formatCLP(variante.precio)}</td>
-      <td className="px-4 py-3">
+    <tr style={{ borderBottom: '1px solid #374151' }}>
+      <td style={{ padding: '12px 16px', color: '#d1d5db', fontSize: 14 }}>{label}</td>
+      <td style={{ padding: '12px 16px', color: '#9ca3af', fontFamily: 'monospace', fontSize: 12 }}>{variante.sku}</td>
+      <td style={{ padding: '12px 16px', color: '#d1d5db', fontSize: 14 }}>{formatCLP(variante.precio)}</td>
+      <td style={{ padding: '12px 16px' }}>
         <span
-          className={`text-xs px-2 py-0.5 rounded ${
-            variante.activo ? 'bg-green-50 text-green-700' : 'bg-stone-100 text-stone-500'
-          }`}
+          style={{
+            fontSize: 12,
+            padding: '2px 8px',
+            borderRadius: 4,
+            ...(variante.activo
+              ? { background: 'rgba(16,185,129,0.12)', color: '#10b981' }
+              : { background: '#374151', color: '#9ca3af' }),
+          }}
         >
           {variante.activo ? 'Activa' : 'Inactiva'}
         </span>
       </td>
-      <td className="px-4 py-3 text-right">
-        <button onClick={onEdit} className="text-xs text-stone-500 hover:text-stone-800">
+      <td style={{ padding: '12px 16px', textAlign: 'right' }}>
+        <button
+          onClick={onEdit}
+          style={{ fontSize: 12, background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: 0 }}
+        >
           Editar
         </button>
       </td>

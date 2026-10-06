@@ -15,11 +15,11 @@ export default async function ImagenesPaginaPage() {
     .order('creado_en', { ascending: false })
 
   return (
-    <div className="max-w-5xl">
-      <h1 className="text-2xl font-light text-stone-800 tracking-wide mb-1">
+    <div style={{ maxWidth: 960 }}>
+      <h1 style={{ fontSize: 24, fontWeight: 300, color: '#f9fafb', letterSpacing: '0.02em', marginBottom: 4 }}>
         Biblioteca de imágenes
       </h1>
-      <p className="text-sm text-stone-500 mb-10">
+      <p style={{ fontSize: 14, color: '#9ca3af', marginBottom: 40 }}>
         Sube y gestiona las imágenes del sitio — hero, banner, historia.
       </p>
 

@@ -50,18 +50,31 @@ export default function CaracteristicasEditor({ productoId, inicial }: Props) {
                 value={row.nombre}
                 onChange={e => updateRow(i, 'nombre', e.target.value)}
                 placeholder="Nombre (ej: Material)"
-                className="w-40 border border-stone-200 px-2 py-1.5 text-sm focus:outline-none focus:border-stone-400"
+                className="w-40 px-2 py-1.5 text-sm focus:outline-none"
+                style={{
+                  background: '#1f2937',
+                  border: '1px solid #374151',
+                  color: '#f9fafb',
+                  borderRadius: '8px',
+                }}
               />
               <input
                 value={row.valor}
                 onChange={e => updateRow(i, 'valor', e.target.value)}
                 placeholder="Valor (ej: Plata 925)"
-                className="flex-1 border border-stone-200 px-2 py-1.5 text-sm focus:outline-none focus:border-stone-400"
+                className="flex-1 px-2 py-1.5 text-sm focus:outline-none"
+                style={{
+                  background: '#1f2937',
+                  border: '1px solid #374151',
+                  color: '#f9fafb',
+                  borderRadius: '8px',
+                }}
               />
               <button
                 type="button"
                 onClick={() => removeRow(i)}
-                className="text-stone-300 hover:text-red-400 transition-colors w-6 text-lg leading-none"
+                className="transition-colors w-6 text-lg leading-none"
+                style={{ color: '#4b5563' }}
                 aria-label="Eliminar fila"
               >
                 ×
@@ -72,7 +85,7 @@ export default function CaracteristicasEditor({ productoId, inicial }: Props) {
       )}
 
       {rows.length === 0 && (
-        <p className="text-xs text-stone-400">
+        <p className="text-xs" style={{ color: '#6b7280' }}>
           Sin características definidas. Agrega pares nombre/valor para describir la pieza.
         </p>
       )}
@@ -81,7 +94,8 @@ export default function CaracteristicasEditor({ productoId, inicial }: Props) {
         <button
           type="button"
           onClick={addRow}
-          className="text-xs text-stone-400 hover:text-stone-700 transition-colors"
+          className="text-xs transition-colors"
+          style={{ color: '#9ca3af' }}
         >
           + Agregar característica
         </button>
@@ -90,7 +104,8 @@ export default function CaracteristicasEditor({ productoId, inicial }: Props) {
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-1.5 text-xs bg-stone-800 text-white hover:bg-stone-700 transition-colors disabled:opacity-50"
+            className="px-4 py-1.5 text-xs transition-colors disabled:opacity-50"
+            style={{ background: '#6366f1', color: 'white', borderRadius: '8px' }}
           >
             {saving ? 'Guardando…' : 'Guardar'}
           </button>

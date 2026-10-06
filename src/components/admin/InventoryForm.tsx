@@ -27,29 +27,29 @@ export default function InventoryForm({ productoId, variantes }: InventoryFormPr
 
   if (variantes.length === 0) {
     return (
-      <div className="bg-white border border-stone-100 rounded-sm p-10 text-center text-stone-400 text-sm">
+      <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 8, padding: '40px 20px', textAlign: 'center', color: '#6b7280', fontSize: 14 }}>
         Crea variantes primero para registrar movimientos de inventario
       </div>
     )
   }
 
   return (
-    <div className="space-y-6">
-      <div className="bg-white border border-stone-100 rounded-sm overflow-hidden">
-        <table className="w-full text-sm">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+      <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 8, overflow: 'hidden' }}>
+        <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
           <thead>
-            <tr className="border-b border-stone-100">
-              <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">SKU</th>
-              <th className="text-left px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Precio</th>
-              <th className="text-right px-4 py-3 text-xs font-normal text-stone-500 uppercase tracking-wider">Stock</th>
+            <tr style={{ borderBottom: '1px solid #374151' }}>
+              <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 11, fontWeight: 400, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>SKU</th>
+              <th style={{ textAlign: 'left', padding: '12px 16px', fontSize: 11, fontWeight: 400, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Precio</th>
+              <th style={{ textAlign: 'right', padding: '12px 16px', fontSize: 11, fontWeight: 400, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Stock</th>
             </tr>
           </thead>
           <tbody>
             {variantes.map((v) => (
-              <tr key={v.id} className="border-b border-stone-50">
-                <td className="px-4 py-3 font-mono text-xs text-stone-700">{v.sku}</td>
-                <td className="px-4 py-3 text-stone-600 text-sm">{formatCLP(v.precio)}</td>
-                <td className="px-4 py-3 text-right font-medium text-stone-800">
+              <tr key={v.id} style={{ borderBottom: '1px solid #374151' }}>
+                <td style={{ padding: '12px 16px', fontFamily: 'monospace', fontSize: 12, color: '#d1d5db' }}>{v.sku}</td>
+                <td style={{ padding: '12px 16px', color: '#d1d5db', fontSize: 14 }}>{formatCLP(v.precio)}</td>
+                <td style={{ padding: '12px 16px', textAlign: 'right', fontWeight: 500, color: '#f9fafb' }}>
                   {v.stock ?? 0}
                 </td>
               </tr>
@@ -58,17 +58,17 @@ export default function InventoryForm({ productoId, variantes }: InventoryFormPr
         </table>
       </div>
 
-      <div className="bg-white border border-stone-100 rounded-sm p-6">
-        <h3 className="text-sm font-medium text-stone-700 mb-4">Registrar movimiento</h3>
-        <form action={formAction} className="space-y-4 max-w-md">
+      <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 8, padding: 24 }}>
+        <h3 style={{ fontSize: 14, fontWeight: 500, color: '#d1d5db', marginBottom: 16 }}>Registrar movimiento</h3>
+        <form action={formAction} style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 448 }}>
           <input type="hidden" name="producto_id" value={productoId} />
 
           <div>
-            <label className="block text-xs text-stone-500 mb-1">Variante *</label>
+            <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>Variante *</label>
             <select
               name="variante_id"
               required
-              className="w-full border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400 bg-white"
+              style={{ width: '100%', background: '#1f2937', border: '1px solid #374151', borderRadius: 8, padding: '8px 12px', fontSize: 14, color: '#f9fafb', outline: 'none' }}
             >
               {variantes.map((v) => (
                 <option key={v.id} value={v.id}>
@@ -78,13 +78,13 @@ export default function InventoryForm({ productoId, variantes }: InventoryFormPr
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
             <div>
-              <label className="block text-xs text-stone-500 mb-1">Tipo *</label>
+              <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>Tipo *</label>
               <select
                 name="tipo"
                 required
-                className="w-full border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400 bg-white"
+                style={{ width: '100%', background: '#1f2937', border: '1px solid #374151', borderRadius: 8, padding: '8px 12px', fontSize: 14, color: '#f9fafb', outline: 'none' }}
               >
                 <option value="entrada">Entrada</option>
                 <option value="salida">Salida</option>
@@ -92,23 +92,23 @@ export default function InventoryForm({ productoId, variantes }: InventoryFormPr
               </select>
             </div>
             <div>
-              <label className="block text-xs text-stone-500 mb-1">Cantidad *</label>
+              <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>Cantidad *</label>
               <input
                 name="cantidad"
                 type="number"
                 required
-                className="w-full border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400"
+                style={{ width: '100%', background: '#1f2937', border: '1px solid #374151', borderRadius: 8, padding: '8px 12px', fontSize: 14, color: '#f9fafb', outline: 'none', boxSizing: 'border-box' }}
                 placeholder="10"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-xs text-stone-500 mb-1">Nota</label>
+            <label style={{ display: 'block', fontSize: 12, color: '#9ca3af', marginBottom: 4 }}>Nota</label>
             <input
               name="nota"
               type="text"
-              className="w-full border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400"
+              style={{ width: '100%', background: '#1f2937', border: '1px solid #374151', borderRadius: 8, padding: '8px 12px', fontSize: 14, color: '#f9fafb', outline: 'none', boxSizing: 'border-box' }}
               placeholder="Descripción del movimiento (opcional)"
             />
           </div>
@@ -116,7 +116,7 @@ export default function InventoryForm({ productoId, variantes }: InventoryFormPr
           <button
             type="submit"
             disabled={isPending}
-            className="px-6 py-2 text-sm bg-stone-800 text-white hover:bg-stone-700 transition-colors disabled:opacity-50"
+            style={{ alignSelf: 'flex-start', padding: '8px 24px', fontSize: 14, background: '#6366f1', color: 'white', border: 'none', borderRadius: 8, cursor: isPending ? 'not-allowed' : 'pointer', opacity: isPending ? 0.5 : 1, transition: 'opacity 0.2s' }}
           >
             {isPending ? 'Registrando...' : 'Registrar movimiento'}
           </button>

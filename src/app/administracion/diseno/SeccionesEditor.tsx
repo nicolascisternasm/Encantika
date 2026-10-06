@@ -75,7 +75,7 @@ export default function SeccionesEditor({ hero: ih, bannerJoya: ib, historia: ii
 
   return (
     <>
-      <div className="space-y-6 max-w-2xl">
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 24, maxWidth: 672 }}>
         <SeccionCard
           titulo="Hero principal"
           seccion={hero}
@@ -96,16 +96,27 @@ export default function SeccionesEditor({ hero: ih, bannerJoya: ib, historia: ii
         />
       </div>
 
-      <div className="flex items-center gap-4 mt-8 pb-12">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginTop: 32, paddingBottom: 48 }}>
         <button
           onClick={handleGuardar}
           disabled={isPending}
-          className="bg-stone-900 text-white text-sm tracking-wide px-8 py-3 hover:bg-stone-700 transition-colors disabled:opacity-50"
+          style={{
+            background: '#6366f1',
+            color: '#fff',
+            fontSize: 14,
+            letterSpacing: '0.04em',
+            padding: '12px 32px',
+            borderRadius: 8,
+            border: 'none',
+            cursor: isPending ? 'not-allowed' : 'pointer',
+            opacity: isPending ? 0.5 : 1,
+            transition: 'opacity 0.15s',
+          }}
         >
           {isPending ? 'Guardando…' : 'Guardar secciones'}
         </button>
         {mensaje && (
-          <p className={`text-sm ${mensaje.tipo === 'ok' ? 'text-stone-500' : 'text-red-600'}`}>
+          <p style={{ fontSize: 14, color: mensaje.tipo === 'ok' ? '#10b981' : '#ef4444' }}>
             {mensaje.texto}
           </p>
         )}
@@ -134,15 +145,14 @@ function SeccionCard({
   onCambiarPosicion: (pos: string) => void
 }) {
   return (
-    <div className="border border-stone-200 rounded-lg p-5 bg-white">
-      <h3 className="text-sm font-medium text-stone-700 mb-4">{titulo}</h3>
+    <div style={{ border: '1px solid #374151', borderRadius: 8, padding: 20, background: '#1f2937' }}>
+      <h3 style={{ fontSize: 14, fontWeight: 500, color: '#d1d5db', marginBottom: 16 }}>{titulo}</h3>
 
-      <div className="flex gap-6 items-start">
+      <div style={{ display: 'flex', gap: 24, alignItems: 'flex-start' }}>
         {/* Miniatura + botón cambiar */}
-        <div className="shrink-0">
+        <div style={{ flexShrink: 0 }}>
           <div
-            className="relative rounded overflow-hidden bg-stone-100 mb-2"
-            style={{ width: 150, height: 100 }}
+            style={{ position: 'relative', borderRadius: 6, overflow: 'hidden', background: '#374151', marginBottom: 8, width: 150, height: 100 }}
           >
             {seccion.imagenUrl ? (
               <Image
@@ -153,14 +163,24 @@ function SeccionCard({
                 style={{ objectPosition: seccion.posicion }}
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-stone-300 text-xs text-center px-2">Sin imagen</span>
+              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <span style={{ color: '#6b7280', fontSize: 12, textAlign: 'center', padding: '0 8px' }}>Sin imagen</span>
               </div>
             )}
           </div>
           <button
             onClick={onCambiarImagen}
-            className="text-xs text-stone-500 border border-stone-200 px-3 py-1.5 rounded hover:border-stone-400 hover:text-stone-700 transition-colors w-full"
+            style={{
+              fontSize: 12,
+              color: '#9ca3af',
+              border: '1px solid #374151',
+              padding: '6px 12px',
+              borderRadius: 6,
+              background: 'transparent',
+              cursor: 'pointer',
+              width: '100%',
+              transition: 'border-color 0.15s, color 0.15s',
+            }}
           >
             Cambiar imagen
           </button>
@@ -168,24 +188,30 @@ function SeccionCard({
 
         {/* Selector de posición focal 3×3 */}
         <div>
-          <p className="text-xs text-stone-400 mb-2">Posición del foco</p>
-          <div className="grid grid-cols-3 gap-1 w-fit">
+          <p style={{ fontSize: 12, color: '#6b7280', marginBottom: 8 }}>Posición del foco</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4, width: 'fit-content' }}>
             {GRID.map(({ pos, flecha }) => (
               <button
                 key={pos}
                 onClick={() => onCambiarPosicion(pos)}
                 title={pos}
-                className={`w-9 h-9 rounded text-sm transition-colors ${
-                  seccion.posicion === pos
-                    ? 'bg-stone-800 text-white'
-                    : 'bg-stone-100 text-stone-400 hover:bg-stone-200'
-                }`}
+                style={{
+                  width: 36,
+                  height: 36,
+                  borderRadius: 6,
+                  fontSize: 14,
+                  border: 'none',
+                  cursor: 'pointer',
+                  transition: 'background 0.15s, color 0.15s',
+                  background: seccion.posicion === pos ? '#6366f1' : '#374151',
+                  color: seccion.posicion === pos ? '#fff' : '#9ca3af',
+                }}
               >
                 {flecha}
               </button>
             ))}
           </div>
-          <p className="text-[10px] text-stone-400 mt-1.5">{seccion.posicion}</p>
+          <p style={{ fontSize: 10, color: '#6b7280', marginTop: 6 }}>{seccion.posicion}</p>
         </div>
       </div>
     </div>

@@ -36,69 +36,75 @@ export default function SelectorImagenModal({ seccionKey, onSelect, onClose }: P
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.7)' }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl mx-4 max-h-[85vh] flex flex-col">
+      <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 8, boxShadow: '0 20px 60px rgba(0,0,0,0.5)', width: '100%', maxWidth: 768, margin: '0 16px', maxHeight: '85vh', display: 'flex', flexDirection: 'column' }}>
         {/* Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-stone-100">
-          <h3 className="text-sm font-medium text-stone-800">Seleccionar imagen</h3>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px 20px', borderBottom: '1px solid #374151' }}>
+          <h3 style={{ fontSize: 14, fontWeight: 500, color: '#f9fafb' }}>Seleccionar imagen</h3>
           <button
             onClick={onClose}
-            className="text-stone-400 hover:text-stone-700 text-xl leading-none w-7 h-7 flex items-center justify-center rounded hover:bg-stone-100 transition-colors"
+            style={{ color: '#9ca3af', fontSize: 20, lineHeight: 1, width: 28, height: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 6, background: 'transparent', border: 'none', cursor: 'pointer', transition: 'background 0.15s' }}
           >
             ×
           </button>
         </div>
 
         {/* Filtros */}
-        <div className="flex items-center gap-2 px-5 py-3 border-b border-stone-100">
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px', borderBottom: '1px solid #374151' }}>
           {(['todas', 'horizontal', 'vertical', 'cuadrada'] as Filtro[]).map((f) => (
             <button
               key={f}
               onClick={() => setFiltro(f)}
-              className={`px-3 py-1 text-xs rounded border transition-colors ${
-                filtro === f
-                  ? 'bg-stone-900 text-white border-stone-900'
-                  : 'border-stone-200 text-stone-600 hover:border-stone-400'
-              }`}
+              style={{
+                padding: '4px 12px',
+                fontSize: 12,
+                borderRadius: 6,
+                border: '1px solid',
+                cursor: 'pointer',
+                transition: 'all 0.15s',
+                background: filtro === f ? '#6366f1' : 'transparent',
+                color: filtro === f ? '#fff' : '#9ca3af',
+                borderColor: filtro === f ? '#6366f1' : '#374151',
+              }}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
               {f === preferida && filtro !== f && (
-                <span className="ml-1 text-[9px] text-amber-500">recomendada</span>
+                <span style={{ marginLeft: 4, fontSize: 9, color: '#f59e0b' }}>recomendada</span>
               )}
             </button>
           ))}
         </div>
 
         {/* Grid de imágenes */}
-        <div className="overflow-y-auto p-5 flex-1">
+        <div style={{ overflowY: 'auto', padding: 20, flex: 1 }}>
           {loading ? (
-            <p className="text-stone-400 text-sm text-center py-8">Cargando…</p>
+            <p style={{ color: '#9ca3af', fontSize: 14, textAlign: 'center', padding: '32px 0' }}>Cargando…</p>
           ) : filtradas.length === 0 ? (
-            <p className="text-stone-400 text-sm text-center py-8">
+            <p style={{ color: '#9ca3af', fontSize: 14, textAlign: 'center', padding: '32px 0' }}>
               {imagenes.length === 0
                 ? 'No hay imágenes. Sube una en la sección Imágenes.'
                 : 'No hay imágenes con ese filtro.'}
             </p>
           ) : (
-            <div className="grid grid-cols-3 gap-3">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
               {filtradas.map((img) => (
                 <button
                   key={img.id}
                   onClick={() => onSelect(img)}
-                  className="group text-left overflow-hidden rounded border-2 border-transparent hover:border-stone-400 focus:outline-none focus:border-stone-600 transition-colors"
+                  style={{ textAlign: 'left', overflow: 'hidden', borderRadius: 6, border: '2px solid transparent', cursor: 'pointer', background: 'transparent', padding: 0, transition: 'border-color 0.15s' }}
                 >
-                  <div className="relative bg-stone-100" style={{ height: 100 }}>
+                  <div style={{ position: 'relative', background: '#374151', height: 100 }}>
                     <Image
                       src={img.url}
                       alt={img.nombre}
                       fill
-                      className="object-cover group-hover:opacity-90 transition-opacity"
+                      className="object-cover"
                       sizes="(max-width: 768px) 33vw, 22vw"
                     />
                   </div>
-                  <p className="text-[10px] text-stone-500 px-2 py-1.5 truncate bg-white">{img.nombre}</p>
+                  <p style={{ fontSize: 10, color: '#9ca3af', padding: '6px 8px', background: '#111827' }} className="truncate">{img.nombre}</p>
                 </button>
               ))}
             </div>

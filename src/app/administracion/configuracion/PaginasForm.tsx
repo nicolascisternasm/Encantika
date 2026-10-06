@@ -40,6 +40,29 @@ interface PaginasFormProps {
 
 type Tab = 'nosotros' | 'footer' | 'contacto'
 
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  background: '#1f2937',
+  border: '1px solid #374151',
+  color: '#f9fafb',
+  borderRadius: 8,
+  padding: '10px 14px',
+  fontSize: 14,
+  outline: 'none',
+  boxSizing: 'border-box',
+  transition: 'border-color 0.15s',
+}
+
+const labelStyle: React.CSSProperties = {
+  display: 'block',
+  color: '#9ca3af',
+  fontSize: 12,
+  fontWeight: 500,
+  textTransform: 'uppercase',
+  letterSpacing: '0.08em',
+  marginBottom: 6,
+}
+
 function Field({
   label,
   name,
@@ -53,13 +76,15 @@ function Field({
 }) {
   return (
     <div>
-      <label className="block text-xs tracking-widest uppercase text-stone-500 mb-1">{label}</label>
+      <label style={labelStyle}>{label}</label>
       <input
         name={name}
         type="text"
         defaultValue={defaultValue ?? ''}
         placeholder={placeholder}
-        className="w-full px-3 py-2 border border-sand text-sm text-stone-800 focus:outline-none focus:border-gold transition-colors"
+        style={inputStyle}
+        onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+        onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
       />
     </div>
   )
@@ -71,22 +96,26 @@ function TextareaField({
   defaultValue,
   rows = 4,
   placeholder,
+  mono,
 }: {
   label: string
   name: string
   defaultValue?: string | null
   rows?: number
   placeholder?: string
+  mono?: boolean
 }) {
   return (
     <div>
-      <label className="block text-xs tracking-widest uppercase text-stone-500 mb-1">{label}</label>
+      <label style={labelStyle}>{label}</label>
       <textarea
         name={name}
         rows={rows}
         defaultValue={defaultValue ?? ''}
         placeholder={placeholder}
-        className="w-full px-3 py-2 border border-sand text-sm text-stone-800 focus:outline-none focus:border-gold transition-colors resize-none"
+        style={{ ...inputStyle, resize: 'none', fontFamily: mono ? 'monospace' : undefined, fontSize: mono ? 11 : 14 }}
+        onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+        onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
       />
     </div>
   )
@@ -94,7 +123,7 @@ function TextareaField({
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-xs tracking-[0.2em] uppercase text-stone-400 border-b border-sand pb-2 mt-6 mb-4">
+    <h3 style={{ fontSize: 11, letterSpacing: '0.2em', textTransform: 'uppercase', color: '#6b7280', borderBottom: '1px solid #374151', paddingBottom: 8, marginTop: 24, marginBottom: 16 }}>
       {children}
     </h3>
   )
@@ -115,21 +144,23 @@ function ImagenSelector({
 
   return (
     <div>
-      <label className="block text-xs tracking-widest uppercase text-stone-500 mb-2">{label}</label>
-      <div className="flex items-start gap-4">
-        <div className="relative overflow-hidden bg-stone-100 rounded" style={{ width: 120, height: 80 }}>
+      <label style={labelStyle}>{label}</label>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+        <div style={{ position: 'relative', overflow: 'hidden', background: '#111827', borderRadius: 8, border: '1px solid #374151', width: 120, height: 80, flexShrink: 0 }}>
           {imagenUrl ? (
             <Image src={imagenUrl} alt="Imagen" fill className="object-cover" />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-stone-300 text-[10px] text-center px-1">Sin imagen</span>
+            <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span style={{ color: '#6b7280', fontSize: 10, textAlign: 'center', padding: '0 4px' }}>Sin imagen</span>
             </div>
           )}
         </div>
         <button
           type="button"
           onClick={() => setModalAbierto(true)}
-          className="text-xs border border-stone-200 px-3 py-1.5 hover:border-stone-400 transition-colors text-stone-600"
+          style={{ fontSize: 12, color: '#d1d5db', border: '1px solid #374151', padding: '6px 12px', borderRadius: 6, background: 'transparent', cursor: 'pointer', transition: 'border-color 0.15s' }}
+          onMouseEnter={e => (e.currentTarget.style.borderColor = '#6366f1')}
+          onMouseLeave={e => (e.currentTarget.style.borderColor = '#374151')}
         >
           {imagenUrl ? 'Cambiar imagen' : 'Seleccionar imagen'}
         </button>
@@ -175,17 +206,25 @@ export default function PaginasForm({ nosotros, seccion1: s1, seccion2: s2, secc
   return (
     <form onSubmit={handleSubmit}>
       {/* Sub-pestañas */}
-      <div className="flex border-b border-sand mb-6">
+      <div style={{ display: 'flex', gap: 8, marginBottom: 24 }}>
         {tabs.map(t => (
           <button
             key={t.key}
             type="button"
             onClick={() => setActiveTab(t.key)}
-            className={`px-4 py-2.5 text-xs uppercase tracking-widest transition-colors -mb-px border-b-2 ${
-              activeTab === t.key
-                ? 'border-stone-900 text-stone-900'
-                : 'border-transparent text-stone-400 hover:text-stone-700'
-            }`}
+            style={{
+              padding: '7px 16px',
+              fontSize: 12,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              borderRadius: 8,
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'background 0.15s, color 0.15s',
+              background: activeTab === t.key ? '#6366f1' : '#374151',
+              color: activeTab === t.key ? '#ffffff' : '#9ca3af',
+              fontWeight: 500,
+            }}
           >
             {t.label}
           </button>
@@ -254,25 +293,40 @@ export default function PaginasForm({ nosotros, seccion1: s1, seccion2: s2, secc
         <TextareaField label="Subtítulo" name="contacto_subtitulo" defaultValue={contacto.subtitulo} rows={2} />
         <Field label="Email de contacto" name="contacto_email" defaultValue={contacto.email} placeholder="contacto@encantika.cl" />
         <div>
-          <label className="block text-xs tracking-widests uppercase text-stone-500 mb-1">URL embed Google Maps</label>
-          <p className="text-[11px] text-stone-400 mb-1.5">
-            En Google Maps → Compartir → Insertar mapa → copia solo el valor del atributo <code className="bg-stone-100 px-1">src="..."</code>
+          <label style={labelStyle}>URL embed Google Maps</label>
+          <p style={{ fontSize: 11, color: '#6b7280', marginBottom: 6 }}>
+            En Google Maps → Compartir → Insertar mapa → copia solo el valor del atributo <code style={{ background: '#111827', padding: '1px 4px', borderRadius: 4 }}>src=&quot;...&quot;</code>
           </p>
           <textarea
             name="contacto_maps_url"
             rows={3}
             defaultValue={contacto.maps_url ?? ''}
             placeholder="https://www.google.com/maps/embed?pb=..."
-            className="w-full px-3 py-2 border border-sand text-sm text-stone-800 focus:outline-none focus:border-gold transition-colors resize-none font-mono text-[11px]"
+            style={{ ...inputStyle, resize: 'none', fontFamily: 'monospace', fontSize: 11 }}
+            onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+            onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
           />
         </div>
       </div>
 
-      <div className="pt-6">
+      <div style={{ paddingTop: 24 }}>
         <button
           type="submit"
           disabled={isPending}
-          className="px-6 py-2.5 bg-onyx text-white text-xs tracking-widest uppercase hover:bg-gold transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{
+            padding: '8px 24px',
+            background: '#6366f1',
+            color: '#ffffff',
+            borderRadius: 8,
+            border: 'none',
+            fontSize: 13,
+            fontWeight: 500,
+            cursor: isPending ? 'not-allowed' : 'pointer',
+            opacity: isPending ? 0.5 : 1,
+            transition: 'opacity 0.15s, background 0.15s',
+          }}
+          onMouseEnter={e => { if (!isPending) e.currentTarget.style.background = '#4f46e5' }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#6366f1' }}
         >
           {isPending ? 'Guardando…' : 'Guardar páginas'}
         </button>

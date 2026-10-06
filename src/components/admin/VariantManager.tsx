@@ -122,32 +122,42 @@ export default function VariantManager({
     })
   }
 
+  const inputStyle: React.CSSProperties = {
+    background: '#111827',
+    border: '1px solid #374151',
+    borderRadius: 6,
+    padding: '4px 8px',
+    fontSize: 12,
+    color: '#f9fafb',
+    outline: 'none',
+  }
+
   return (
-    <div className="space-y-6">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
       {/* Attribute selection */}
-      <div className="space-y-3">
-        <p className="text-xs text-stone-500 uppercase tracking-wider">Atributos</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+        <p style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Atributos</p>
         {atributosDisponibles.length === 0 ? (
-          <p className="text-sm text-stone-400">
+          <p style={{ fontSize: 14, color: '#6b7280' }}>
             No hay atributos configurados con valores activos.
           </p>
         ) : (
-          <div className="space-y-2.5">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {atributosDisponibles.map(attr => (
-              <label key={attr.id} className="flex items-start gap-3 cursor-pointer">
+              <label key={attr.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer' }}>
                 <input
                   type="checkbox"
                   checked={selectedAttrs.includes(attr.id)}
                   onChange={() => toggleAttr(attr.id)}
-                  className="mt-0.5 w-4 h-4 accent-stone-700 cursor-pointer"
+                  style={{ marginTop: 2, width: 16, height: 16, accentColor: '#6366f1', cursor: 'pointer' }}
                 />
                 <div>
-                  <span className="text-sm text-stone-700">{attr.nombre}</span>
-                  <div className="flex flex-wrap gap-1 mt-1">
+                  <span style={{ fontSize: 14, color: '#d1d5db' }}>{attr.nombre}</span>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginTop: 4 }}>
                     {attr.valores_atributo.map(v => (
                       <span
                         key={v.id}
-                        className="text-[11px] px-1.5 py-0.5 bg-stone-100 text-stone-500 rounded-sm"
+                        style={{ fontSize: 11, padding: '2px 6px', background: '#374151', color: '#9ca3af', borderRadius: 4 }}
                       >
                         {v.valor}
                       </span>
@@ -162,12 +172,12 @@ export default function VariantManager({
           type="button"
           onClick={handleGenerate}
           disabled={generating}
-          className="px-4 py-2 text-xs bg-stone-800 text-white hover:bg-stone-700 transition-colors disabled:opacity-50"
+          style={{ alignSelf: 'flex-start', padding: '8px 16px', fontSize: 12, background: '#6366f1', color: 'white', border: 'none', borderRadius: 8, cursor: generating ? 'not-allowed' : 'pointer', opacity: generating ? 0.5 : 1, transition: 'opacity 0.2s' }}
         >
           {generating ? 'Generando…' : rows.length > 0 ? 'Regenerar variantes' : 'Generar variantes'}
         </button>
         {rows.length > 0 && (
-          <p className="text-[11px] text-stone-400">
+          <p style={{ fontSize: 11, color: '#6b7280' }}>
             Regenerar desactiva las variantes anteriores sin eliminarlas.
           </p>
         )}
@@ -175,81 +185,82 @@ export default function VariantManager({
 
       {/* Variant table */}
       {rows.length > 0 && (
-        <div className="space-y-3">
-          <p className="text-xs text-stone-500 uppercase tracking-wider">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <p style={{ fontSize: 11, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             {rows.length} variante{rows.length !== 1 ? 's' : ''}
           </p>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', fontSize: 14, borderCollapse: 'collapse' }}>
               <thead>
-                <tr className="border-b border-stone-100">
-                  <th className="text-left pb-2 pr-3 text-xs font-normal text-stone-400 whitespace-nowrap">
+                <tr style={{ borderBottom: '1px solid #374151' }}>
+                  <th style={{ textAlign: 'left', paddingBottom: 8, paddingRight: 12, fontSize: 11, fontWeight: 400, color: '#9ca3af', whiteSpace: 'nowrap' }}>
                     Variante
                   </th>
-                  <th className="text-left pb-2 pr-3 text-xs font-normal text-stone-400">SKU</th>
-                  <th className="text-left pb-2 pr-3 text-xs font-normal text-stone-400">Precio</th>
-                  <th className="text-center pb-2 pr-3 text-xs font-normal text-stone-400 whitespace-nowrap">Stock actual</th>
-                  <th className="text-center pb-2 pr-3 text-xs font-normal text-stone-400 whitespace-nowrap">Nuevo stock</th>
-                  <th className="text-center pb-2 pr-3 text-xs font-normal text-stone-400 whitespace-nowrap">
+                  <th style={{ textAlign: 'left', paddingBottom: 8, paddingRight: 12, fontSize: 11, fontWeight: 400, color: '#9ca3af' }}>SKU</th>
+                  <th style={{ textAlign: 'left', paddingBottom: 8, paddingRight: 12, fontSize: 11, fontWeight: 400, color: '#9ca3af' }}>Precio</th>
+                  <th style={{ textAlign: 'center', paddingBottom: 8, paddingRight: 12, fontSize: 11, fontWeight: 400, color: '#9ca3af', whiteSpace: 'nowrap' }}>Stock actual</th>
+                  <th style={{ textAlign: 'center', paddingBottom: 8, paddingRight: 12, fontSize: 11, fontWeight: 400, color: '#9ca3af', whiteSpace: 'nowrap' }}>Nuevo stock</th>
+                  <th style={{ textAlign: 'center', paddingBottom: 8, paddingRight: 12, fontSize: 11, fontWeight: 400, color: '#9ca3af', whiteSpace: 'nowrap' }}>
                     A pedido
                   </th>
-                  <th className="text-center pb-2 text-xs font-normal text-stone-400">Activa</th>
+                  <th style={{ textAlign: 'center', paddingBottom: 8, fontSize: 11, fontWeight: 400, color: '#9ca3af' }}>Activa</th>
                 </tr>
               </thead>
               <tbody>
                 {rows.map((row, i) => (
-                  <tr key={row.id} className="border-b border-stone-50">
-                    <td className="py-2 pr-3 text-stone-700 text-xs whitespace-nowrap max-w-[120px] truncate">
+                  <tr key={row.id} style={{ borderBottom: '1px solid #374151' }}>
+                    <td style={{ paddingTop: 8, paddingBottom: 8, paddingRight: 12, color: '#d1d5db', fontSize: 12, whiteSpace: 'nowrap', maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis' }}>
                       {row.label}
                     </td>
-                    <td className="py-2 pr-3">
+                    <td style={{ paddingTop: 8, paddingBottom: 8, paddingRight: 12 }}>
                       <input
                         value={row.sku}
                         onChange={e => updateRow(i, 'sku', e.target.value)}
-                        className="w-full min-w-[130px] border border-stone-200 px-2 py-1 text-xs font-mono focus:outline-none focus:border-stone-400"
+                        style={{ ...inputStyle, fontFamily: 'monospace', width: '100%', minWidth: 130 }}
                       />
                     </td>
-                    <td className="py-2 pr-3">
+                    <td style={{ paddingTop: 8, paddingBottom: 8, paddingRight: 12 }}>
                       <input
                         type="number"
                         value={row.precio}
                         min={0}
                         step={10}
                         onChange={e => updateRow(i, 'precio', Number(e.target.value))}
-                        className="w-24 border border-stone-200 px-2 py-1 text-xs focus:outline-none focus:border-stone-400"
+                        style={{ ...inputStyle, width: 96 }}
                       />
                     </td>
-                    <td className="py-2 pr-3 text-center text-xs text-stone-500 tabular-nums">
+                    <td style={{ paddingTop: 8, paddingBottom: 8, paddingRight: 12, textAlign: 'center', fontSize: 12, color: '#9ca3af', fontVariantNumeric: 'tabular-nums' }}>
                       {row.stock}
                     </td>
-                    <td className="py-2 pr-3">
+                    <td style={{ paddingTop: 8, paddingBottom: 8, paddingRight: 12 }}>
                       <input
                         type="number"
                         value={row.nuevoStock}
                         min={0}
                         step={1}
                         onChange={e => updateRow(i, 'nuevoStock', Number(e.target.value))}
-                        className={`w-20 border px-2 py-1 text-xs text-center focus:outline-none ${
-                          row.nuevoStock !== row.stock
-                            ? 'border-stone-400 bg-stone-50'
-                            : 'border-stone-200'
-                        }`}
+                        style={{
+                          ...inputStyle,
+                          width: 80,
+                          textAlign: 'center',
+                          border: row.nuevoStock !== row.stock ? '1px solid #6366f1' : '1px solid #374151',
+                        }}
                       />
                     </td>
-                    <td className="py-2 pr-3 text-center">
+                    <td style={{ paddingTop: 8, paddingBottom: 8, paddingRight: 12, textAlign: 'center' }}>
                       <input
                         type="checkbox"
                         checked={row.permite_a_pedido}
                         onChange={e => updateRow(i, 'permite_a_pedido', e.target.checked)}
-                        className="w-4 h-4 accent-stone-700 cursor-pointer"
+                        style={{ width: 16, height: 16, accentColor: '#6366f1', cursor: 'pointer' }}
                       />
                     </td>
-                    <td className="py-2 text-center">
+                    <td style={{ paddingTop: 8, paddingBottom: 8, textAlign: 'center' }}>
                       <input
                         type="checkbox"
                         checked={row.activo}
                         onChange={e => updateRow(i, 'activo', e.target.checked)}
-                        className="w-4 h-4 accent-stone-700 cursor-pointer"
+                        style={{ width: 16, height: 16, accentColor: '#6366f1', cursor: 'pointer' }}
                       />
                     </td>
                   </tr>
@@ -261,7 +272,7 @@ export default function VariantManager({
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 text-xs bg-stone-800 text-white hover:bg-stone-700 transition-colors disabled:opacity-50"
+            style={{ alignSelf: 'flex-start', padding: '8px 16px', fontSize: 12, background: '#6366f1', color: 'white', border: 'none', borderRadius: 8, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.5 : 1, transition: 'opacity 0.2s' }}
           >
             {saving ? 'Guardando…' : 'Guardar variantes'}
           </button>

@@ -16,17 +16,37 @@ export default function CollapsibleSection({
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <div className="border border-stone-100 bg-white">
+    <div style={{ border: '1px solid #374151', borderRadius: 8, background: '#1f2937', overflow: 'hidden' }}>
       <button
         type="button"
         onClick={() => setOpen(v => !v)}
-        className="w-full flex items-center justify-between px-6 py-4 hover:bg-stone-50 transition-colors text-left"
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '16px 24px',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          textAlign: 'left',
+          transition: 'background 0.2s',
+        }}
+        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(55,65,81,0.4)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'none')}
       >
-        <span className="text-xs font-medium text-stone-500 uppercase tracking-widest">
+        <span style={{ fontSize: 11, fontWeight: 500, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
           {title}
         </span>
         <svg
-          className={`w-4 h-4 text-stone-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          style={{
+            width: 16,
+            height: 16,
+            color: '#6b7280',
+            transition: 'transform 0.2s',
+            transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+            flexShrink: 0,
+          }}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -34,7 +54,7 @@ export default function CollapsibleSection({
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
         </svg>
       </button>
-      {open && <div className="px-6 pb-6">{children}</div>}
+      {open && <div style={{ padding: '0 24px 24px' }}>{children}</div>}
     </div>
   )
 }

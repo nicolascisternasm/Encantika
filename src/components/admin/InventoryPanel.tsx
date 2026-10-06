@@ -30,10 +30,10 @@ interface InventoryPanelProps {
   todosInsumos: InsumoBasico[]
 }
 
-function stockBadgeClass(stock: number) {
-  if (stock > 3) return 'bg-green-50 text-green-700'
-  if (stock > 0) return 'bg-yellow-50 text-yellow-700'
-  return 'bg-red-50 text-red-600'
+function stockBadgeStyle(stock: number): React.CSSProperties {
+  if (stock > 3) return { background: 'rgba(16,185,129,0.12)', color: '#10b981' }
+  if (stock > 0) return { background: 'rgba(245,158,11,0.1)', color: '#f59e0b' }
+  return { background: 'rgba(239,68,68,0.1)', color: '#ef4444' }
 }
 
 function stockBadgeLabel(stock: number) {
@@ -75,11 +75,11 @@ export default function InventoryPanel({
   }
 
   return (
-    <div className="space-y-5">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
       {/* Stock input */}
-      <div className="flex items-end gap-4 flex-wrap">
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 16, flexWrap: 'wrap' }}>
         <div>
-          <label className="block text-xs text-stone-400 mb-1 uppercase tracking-wider">
+          <label style={{ display: 'block', fontSize: 11, color: '#9ca3af', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
             Unidades en stock
           </label>
           <input
@@ -88,22 +88,30 @@ export default function InventoryPanel({
             min={0}
             step={1}
             onChange={e => setNuevoStock(Number(e.target.value))}
-            className={`w-28 border px-3 py-2 text-sm focus:outline-none transition-colors ${
-              nuevoStock !== stockActual ? 'border-stone-400 bg-stone-50' : 'border-stone-200'
-            }`}
+            style={{
+              width: 112,
+              background: '#1f2937',
+              border: nuevoStock !== stockActual ? '1px solid #6366f1' : '1px solid #374151',
+              borderRadius: 8,
+              padding: '8px 12px',
+              fontSize: 14,
+              color: '#f9fafb',
+              outline: 'none',
+              transition: 'border-color 0.2s',
+            }}
           />
         </div>
-        <div className="pb-0.5">
-          <span className={`text-xs px-2.5 py-1 ${stockBadgeClass(stockActual)}`}>
+        <div style={{ paddingBottom: 2 }}>
+          <span style={{ fontSize: 12, padding: '4px 10px', borderRadius: 4, ...stockBadgeStyle(stockActual) }}>
             {stockBadgeLabel(stockActual)}
           </span>
         </div>
-        <div className="pb-0.5">
+        <div style={{ paddingBottom: 2 }}>
           <button
             type="button"
             onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 text-xs bg-stone-800 text-white hover:bg-stone-700 transition-colors disabled:opacity-50"
+            style={{ padding: '8px 16px', fontSize: 12, background: '#6366f1', color: 'white', border: 'none', borderRadius: 8, cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.5 : 1, transition: 'opacity 0.2s' }}
           >
             {saving ? 'Guardando…' : 'Guardar stock'}
           </button>

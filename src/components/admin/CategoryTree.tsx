@@ -48,13 +48,18 @@ export default function CategoryTree({ categorias }: { categorias: Categoria[] }
 
   return (
     <div className="space-y-6">
-      <div className="bg-white border border-stone-100 rounded-sm overflow-hidden">
+      <div
+        className="rounded-sm overflow-hidden"
+        style={{ background: '#1f2937', border: '1px solid #374151' }}
+      >
         {categorias.length === 0 ? (
-          <div className="p-10 text-center text-stone-400 text-sm">No hay categorías todavía</div>
+          <div className="p-10 text-center text-sm" style={{ color: '#9ca3af' }}>
+            No hay categorías todavía
+          </div>
         ) : (
-          <ul className="divide-y divide-stone-50">
+          <ul>
             {raices.map((cat) => (
-              <li key={cat.id}>
+              <li key={cat.id} style={{ borderBottom: '1px solid #374151' }}>
                 <CategoryItem
                   categoria={cat}
                   onToggle={handleToggle}
@@ -79,20 +84,34 @@ export default function CategoryTree({ categorias }: { categorias: Categoria[] }
       </div>
 
       {/* Crear nueva categoría */}
-      <div className="bg-white border border-stone-100 rounded-sm p-6">
-        <h3 className="text-sm font-medium text-stone-700 mb-4">Nueva categoría</h3>
+      <div
+        className="rounded-sm p-6"
+        style={{ background: '#1f2937', border: '1px solid #374151' }}
+      >
+        <h3 className="text-sm font-medium mb-4" style={{ color: '#d1d5db' }}>
+          Nueva categoría
+        </h3>
         <form action={formAction} className="flex gap-3 max-w-md">
           <input
             name="nombre"
             type="text"
             placeholder="Nombre de la categoría"
             required
-            className="flex-1 border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400"
+            className="flex-1 px-3 py-2 text-sm focus:outline-none transition-colors"
+            style={{
+              background: '#111827',
+              border: '1px solid #374151',
+              color: '#f9fafb',
+              borderRadius: '8px',
+            }}
+            onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+            onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
           />
           <button
             type="submit"
             disabled={isPending}
-            className="px-4 py-2 text-sm bg-stone-800 text-white hover:bg-stone-700 transition-colors disabled:opacity-50"
+            className="px-4 py-2 text-sm transition-colors disabled:opacity-50"
+            style={{ background: '#6366f1', color: 'white', borderRadius: '8px' }}
           >
             {isPending ? '...' : 'Crear'}
           </button>
@@ -145,10 +164,15 @@ function CategoryItem({
   }
 
   return (
-    <div className={`flex items-center justify-between px-4 py-3 hover:bg-stone-50 transition-colors${indent > 0 ? ' pl-10' : ''}`}>
+    <div
+      className={`flex items-center justify-between px-4 py-3 transition-colors${indent > 0 ? ' pl-10' : ''}`}
+      style={{ background: 'transparent' }}
+      onMouseEnter={e => (e.currentTarget.style.background = '#111827')}
+      onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
+    >
       {/* Nombre / input de edición */}
       <div className="flex items-center gap-2 flex-1 min-w-0">
-        {indent > 0 && <span className="text-stone-300 mr-1 shrink-0">└</span>}
+        {indent > 0 && <span className="mr-1 shrink-0" style={{ color: '#4b5563' }}>└</span>}
 
         {editing ? (
           <input
@@ -157,12 +181,20 @@ function CategoryItem({
             onChange={e => setValue(e.target.value)}
             onKeyDown={handleKeyDown}
             disabled={saving}
-            className="border border-stone-300 px-2 py-0.5 text-sm text-stone-800 focus:outline-none focus:border-stone-500 rounded-sm w-48"
+            className="px-2 py-0.5 text-sm focus:outline-none rounded-sm w-48 transition-colors"
+            style={{
+              background: '#111827',
+              border: '1px solid #374151',
+              color: '#f9fafb',
+              borderRadius: '6px',
+            }}
+            onFocus={e => (e.currentTarget.style.borderColor = '#6366f1')}
+            onBlur={e => (e.currentTarget.style.borderColor = '#374151')}
           />
         ) : (
           <>
-            <span className="text-sm text-stone-800 truncate">{categoria.nombre}</span>
-            <span className="text-xs text-stone-400 font-mono hidden sm:inline">{categoria.slug}</span>
+            <span className="text-sm truncate" style={{ color: '#f9fafb' }}>{categoria.nombre}</span>
+            <span className="text-xs font-mono hidden sm:inline" style={{ color: '#6b7280' }}>{categoria.slug}</span>
           </>
         )}
       </div>
@@ -174,14 +206,16 @@ function CategoryItem({
             <button
               onClick={confirmEdit}
               disabled={saving}
-              className="text-xs px-2.5 py-1 bg-stone-800 text-white hover:bg-stone-700 transition-colors rounded-sm disabled:opacity-50"
+              className="text-xs px-2.5 py-1 transition-colors rounded-sm disabled:opacity-50"
+              style={{ background: '#6366f1', color: 'white', borderRadius: '6px' }}
             >
               {saving ? '...' : 'Guardar'}
             </button>
             <button
               onClick={cancelEdit}
               disabled={saving}
-              className="text-xs px-2.5 py-1 border border-stone-200 text-stone-500 hover:border-stone-400 transition-colors rounded-sm"
+              className="text-xs px-2.5 py-1 transition-colors rounded-sm"
+              style={{ border: '1px solid #374151', color: '#9ca3af', borderRadius: '6px', background: 'transparent' }}
             >
               Cancelar
             </button>
@@ -191,7 +225,10 @@ function CategoryItem({
             {/* Editar */}
             <button
               onClick={startEdit}
-              className="p-1.5 text-stone-400 hover:text-stone-700 transition-colors"
+              className="p-1.5 transition-colors"
+              style={{ color: '#6b7280' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#d1d5db')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#6b7280')}
               title="Editar nombre"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
@@ -203,11 +240,12 @@ function CategoryItem({
             {/* Activa / Inactiva */}
             <button
               onClick={() => onToggle(categoria.id, categoria.activo)}
-              className={`text-xs px-2 py-0.5 rounded transition-colors ${
+              className="text-xs px-2 py-0.5 rounded transition-colors"
+              style={
                 categoria.activo
-                  ? 'bg-green-50 text-green-700 hover:bg-green-100'
-                  : 'bg-stone-100 text-stone-500 hover:bg-stone-200'
-              }`}
+                  ? { background: 'rgba(16,185,129,0.12)', color: '#10b981', borderRadius: '6px' }
+                  : { background: '#374151', color: '#9ca3af', borderRadius: '6px' }
+              }
             >
               {categoria.activo ? 'Activa' : 'Inactiva'}
             </button>
@@ -215,7 +253,10 @@ function CategoryItem({
             {/* Eliminar */}
             <button
               onClick={() => onDelete(categoria.id, categoria.nombre)}
-              className="p-1.5 text-stone-300 hover:text-red-500 transition-colors"
+              className="p-1.5 transition-colors"
+              style={{ color: '#4b5563' }}
+              onMouseEnter={e => (e.currentTarget.style.color = '#ef4444')}
+              onMouseLeave={e => (e.currentTarget.style.color = '#4b5563')}
               title="Eliminar categoría"
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
