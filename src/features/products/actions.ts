@@ -83,8 +83,31 @@ export async function deleteProducto(id: string): Promise<ActionState> {
   if (!user) return { error: 'No autorizado' }
 
   const admin = createAdminClient()
+
+  // Verificar si alguna variante tiene movimientos de inventario.
+  // movimientos_inventario tiene un trigger de inmutabilidad que bloquea DELETE,
+  // por lo que no se puede eliminar un producto con historial de stock.
+  const { data: variantes } = await admin
+    .from('variantes_producto')
+    .select('id')
+    .eq('producto_id', id)
+
+  if (variantes && variantes.length > 0) {
+    const varianteIds = variantes.map((v) => v.id)
+    const { count } = await admin
+      .from('movimientos_inventario')
+      .select('id', { count: 'exact', head: true })
+      .in('variante_id', varianteIds)
+
+    if (count && count > 0) {
+      return {
+        error: 'Este producto tiene movimientos de inventario registrados y no se puede eliminar. Cámbia su estado a "Archivado" para ocultarlo de la tienda.',
+      }
+    }
+  }
+
   const { error } = await admin.from('productos').delete().eq('id', id)
-  if (error) return { error: 'Error al eliminar el producto' }
+  if (error) return { error: `Error al eliminar el producto: ${error.message}` }
   revalidatePath('/administracion/productos')
   return { success: 'Producto eliminado' }
 }
