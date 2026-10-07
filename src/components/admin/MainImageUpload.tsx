@@ -26,7 +26,7 @@ export default function MainImageUpload({ productoId, imagen, storageUrl }: Main
   async function uploadFile(file: File) {
     const allowed = ['image/jpeg', 'image/png', 'image/webp']
     if (!allowed.includes(file.type)) { toast.error('Solo JPG, PNG o WebP'); return }
-    if (file.size > 5 * 1024 * 1024) { toast.error('Supera el límite de 5 MB'); return }
+    if (file.size > 10 * 1024 * 1024) { toast.error('Supera el límite de 10 MB. Los PNG suelen ser muy pesados — convierte a WEBP o JPG.'); return }
     setUploading(true)
     try {
       const fd = new FormData()

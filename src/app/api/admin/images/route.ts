@@ -29,8 +29,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'No se recibió ningún archivo' }, { status: 400 })
   }
 
-  if (file.size > 5 * 1024 * 1024) {
-    return NextResponse.json({ error: 'El archivo supera los 5 MB' }, { status: 400 })
+  if (file.size > 10 * 1024 * 1024) {
+    return NextResponse.json({ error: 'El archivo supera los 10 MB. Para PNG, convierte a WEBP o reduce la resolución.' }, { status: 400 })
   }
 
   const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp']
