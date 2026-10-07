@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { deleteImagen } from '@/features/images/actions'
+import GoogleDrivePicker from './GoogleDrivePicker'
 
 type Imagen = { id: string; ruta_almacenamiento: string; texto_alt: string | null }
 
@@ -66,7 +67,10 @@ export default function MainImageUpload({ productoId, imagen, storageUrl }: Main
 
   return (
     <div>
-      <p className="text-xs text-stone-500 uppercase tracking-widest mb-3">Imagen principal</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <p className="text-xs text-stone-500 uppercase tracking-widest">Imagen principal</p>
+        <GoogleDrivePicker onFile={uploadFile} disabled={uploading} />
+      </div>
       <div
         className={`group relative w-[120px] h-[120px] border-2 border-dashed transition-colors ${
           uploading ? 'border-sand opacity-60' : 'border-sand hover:border-gold cursor-pointer'

@@ -4,6 +4,7 @@ import { useState, useRef, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { deleteImagen, reorderImages } from '@/features/images/actions'
+import GoogleDrivePicker from './GoogleDrivePicker'
 
 type Imagen = {
   id: string
@@ -159,6 +160,11 @@ export default function ImageGallery({
 
   return (
     <div className="space-y-6">
+      {/* Botón Google Drive */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <GoogleDrivePicker onFile={(file) => uploadFiles([file])} disabled={uploading} />
+      </div>
+
       {/* Drop zone / upload trigger */}
       <div
         className={`border-2 border-dashed p-8 text-center transition-colors ${
@@ -200,7 +206,7 @@ export default function ImageGallery({
               <span className="underline underline-offset-2 decoration-stone-400">haz clic para seleccionar</span>
             </p>
             <p className="text-xs text-stone-400 mt-1">
-              JPG, PNG, WebP — hasta 10 archivos, máx. 5 MB c/u
+              JPG, PNG, WebP — hasta 10 archivos, máx. 10 MB c/u
             </p>
           </div>
         )}

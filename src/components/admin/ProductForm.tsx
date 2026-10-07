@@ -27,6 +27,27 @@ interface ProductFormProps {
   producto?: Product
 }
 
+const input = {
+  background: '#111827',
+  border: '1px solid #374151',
+  color: '#f9fafb',
+  borderRadius: 6,
+  padding: '8px 12px',
+  fontSize: 13,
+  width: '100%',
+  outline: 'none',
+  transition: 'border-color 0.15s',
+} as const
+
+const label = {
+  display: 'block',
+  fontSize: 11,
+  color: '#6b7280',
+  marginBottom: 6,
+  textTransform: 'uppercase' as const,
+  letterSpacing: '0.06em',
+}
+
 export default function ProductForm({ categorias, producto }: ProductFormProps) {
   const router = useRouter()
   const isEdit = !!producto
@@ -56,131 +77,183 @@ export default function ProductForm({ categorias, producto }: ProductFormProps) 
     }
   }
 
+  function focusBorder(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+    e.currentTarget.style.borderColor = '#6366f1'
+  }
+  function blurBorder(e: React.FocusEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) {
+    e.currentTarget.style.borderColor = '#374151'
+  }
+
   return (
-    <form action={formAction} className="max-w-2xl space-y-6">
-      <div className="bg-white border border-stone-100 rounded-sm p-6 space-y-5">
-        <h2 className="text-xs font-medium text-stone-500 uppercase tracking-widest">
+    <form action={formAction} style={{ maxWidth: 672 }}>
+      <div style={{ background: '#1f2937', border: '1px solid #374151', borderRadius: 8, padding: 24, marginBottom: 24 }}>
+        <h2 style={{ fontSize: 11, fontWeight: 500, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 24 }}>
           Información básica
         </h2>
 
-        <div>
-          <label className="block text-xs text-stone-500 mb-1">Nombre *</label>
-          <input
-            name="nombre"
-            type="text"
-            defaultValue={producto?.nombre}
-            onChange={handleNombreChange}
-            required
-            className="w-full border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400 transition-colors"
-            placeholder="Collar Luna"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs text-stone-500 mb-1">Slug *</label>
-          <input
-            name="slug"
-            type="text"
-            ref={slugRef}
-            defaultValue={producto?.slug}
-            onInput={() => { slugEdited.current = true }}
-            required
-            className="w-full border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400 transition-colors font-mono"
-            placeholder="collar-luna"
-          />
-          <p className="mt-1 text-xs text-stone-400">Se genera automáticamente desde el nombre</p>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+          {/* Nombre */}
           <div>
-            <label className="block text-xs text-stone-500 mb-1">Precio base (CLP) *</label>
+            <label style={label}>Nombre *</label>
             <input
-              name="precio_base"
-              type="number"
-              min={0}
-              step={1}
-              defaultValue={producto?.precio_base ?? 0}
+              name="nombre"
+              type="text"
+              defaultValue={producto?.nombre}
+              onChange={handleNombreChange}
               required
-              className="w-full border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400 transition-colors"
-              placeholder="29990"
+              placeholder="Collar Luna"
+              style={input}
+              onFocus={focusBorder}
+              onBlur={blurBorder}
             />
           </div>
+
+          {/* Slug */}
           <div>
-            <label className="block text-xs text-stone-500 mb-1">Estado *</label>
+            <label style={label}>Slug *</label>
+            <input
+              name="slug"
+              type="text"
+              ref={slugRef}
+              defaultValue={producto?.slug}
+              onInput={() => { slugEdited.current = true }}
+              required
+              placeholder="collar-luna"
+              style={{ ...input, fontFamily: 'monospace', fontSize: 12 }}
+              onFocus={focusBorder}
+              onBlur={blurBorder}
+            />
+            <p style={{ marginTop: 4, fontSize: 11, color: '#4b5563' }}>Se genera automáticamente desde el nombre</p>
+          </div>
+
+          {/* Precio + Estado */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+            <div>
+              <label style={label}>Precio base (CLP) *</label>
+              <input
+                name="precio_base"
+                type="number"
+                min={0}
+                step={1}
+                defaultValue={producto?.precio_base ?? 0}
+                required
+                placeholder="29990"
+                style={input}
+                onFocus={focusBorder}
+                onBlur={blurBorder}
+              />
+            </div>
+            <div>
+              <label style={label}>Estado *</label>
+              <select
+                name="estado"
+                defaultValue={producto?.estado ?? 'borrador'}
+                style={{ ...input, cursor: 'pointer' }}
+                onFocus={focusBorder}
+                onBlur={blurBorder}
+              >
+                <option value="borrador">Borrador</option>
+                <option value="activo">Activo</option>
+                <option value="archivado">Archivado</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Tipo de producto */}
+          <div>
+            <label style={label}>Tipo de producto *</label>
             <select
-              name="estado"
-              defaultValue={producto?.estado ?? 'borrador'}
-              className="w-full border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400 transition-colors bg-white"
+              name="tipo_producto"
+              defaultValue={producto?.tipo_producto ?? 'terminado'}
+              style={{ ...input, cursor: 'pointer' }}
+              onFocus={focusBorder}
+              onBlur={blurBorder}
             >
-              <option value="borrador">Borrador</option>
-              <option value="activo">Activo</option>
-              <option value="archivado">Archivado</option>
+              <option value="terminado">Producto terminado (comprado, llega listo)</option>
+              <option value="fabricado">Fabricado por Encantika (lo hacemos nosotros)</option>
             </select>
           </div>
-        </div>
 
-        <div>
-          <label className="block text-xs text-stone-500 mb-1">Tipo de producto *</label>
-          <select
-            name="tipo_producto"
-            defaultValue={producto?.tipo_producto ?? 'terminado'}
-            className="w-full border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400 transition-colors bg-white"
-          >
-            <option value="terminado">Producto terminado (comprado, llega listo)</option>
-            <option value="fabricado">Fabricado por Encantika (lo hacemos nosotros)</option>
-          </select>
-        </div>
+          {/* Categoría */}
+          <div>
+            <label style={label}>Categoría</label>
+            <select
+              name="categoria_id"
+              defaultValue={producto?.categoria_id ?? ''}
+              style={{ ...input, cursor: 'pointer' }}
+              onFocus={focusBorder}
+              onBlur={blurBorder}
+            >
+              <option value="">Sin categoría</option>
+              {categorias.map((c) => (
+                <option key={c.id} value={c.id}>{c.nombre}</option>
+              ))}
+            </select>
+          </div>
 
-        <div>
-          <label className="block text-xs text-stone-500 mb-1">Categoría</label>
-          <select
-            name="categoria_id"
-            defaultValue={producto?.categoria_id ?? ''}
-            className="w-full border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400 transition-colors bg-white"
-          >
-            <option value="">Sin categoría</option>
-            {categorias.map((c) => (
-              <option key={c.id} value={c.id}>{c.nombre}</option>
-            ))}
-          </select>
-        </div>
+          {/* Descripción */}
+          <div>
+            <label style={label}>Descripción</label>
+            <textarea
+              name="descripcion"
+              defaultValue={producto?.descripcion ?? ''}
+              rows={4}
+              placeholder="Descripción del producto..."
+              style={{ ...input, resize: 'none' }}
+              onFocus={focusBorder as any}
+              onBlur={blurBorder as any}
+            />
+          </div>
 
-        <div>
-          <label className="block text-xs text-stone-500 mb-1">Descripción</label>
-          <textarea
-            name="descripcion"
-            defaultValue={producto?.descripcion ?? ''}
-            rows={4}
-            className="w-full border border-stone-200 px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-400 transition-colors resize-none"
-            placeholder="Descripción del producto..."
-          />
-        </div>
-
-        <div className="flex items-center gap-2">
-          <input
-            name="destacado"
-            type="checkbox"
-            id="destacado"
-            value="true"
-            defaultChecked={producto?.destacado}
-            className="border-stone-300"
-          />
-          <label htmlFor="destacado" className="text-sm text-stone-700">Producto destacado</label>
+          {/* Destacado */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <input
+              name="destacado"
+              type="checkbox"
+              id="destacado"
+              value="true"
+              defaultChecked={producto?.destacado}
+              style={{ width: 16, height: 16, accentColor: '#6366f1', cursor: 'pointer' }}
+            />
+            <label htmlFor="destacado" style={{ fontSize: 13, color: '#d1d5db', cursor: 'pointer' }}>
+              Producto destacado
+            </label>
+          </div>
         </div>
       </div>
 
-      <div className="flex justify-end gap-3">
+      {/* Botones */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
         <button
           type="button"
           onClick={() => router.back()}
-          className="px-4 py-2 text-sm text-stone-600 border border-stone-200 hover:bg-stone-50 transition-colors"
+          style={{
+            padding: '10px 20px',
+            fontSize: 13,
+            color: '#9ca3af',
+            border: '1px solid #374151',
+            borderRadius: 6,
+            background: 'transparent',
+            cursor: 'pointer',
+            transition: 'border-color 0.15s',
+          }}
         >
           Cancelar
         </button>
         <button
           type="submit"
           disabled={isPending}
-          className="px-6 py-2 text-sm bg-stone-800 text-white hover:bg-stone-700 transition-colors disabled:opacity-50"
+          style={{
+            padding: '10px 24px',
+            fontSize: 13,
+            background: isPending ? '#4f46e5' : '#6366f1',
+            color: '#fff',
+            border: 'none',
+            borderRadius: 6,
+            cursor: isPending ? 'not-allowed' : 'pointer',
+            opacity: isPending ? 0.7 : 1,
+            transition: 'opacity 0.15s',
+          }}
         >
           {isPending ? 'Guardando...' : isEdit ? 'Guardar cambios' : 'Crear producto'}
         </button>
