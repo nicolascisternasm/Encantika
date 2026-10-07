@@ -125,7 +125,7 @@ export default function LoginForm() {
 
     setLoading(false)
     if (updateError) {
-      setError('No se pudo actualizar la contraseña. Intenta de nuevo.')
+      setError(`Error: ${updateError.message}`)
     } else {
       setSuccessMsg('¡Contraseña actualizada! Ya puedes iniciar sesión.')
       setTimeout(() => resetRecovery(), 2500)
