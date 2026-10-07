@@ -105,7 +105,7 @@ export default function LoginForm() {
     setLoading(true)
     const supabase = createClient()
 
-    const { error: verifyError } = await supabase.auth.verifyOtp({
+    const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
       email,
       token: code.trim(),
       type: 'recovery',
@@ -115,6 +115,10 @@ export default function LoginForm() {
       setError('Código inválido o expirado. Solicita uno nuevo.')
       setLoading(false)
       return
+    }
+
+    if (verifyData.session) {
+      await supabase.auth.setSession(verifyData.session)
     }
 
     const { error: updateError } = await supabase.auth.updateUser({ password: newPassword })
