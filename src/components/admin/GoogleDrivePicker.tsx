@@ -76,6 +76,8 @@ async function openPicker(
     builder = builder.enableFeature(window.google.picker.Feature.MULTISELECT_ENABLED)
   }
 
+  window.scrollTo({ top: 0, behavior: 'instant' })
+
   builder.setCallback(async (data: any) => {
       if (data.action !== window.google.picker.Action.PICKED) return
 
