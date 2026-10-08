@@ -162,7 +162,11 @@ export default function ImageGallery({
     <div className="space-y-6">
       {/* Botón Google Drive */}
       <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <GoogleDrivePicker onFile={(file) => uploadFiles([file])} disabled={uploading} />
+        <GoogleDrivePicker
+          multiselect
+          onFiles={(files) => uploadFiles(files)}
+          disabled={uploading}
+        />
       </div>
 
       {/* Drop zone / upload trigger */}

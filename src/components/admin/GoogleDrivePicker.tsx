@@ -3,7 +3,9 @@
 import { useCallback } from 'react'
 
 interface Props {
-  onFile: (file: File) => void
+  onFile?: (file: File) => void
+  onFiles?: (files: File[]) => void
+  multiselect?: boolean
   disabled?: boolean
 }
 
@@ -32,7 +34,11 @@ async function loadScript(src: string): Promise<void> {
   })
 }
 
-async function openPicker(onFile: (file: File) => void) {
+async function openPicker(
+  onFile: ((file: File) => void) | undefined,
+  onFiles: ((files: File[]) => void) | undefined,
+  multiselect: boolean,
+) {
   if (!API_KEY || !CLIENT_ID) {
     alert('Falta configurar NEXT_PUBLIC_GOOGLE_API_KEY y NEXT_PUBLIC_GOOGLE_CLIENT_ID en las variables de entorno.')
     return
@@ -41,11 +47,9 @@ async function openPicker(onFile: (file: File) => void) {
   await loadScript('https://apis.google.com/js/api.js')
   await loadScript('https://accounts.google.com/gsi/client')
 
-  // Cargar gapi.client y picker
   await new Promise<void>((resolve) => window.gapi.load('client:picker', resolve))
   await window.gapi.client.init({ apiKey: API_KEY, discoveryDocs: [] })
 
-  // Obtener token OAuth
   const token = await new Promise<string>((resolve, reject) => {
     const client = window.google.accounts.oauth2.initTokenClient({
       client_id: CLIENT_ID,
@@ -58,46 +62,55 @@ async function openPicker(onFile: (file: File) => void) {
     client.requestAccessToken({ prompt: '' })
   })
 
-  // Abrir el Picker
   const view = new window.google.picker.DocsView(window.google.picker.ViewId.DOCS_IMAGES)
     .setIncludeFolders(true)
     .setMimeTypes('image/jpeg,image/png,image/webp')
 
-  new window.google.picker.PickerBuilder()
+  let builder = new window.google.picker.PickerBuilder()
     .addView(view)
     .setOAuthToken(token)
     .setDeveloperKey(API_KEY)
-    .setTitle('Selecciona una imagen')
-    .setCallback(async (data: any) => {
+    .setTitle(multiselect ? 'Selecciona las imágenes' : 'Selecciona una imagen')
+
+  if (multiselect) {
+    builder = builder.enableFeature(window.google.picker.Feature.MULTISELECT_ENABLED)
+  }
+
+  builder.setCallback(async (data: any) => {
       if (data.action !== window.google.picker.Action.PICKED) return
-      const doc = data.docs[0]
-      const fileId = doc.id
-      const fileName = doc.name
-      const mimeType = doc.mimeType
 
-      // Descargar el archivo desde Drive
-      const res = await fetch(
-        `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
-        { headers: { Authorization: `Bearer ${token}` } }
+      const docs = data.docs as { id: string; name: string; mimeType: string }[]
+
+      const files = await Promise.all(
+        docs.map(async (doc) => {
+          const res = await fetch(
+            `https://www.googleapis.com/drive/v3/files/${doc.id}?alt=media`,
+            { headers: { Authorization: `Bearer ${token}` } }
+          )
+          if (!res.ok) throw new Error(`No se pudo descargar ${doc.name}`)
+          const blob = await res.blob()
+          return new File([blob], doc.name, { type: doc.mimeType })
+        })
       )
-      if (!res.ok) { alert('No se pudo descargar el archivo de Google Drive'); return }
 
-      const blob = await res.blob()
-      const file = new File([blob], fileName, { type: mimeType })
-      onFile(file)
+      if (multiselect && onFiles) {
+        onFiles(files)
+      } else if (onFile) {
+        onFile(files[0])
+      }
     })
     .build()
     .setVisible(true)
 }
 
-export default function GoogleDrivePicker({ onFile, disabled }: Props) {
+export default function GoogleDrivePicker({ onFile, onFiles, multiselect = false, disabled }: Props) {
   const handleClick = useCallback(() => {
     if (disabled) return
-    openPicker(onFile).catch((err) => {
+    openPicker(onFile, onFiles, multiselect).catch((err) => {
       console.error('Google Drive Picker error:', err)
       alert('Error al abrir Google Drive. Verifica que las credenciales estén configuradas.')
     })
-  }, [onFile, disabled])
+  }, [onFile, onFiles, multiselect, disabled])
 
   return (
     <button
