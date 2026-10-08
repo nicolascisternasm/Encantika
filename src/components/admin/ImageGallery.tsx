@@ -52,8 +52,8 @@ export default function ImageGallery({
         toast.error(`${f.name}: solo se permiten JPG, PNG o WebP`)
         return
       }
-      if (f.size > 10 * 1024 * 1024) {
-        toast.error(`${f.name}: supera los 10 MB. Los PNG suelen ser muy pesados — convierte a WEBP o JPG.`)
+      if (f.size > 50 * 1024 * 1024) {
+        toast.error(`${f.name}: supera los 50 MB.`)
         return
       }
     }
