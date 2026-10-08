@@ -4,6 +4,7 @@ import { useRef, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { deleteImagen } from '@/features/images/actions'
+import GoogleDrivePicker from './GoogleDrivePicker'
 
 type Imagen = { id: string; ruta_almacenamiento: string; texto_alt: string | null; orden: number }
 
@@ -25,30 +26,40 @@ export default function AdditionalGallery({ productoId, imagenes, storageUrl }: 
     return `${storageUrl}/imagenes-productos/${ruta}`
   }
 
-  async function uploadFile(file: File) {
-    if (imagenes.length >= MAX_ADDITIONAL) {
-      toast.error(`Máximo ${MAX_ADDITIONAL} imágenes adicionales`)
-      return
-    }
+  async function uploadFiles(files: File[]) {
+    const remaining = MAX_ADDITIONAL - imagenes.length
+    if (remaining <= 0) { toast.error(`Máximo ${MAX_ADDITIONAL} imágenes adicionales`); return }
+    const toUpload = files.slice(0, remaining)
+    if (files.length > remaining) toast.warning(`Solo se subirán ${remaining} imagen(es) — límite alcanzado`)
+
     const allowed = ['image/jpeg', 'image/png', 'image/webp']
-    if (!allowed.includes(file.type)) { toast.error('Solo JPG, PNG o WebP'); return }
-    if (file.size > 5 * 1024 * 1024) { toast.error('Supera el límite de 5 MB'); return }
+    for (const f of toUpload) {
+      if (!allowed.includes(f.type)) { toast.error(`${f.name}: solo JPG, PNG o WebP`); return }
+      if (f.size > 50 * 1024 * 1024) { toast.error(`${f.name}: supera los 50 MB`); return }
+    }
+
     setUploading(true)
-    try {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await fetch(`/api/admin/images?productoId=${productoId}`, {
-        method: 'POST',
-        body: fd,
-      })
-      const json = await res.json()
-      if (!res.ok) toast.error(json.error ?? 'Error al subir')
-      else { toast.success('Imagen agregada'); router.refresh() }
-    } catch {
-      toast.error('Error de conexión')
-    } finally {
-      setUploading(false)
-      if (fileRef.current) fileRef.current.value = ''
+    let anySuccess = false
+    for (const file of toUpload) {
+      try {
+        const fd = new FormData()
+        fd.append('file', file)
+        const res = await fetch(`/api/admin/images?productoId=${productoId}`, {
+          method: 'POST',
+          body: fd,
+        })
+        const json = await res.json()
+        if (!res.ok) toast.error(`${file.name}: ${json.error ?? 'error al subir'}`)
+        else anySuccess = true
+      } catch {
+        toast.error(`${file.name}: error de conexión`)
+      }
+    }
+    setUploading(false)
+    if (fileRef.current) fileRef.current.value = ''
+    if (anySuccess) {
+      toast.success(toUpload.length > 1 ? 'Imágenes subidas' : 'Imagen subida')
+      router.refresh()
     }
   }
 
@@ -63,7 +74,14 @@ export default function AdditionalGallery({ productoId, imagenes, storageUrl }: 
 
   return (
     <div>
-      <p className="text-xs text-stone-500 uppercase tracking-widest mb-3">Galería adicional</p>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+        <p className="text-xs text-stone-500 uppercase tracking-widest">Galería adicional</p>
+        <GoogleDrivePicker
+          multiselect
+          onFiles={(files) => uploadFiles(files)}
+          disabled={uploading}
+        />
+      </div>
       <div className="flex flex-wrap gap-2">
         {imagenes.map(img => (
           <div key={img.id} className="group relative w-20 h-20 border border-sand flex-shrink-0">
@@ -95,8 +113,12 @@ export default function AdditionalGallery({ productoId, imagenes, storageUrl }: 
           ref={fileRef}
           type="file"
           accept="image/jpeg,image/png,image/webp"
+          multiple
           className="hidden"
-          onChange={e => { const f = e.target.files?.[0]; if (f) uploadFile(f) }}
+          onChange={e => {
+            const files = Array.from(e.target.files ?? [])
+            if (files.length) uploadFiles(files)
+          }}
           disabled={uploading}
         />
       </div>
