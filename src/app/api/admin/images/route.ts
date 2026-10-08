@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
+import sharp from 'sharp'
 import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 
@@ -38,10 +39,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Formato de archivo no permitido' }, { status: 400 })
   }
 
-  const ext = file.name.split('.').pop()?.toLowerCase() ?? 'jpg'
   const ruta = isMain
-    ? `${productoId}/principal-${Date.now()}.${ext}`
-    : `${productoId}/${Date.now()}.${ext}`
+    ? `${productoId}/principal-${Date.now()}.webp`
+    : `${productoId}/${Date.now()}.webp`
 
   const admin = createAdminClient()
 
@@ -60,11 +60,14 @@ export async function POST(req: NextRequest) {
   }
 
   const arrayBuffer = await file.arrayBuffer()
-  const buffer = new Uint8Array(arrayBuffer)
+  const compressed = await sharp(Buffer.from(arrayBuffer))
+    .resize({ width: 1500, withoutEnlargement: true })
+    .webp({ quality: 82 })
+    .toBuffer()
 
   const { error: storageError } = await admin.storage
     .from('imagenes-productos')
-    .upload(ruta, buffer, { contentType: file.type, upsert: false })
+    .upload(ruta, compressed, { contentType: 'image/webp', upsert: false })
 
   if (storageError) {
     return NextResponse.json({ error: 'Error al subir el archivo al almacenamiento' }, { status: 500 })
