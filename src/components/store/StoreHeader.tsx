@@ -6,10 +6,20 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { obtenerCantidadTotal } from '@/lib/cart'
 
+const JOYAS_ITEMS = [
+  { label: 'Collares', href: '/catalogo?categoria=collares' },
+  { label: 'Pulseras', href: '/catalogo?categoria=pulseras' },
+  { label: 'Anillos', href: '/catalogo?categoria=anillos' },
+]
+
+const ACCESORIOS_ITEMS = [
+  { label: 'Accesorios', href: '/catalogo?categoria=accesorios' },
+  { label: 'Cinturones', href: '/catalogo?categoria=cinturones' },
+]
+
 const NAV_LINKS = [
   { label: 'Home', href: '/' },
   { label: 'Nosotros', href: '/nosotros' },
-  { label: 'Joyas', href: '/catalogo' },
   { label: 'Contacto', href: '/contacto' },
 ]
 
@@ -19,7 +29,7 @@ interface StoreHeaderProps {
   variant?: HeaderVariant
 }
 
-function isActive(href: string, pathname: string) {
+function isActive(href: string, pathname: string, search?: string) {
   if (href === '/') return pathname === '/'
   return pathname.startsWith(href)
 }
@@ -28,6 +38,9 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [cartCount, setCartCount] = useState(0)
+  const [mobileProductosOpen, setMobileProductosOpen] = useState(false)
+  const [mobileJoyasOpen, setMobileJoyasOpen] = useState(false)
+  const [mobileAccesoriosOpen, setMobileAccesoriosOpen] = useState(false)
   const pathname = usePathname()
 
   const effectiveVariant: HeaderVariant = pathname === '/' ? variant : 'default'
@@ -59,6 +72,15 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
       : 'bg-white border-b border-sand',
   ].join(' ')
 
+  const linkCls = (active: boolean) => [
+    'text-[12px] tracking-[.10em] uppercase transition-colors duration-200',
+    active
+      ? 'text-onyx border-b border-onyx pb-0.5'
+      : 'text-encantika-stone hover:text-onyx',
+  ].join(' ')
+
+  const isProductosActive = pathname.startsWith('/catalogo')
+
   return (
     <>
       <header className={headerCls}>
@@ -69,25 +91,94 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
           <Link href="/" className="hidden sm:block shrink-0 mr-12">
             <Image src="/logo.png" alt="Encantika" width={398} height={110} className="h-12 w-auto" priority />
           </Link>
+
+          {/* Desktop nav */}
           <nav className="hidden sm:flex flex-1 items-center justify-center gap-10">
-            {NAV_LINKS.map(({ label, href }) => {
-              const active = isActive(href, pathname)
-              return (
-                <Link
-                  key={href}
-                  href={href}
-                  className={[
-                    'text-[12px] tracking-[.10em] uppercase transition-colors duration-200',
-                    active
-                      ? 'text-onyx border-b border-onyx pb-0.5'
-                      : 'text-encantika-stone hover:text-onyx',
-                  ].join(' ')}
-                >
-                  {label}
-                </Link>
-              )
-            })}
+            {NAV_LINKS.slice(0, 2).map(({ label, href }) => (
+              <Link key={href} href={href} className={linkCls(isActive(href, pathname))}>
+                {label}
+              </Link>
+            ))}
+
+            {/* Productos dropdown */}
+            <div className="group relative">
+              <button
+                className={[
+                  'flex items-center gap-1 text-[12px] tracking-[.10em] uppercase transition-colors duration-200',
+                  isProductosActive
+                    ? 'text-onyx border-b border-onyx pb-0.5'
+                    : 'text-encantika-stone hover:text-onyx',
+                ].join(' ')}
+              >
+                Productos
+                <svg className="w-3 h-3 mt-0.5 transition-transform duration-200 group-hover:rotate-180" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {/* Level 1 */}
+              <div className="absolute left-1/2 -translate-x-1/2 top-full pt-3 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                <div className="bg-white border border-sand shadow-md min-w-[160px]">
+
+                  {/* Joyas → sub-dropdown */}
+                  <div className="group/joyas relative">
+                    <div className="flex items-center justify-between px-4 py-2.5 hover:bg-stone-50 cursor-default select-none">
+                      <span className="text-[11px] tracking-[.08em] uppercase text-encantika-stone group-hover/joyas:text-onyx transition-colors">Joyas</span>
+                      <svg className="w-3 h-3 text-stone-400 flex-shrink-0 ml-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                    {/* Level 2 - Joyas */}
+                    <div className="absolute left-full top-0 opacity-0 invisible group-hover/joyas:opacity-100 group-hover/joyas:visible transition-all duration-150 z-50">
+                      <div className="bg-white border border-sand shadow-md min-w-[150px] ml-px">
+                        {JOYAS_ITEMS.map(({ label, href }) => (
+                          <Link
+                            key={href}
+                            href={href}
+                            className="block px-4 py-2.5 text-[11px] tracking-[.08em] uppercase text-encantika-stone hover:text-onyx hover:bg-stone-50 transition-colors"
+                          >
+                            {label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Accesorios → sub-dropdown */}
+                  <div className="group/acc relative border-t border-sand/50">
+                    <div className="flex items-center justify-between px-4 py-2.5 hover:bg-stone-50 cursor-default select-none">
+                      <span className="text-[11px] tracking-[.08em] uppercase text-encantika-stone group-hover/acc:text-onyx transition-colors">Accesorios</span>
+                      <svg className="w-3 h-3 text-stone-400 flex-shrink-0 ml-3" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                    {/* Level 2 - Accesorios */}
+                    <div className="absolute left-full top-0 opacity-0 invisible group-hover/acc:opacity-100 group-hover/acc:visible transition-all duration-150 z-50">
+                      <div className="bg-white border border-sand shadow-md min-w-[150px] ml-px">
+                        {ACCESORIOS_ITEMS.map(({ label, href }) => (
+                          <Link
+                            key={href}
+                            href={href}
+                            className="block px-4 py-2.5 text-[11px] tracking-[.08em] uppercase text-encantika-stone hover:text-onyx hover:bg-stone-50 transition-colors"
+                          >
+                            {label}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            {NAV_LINKS.slice(2).map(({ label, href }) => (
+              <Link key={href} href={href} className={linkCls(isActive(href, pathname))}>
+                {label}
+              </Link>
+            ))}
           </nav>
+
           <div className="flex-1 sm:hidden" />
           <div className="flex items-center gap-3 sm:gap-4">
             <button className="hidden sm:flex p-1.5 text-encantika-stone hover:text-onyx transition-colors" aria-label="Buscar">
@@ -125,6 +216,7 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
         </div>
       </header>
 
+      {/* Mobile menu */}
       {isOpen && (
         <div className="fixed inset-0 z-50 sm:hidden">
           <div className="absolute inset-0 bg-black/40" onClick={() => setIsOpen(false)} />
@@ -138,23 +230,76 @@ export default function StoreHeader({ variant = 'default' }: StoreHeaderProps) {
                 </svg>
               </button>
             </div>
-            <nav className="flex flex-col px-6 py-8 gap-6">
-              {NAV_LINKS.map(({ label, href }) => {
-                const active = isActive(href, pathname)
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    onClick={() => setIsOpen(false)}
-                    className={[
-                      'text-sm tracking-[.10em] uppercase transition-colors',
-                      active ? 'text-onyx' : 'text-stone-600 hover:text-onyx',
-                    ].join(' ')}
-                  >
-                    {label}
-                  </Link>
-                )
-              })}
+            <nav className="flex flex-col px-6 py-8 gap-0 overflow-y-auto">
+              <Link href="/" onClick={() => setIsOpen(false)} className={['text-sm tracking-[.10em] uppercase transition-colors py-3 border-b border-sand/40', isActive('/', pathname) ? 'text-onyx' : 'text-stone-600 hover:text-onyx'].join(' ')}>
+                Home
+              </Link>
+              <Link href="/nosotros" onClick={() => setIsOpen(false)} className={['text-sm tracking-[.10em] uppercase transition-colors py-3 border-b border-sand/40', isActive('/nosotros', pathname) ? 'text-onyx' : 'text-stone-600 hover:text-onyx'].join(' ')}>
+                Nosotros
+              </Link>
+
+              {/* Productos accordion */}
+              <div className="border-b border-sand/40">
+                <button
+                  onClick={() => setMobileProductosOpen(v => !v)}
+                  className="flex items-center justify-between w-full py-3 text-sm tracking-[.10em] uppercase text-stone-600 hover:text-onyx transition-colors"
+                >
+                  Productos
+                  <svg className={['w-3.5 h-3.5 transition-transform duration-200', mobileProductosOpen ? 'rotate-180' : ''].join(' ')} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+                {mobileProductosOpen && (
+                  <div className="pl-4 pb-2 space-y-0">
+                    {/* Joyas */}
+                    <div>
+                      <button
+                        onClick={() => setMobileJoyasOpen(v => !v)}
+                        className="flex items-center justify-between w-full py-2 text-xs tracking-[.08em] uppercase text-stone-500 hover:text-onyx transition-colors"
+                      >
+                        Joyas
+                        <svg className={['w-3 h-3 transition-transform duration-200 mr-1', mobileJoyasOpen ? 'rotate-180' : ''].join(' ')} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {mobileJoyasOpen && (
+                        <div className="pl-3 pb-1">
+                          {JOYAS_ITEMS.map(({ label, href }) => (
+                            <Link key={href} href={href} onClick={() => setIsOpen(false)} className="block py-1.5 text-xs tracking-[.06em] uppercase text-stone-400 hover:text-onyx transition-colors">
+                              {label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                    {/* Accesorios */}
+                    <div>
+                      <button
+                        onClick={() => setMobileAccesoriosOpen(v => !v)}
+                        className="flex items-center justify-between w-full py-2 text-xs tracking-[.08em] uppercase text-stone-500 hover:text-onyx transition-colors"
+                      >
+                        Accesorios
+                        <svg className={['w-3 h-3 transition-transform duration-200 mr-1', mobileAccesoriosOpen ? 'rotate-180' : ''].join(' ')} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {mobileAccesoriosOpen && (
+                        <div className="pl-3 pb-1">
+                          {ACCESORIOS_ITEMS.map(({ label, href }) => (
+                            <Link key={href} href={href} onClick={() => setIsOpen(false)} className="block py-1.5 text-xs tracking-[.06em] uppercase text-stone-400 hover:text-onyx transition-colors">
+                              {label}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <Link href="/contacto" onClick={() => setIsOpen(false)} className={['text-sm tracking-[.10em] uppercase transition-colors py-3', isActive('/contacto', pathname) ? 'text-onyx' : 'text-stone-600 hover:text-onyx'].join(' ')}>
+                Contacto
+              </Link>
             </nav>
             <div className="mt-auto px-6 pb-8">
               <Link href="/administracion" onClick={() => setIsOpen(false)}

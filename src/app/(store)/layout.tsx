@@ -21,7 +21,7 @@ const cormorant = Cormorant_Garamond({
 const FOOTER_NAV = [
   { label: 'Home', href: '/' },
   { label: 'Nosotros', href: '/nosotros' },
-  { label: 'Joyas', href: '/catalogo' },
+  { label: 'Productos', href: '/catalogo' },
   { label: 'Contacto', href: '/contacto' },
 ]
 
